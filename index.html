@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <link rel="icon" href="/zombie.png" type="image/png">
+    <!-- Favicon 使用絕對路徑 -->
+    <link rel="icon" href="https://voiceofthedead.firebaseapp.com/zombie.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
@@ -66,7 +67,6 @@
         }
         .shake-anim { animation: shake 0.3s; }
 
-        /* 手機比例容器優化：確保 100% 高度不溢出 */
         .game-wrapper {
             position: relative;
             width: 100%;
@@ -80,7 +80,6 @@
             border-right: 2px solid #222;
         }
 
-        /* 遊戲畫面佔 2/3 (約 67%) */
         .canvas-container {
             width: 100%;
             height: 67%;
@@ -96,14 +95,13 @@
             height: 100%;
         }
 
-        /* UI 面板佔 1/3 (約 33%) */
         .ui-panel {
             height: 33%;
             width: 100%;
             background: #050505;
             padding: 12px 15px;
             display: grid;
-            grid-template-rows: auto 1fr auto; /* 垂直排版優化 */
+            grid-template-rows: auto 1fr auto; 
             gap: 10px;
             z-index: 50;
             box-sizing: border-box;
@@ -157,6 +155,10 @@
         .status-fine { color: var(--horror-green); }
         .status-caution { color: var(--horror-yellow); }
         .status-danger { color: var(--horror-red); }
+        
+        /* 管理員表格樣式 */
+        #records-body tr:nth-child(even) { background: #080808; }
+        .admin-table-container { max-height: 60vh; width: 100%; overflow-y: auto; border: 1px solid #333; }
     </style>
 </head>
 <body class="crt">
@@ -172,9 +174,9 @@
                 <p class="text-[8px] text-zinc-600 mb-2 pixel-font">DATA VOLUME</p>
                 <div class="grid grid-cols-5 gap-1">
                     <button onclick="selectBook(1)" class="btn pixel-font book-btn" id="b1">I</button>
-                    <button onclick="selectBook(2)" class="btn pixel-font book-btn active-diff" id="b2">II</button>
+                    <button onclick="selectBook(2)" class="btn pixel-font book-btn" id="b2">II</button>
                     <button onclick="selectBook(3)" class="btn pixel-font book-btn" id="b3">III</button>
-                    <button onclick="selectBook(4)" class="btn pixel-font book-btn" id="b4">IV</button>
+                    <button onclick="selectBook(4)" class="btn pixel-font book-btn active-diff" id="b4">IV</button>
                     <button onclick="selectBook(5)" class="btn pixel-font book-btn" id="b5">V</button>
                 </div>
             </div>
@@ -182,8 +184,8 @@
             <div class="w-full mb-4">
                 <p class="text-[8px] text-zinc-600 mb-2 pixel-font">SECTOR UNIT</p>
                 <div class="grid grid-cols-3 gap-1">
-                    <button onclick="selectLesson(1)" class="btn pixel-font lesson-btn" id="l1">1</button>
-                    <button onclick="selectLesson(2)" class="btn pixel-font lesson-btn active-diff" id="l2">2</button>
+                    <button onclick="selectLesson(1)" class="btn pixel-font lesson-btn active-diff" id="l1">1</button>
+                    <button onclick="selectLesson(2)" class="btn pixel-font lesson-btn" id="l2">2</button>
                     <button onclick="selectLesson(3)" class="btn pixel-font lesson-btn" id="l3">3</button>
                     <button onclick="selectLesson(4)" class="btn pixel-font lesson-btn" id="l4">4</button>
                     <button onclick="selectLesson(5)" class="btn pixel-font lesson-btn" id="l5">5</button>
@@ -263,16 +265,22 @@
 
     <!-- Admin Screen -->
     <div id="admin-screen" class="overlay-screen hidden">
-        <h2 class="pixel-font text-blue-600 mb-4">ARCHIVE DATA</h2>
-        <div class="w-full max-w-md bg-black border border-zinc-800 overflow-x-auto">
+        <h2 class="pixel-font text-blue-600 mb-6">RECORDS MANAGEMENT</h2>
+        <div class="admin-table-container">
             <table class="w-full text-[9px] text-left">
-                <thead class="border-b border-zinc-800 text-zinc-500 font-bold uppercase">
-                    <tr><th class="p-2">Class</th><th class="p-2">No</th><th class="p-2">Name</th><th class="p-2">Score</th></tr>
+                <thead class="bg-zinc-900 text-zinc-400 font-bold uppercase sticky top-0">
+                    <tr>
+                        <th class="p-3">Class</th>
+                        <th class="p-3">No</th>
+                        <th class="p-3">Name</th>
+                        <th class="p-3">Score</th>
+                        <th class="p-3">Diff</th>
+                    </tr>
                 </thead>
                 <tbody id="records-body"></tbody>
             </table>
         </div>
-        <button onclick="location.reload()" class="btn mt-6 py-3 px-8 pixel-font">LOGOUT</button>
+        <button onclick="location.reload()" class="btn mt-8 py-3 px-12 pixel-font bg-blue-950 border-blue-700">LOGOUT TERMINAL</button>
     </div>
 
     <!-- Pause Screen -->
@@ -290,9 +298,8 @@
         <canvas id="game-canvas"></canvas>
     </div>
 
-    <!-- 下方 UI Panel (1/3) -->
+    <!-- 下方 UI Panel -->
     <div class="ui-panel">
-        <!-- 第一列：狀態與分數 -->
         <div class="flex justify-between items-end border-b border-zinc-800 pb-2">
             <div class="flex flex-col">
                 <div id="status-label" class="pixel-font status-fine">FINE</div>
@@ -301,12 +308,10 @@
             <div id="level-progress-ui" class="text-[7px] text-zinc-700 pixel-font mb-1">SEC 1: 0/10</div>
         </div>
 
-        <!-- 第二列：目前單字 -->
         <div class="flex items-center justify-center">
             <div id="current-word-ui" class="text-sm md:text-lg text-zinc-300 font-bold text-center leading-tight uppercase tracking-widest">---</div>
         </div>
 
-        <!-- 第三列：操作按鈕 -->
         <div class="grid grid-cols-2 gap-2">
             <button onclick="togglePause()" class="btn pixel-font !py-3">PAUSE</button>
             <button onclick="retreatToMenu()" class="btn pixel-font !py-3 bg-zinc-900">RETREAT</button>
@@ -342,9 +347,10 @@
 </script>
 
 <script>
-    const ADMIN_CODE = "teacher999";
-    let selectedBook = 2; 
-    let selectedLesson = 2; 
+    const ADMIN_NAME = "AdaWong";
+    // 預設為 Book 4, Lesson 1
+    let selectedBook = 4; 
+    let selectedLesson = 1; 
     let currentBookData = {}; 
     let currentLessonData = null; 
 
@@ -392,7 +398,8 @@
         }
     }
 
-    loadBookData(2);
+    // 初始化載入 Book 4
+    loadBookData(4);
 
     function confirmMission() {
         const key = `L${selectedLesson}`;
@@ -438,7 +445,6 @@
 
     function handleResize() {
         const dpr = window.devicePixelRatio || 1;
-        // 獲取容器的實際尺寸，讓 Canvas 完全填滿容器
         const rect = canvas.parentElement.getBoundingClientRect();
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
@@ -476,14 +482,16 @@
             this.z = forceClose ? 0.3 : 0; 
             const stageFactor = state.level === 2 ? 0.8 : 1.1; 
             this.speed = (0.0008 + (Math.random() * 0.0006)) * state.difficultyMultiplier * (isElite ? 0.9 : 1) * stageFactor;
-            this.x = (Math.random() - 0.5) * 280;
-            this.y = (Math.random() - 0.5) * 50;
+            
+            // 隨機生成 X 座標，並在 spawnLogic 中確保不會太擠
+            this.x = (Math.random() - 0.5) * 320; 
+            this.y = (Math.random() - 0.5) * 60;
+            
             this.isDying = false;
             this.opacity = 0;
             this.isElite = isElite;
             this.cSkin = isElite ? '#4a008b' : (Math.random() > 0.5 ? '#3d5c31' : '#567d46');
             this.cShirt = isElite ? 'gold' : (Math.random() > 0.5 ? '#4a4a4a' : '#2e2e2e');
-            this.bloodColor = Math.random() > 0.5 ? '#8b0000' : '#4a0000';
         }
 
         update() {
@@ -500,7 +508,6 @@
             
             const size = (this.isElite ? 15 : 8) + (Math.pow(this.z, 2) * 220);
             const xPos = w / 2 + (this.x * this.z);
-            // 調整 Y 軸中心點
             const yPos = h / 2 + (this.y * this.z) + (this.z * (h * 0.3));
             
             ctx.save();
@@ -508,11 +515,6 @@
             const br = 0.3 + (this.z * 0.7);
             ctx.filter = `brightness(${br})`;
             
-            // 雙臂
-            ctx.fillStyle = this.cSkin;
-            ctx.fillRect(xPos - size*0.5, yPos - size*0.6, size*0.25, size*0.15); 
-            ctx.fillRect(xPos + size*0.25, yPos - size*0.6, size*0.25, size*0.15); 
-
             // 軀幹
             ctx.fillStyle = this.cShirt;
             ctx.fillRect(xPos - size*0.3, yPos - size*0.7, size*0.6, size*0.6); 
@@ -526,8 +528,7 @@
             ctx.fillRect(xPos - size*0.12, yPos - size*1.0, size*0.06, size*0.06);
             ctx.fillRect(xPos + size*0.06, yPos - size*1.0, size*0.06, size*0.06);
 
-            // 文字
-            const fontSize = Math.max(10, size/7);
+            const fontSize = Math.max(10, size/7.5);
             ctx.fillStyle = this.isElite ? 'gold' : '#fff';
             ctx.font = `bold ${fontSize}px 'Noto Sans TC'`;
             ctx.textAlign = 'center';
@@ -555,9 +556,19 @@
             const list = currentLessonData.stages[state.level.toString()];
             if (!list) return;
             const word = list[Math.floor(Math.random() * list.length)];
+            
+            // 檢查是否重複
             if (!state.enemies.some(e => e.word === word)) {
-                const eliteChance = state.difficultyMultiplier >= 1.5 ? 0.3 : 0.15;
-                state.enemies.push(new Enemy(word, state.level, Math.random() < eliteChance, state.isFirstSpawn));
+                let newEnemy = new Enemy(word, state.level, Math.random() < 0.15, state.isFirstSpawn);
+                
+                // 分散邏輯：如果離現有敵人太近，嘗試調整 X 座標 (最多嘗試 5 次)
+                let attempts = 0;
+                while (attempts < 5 && state.enemies.some(e => Math.abs(e.x - newEnemy.x) < 50)) {
+                    newEnemy.x = (Math.random() - 0.5) * 320;
+                    attempts++;
+                }
+
+                state.enemies.push(newEnemy);
                 state.spawnTimer = Date.now();
                 state.isFirstSpawn = false;
             }
@@ -624,7 +635,13 @@
         const cls = document.getElementById('select-class').value;
         const no = document.getElementById('input-no').value.trim();
         const name = document.getElementById('input-name').value.trim();
-        if (name === ADMIN_CODE) { showAdminDashboard(); return; }
+        
+        // 輸入 AdaWong 進入後台
+        if (name === ADMIN_NAME) { 
+            showAdminDashboard(); 
+            return; 
+        }
+        
         if (!no || !name) return;
         state.player = { class: `${grade}${cls}`, no: no, name: name };
         document.getElementById('login-screen').classList.add('hidden');
@@ -635,23 +652,38 @@
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('admin-screen').classList.remove('hidden');
         const body = document.getElementById('records-body');
-        body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>LOADING...</td></tr>";
+        body.innerHTML = "<tr><td colspan='5' class='p-8 text-center animate-pulse'>CONNECTING TO DATABASE...</td></tr>";
         try {
             const { db, appId, collection, getDocs } = window.fbase;
             const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
             let res = []; snap.forEach(d => res.push(d.data()));
+            
+            // 排序：班級 -> 座號
             res.sort((a,b) => a.class.localeCompare(b.class) || a.no - b.no);
+            
             body.innerHTML = "";
-            res.forEach(d => {
-                body.insertAdjacentHTML('beforeend', `<tr class="border-b border-zinc-900"><td class="p-2">${d.class}</td><td class="p-2">${d.no}</td><td class="p-2">${d.name}</td><td class="p-2 text-green-500 font-bold">${d.score}</td></tr>`);
-            });
-        } catch (e) { body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>ERROR</td></tr>"; }
+            if (res.length === 0) {
+                body.innerHTML = "<tr><td colspan='5' class='p-8 text-center text-zinc-600'>NO RECORDS FOUND</td></tr>";
+            } else {
+                res.forEach(d => {
+                    body.insertAdjacentHTML('beforeend', `
+                        <tr class="border-b border-zinc-900 hover:bg-zinc-950">
+                            <td class="p-3 text-zinc-300 font-bold">${d.class}</td>
+                            <td class="p-3 text-zinc-500">${d.no}</td>
+                            <td class="p-3 text-white">${d.name}</td>
+                            <td class="p-3 text-green-500 font-bold">${d.score}</td>
+                            <td class="p-3 text-zinc-600 text-[7px]">${d.difficulty || 'N/A'}</td>
+                        </tr>
+                    `);
+                });
+            }
+        } catch (e) { body.innerHTML = "<tr><td colspan='5' class='p-8 text-center text-red-700'>CRITICAL ERROR: CONNECTION REFUSED</td></tr>"; }
     }
 
     function startGame() {
         state.gameActive = true; state.hp = 5; state.score = 0; state.level = 1; state.levelKills = 0; state.enemies = []; state.isFirstSpawn = true;
         updateUI(); 
-        handleResize(); // 啟動時強制重新計算尺寸
+        handleResize(); 
         if (recognition) { try { recognition.start(); } catch(e) {} } 
         gameLoop();
     }
@@ -661,7 +693,10 @@
             const { db, appId, setDoc, doc, serverTimestamp } = window.fbase;
             const rid = `${state.player.class}_${state.player.no}_${Date.now()}`;
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'scores', rid), {
-                ...state.player, score: state.score, timestamp: serverTimestamp()
+                ...state.player, 
+                score: state.score, 
+                difficulty: state.difficultyName,
+                timestamp: serverTimestamp()
             });
         } catch (e) {}
     }
