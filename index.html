@@ -7,9 +7,9 @@
     
     <!-- 社群分享標籤 (Open Graph) -->
     <title>Voice of the Dead</title>
-    <meta name="description" content="Speak to excorcise!">
-    <meta property="og:title" content="Speak your way out!">
-    <meta property="og:description" content="Want to Survive? Speak!">
+    <meta name="description" content="Want to Survive? Speak!">
+    <meta property="og:title" content="Speak your way out.">
+    <meta property="og:description" content="Speak to excorcise.">
     <meta property="og:type" content="website">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -66,50 +66,60 @@
         }
         .shake-anim { animation: shake 0.3s; }
 
-        /* 強制 9:16 手機比例容器 */
+        /* 手機比例容器優化：確保 100% 高度不溢出 */
         .game-wrapper {
             position: relative;
             width: 100%;
             max-width: 500px; 
-            height: 100%;
-            max-height: 100dvh;
-            aspect-ratio: 9 / 16;
+            height: 100dvh;
             background: #000;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 2px solid #222;
+            border-left: 2px solid #222;
+            border-right: 2px solid #222;
+        }
+
+        /* 遊戲畫面佔 2/3 (約 67%) */
+        .canvas-container {
+            width: 100%;
+            height: 67%;
+            position: relative;
+            border-bottom: 2px solid var(--horror-red);
+            overflow: hidden;
         }
 
         #game-canvas {
             image-rendering: pixelated;
-            background: radial-gradient(circle, #222 0%, #000 90%);
+            background: radial-gradient(circle, #151515 0%, #000 95%);
             width: 100%;
-            flex-grow: 1;
-            border-bottom: 2px solid var(--horror-red);
+            height: 100%;
         }
 
-        /* 經典 RE 介面配色 */
+        /* UI 面板佔 1/3 (約 33%) */
         .ui-panel {
-            height: 16%;
+            height: 33%;
             width: 100%;
             background: #050505;
-            border-top: 2px solid #333;
-            padding: 8px 12px;
+            padding: 12px 15px;
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            align-items: center;
+            grid-template-rows: auto 1fr auto; /* 垂直排版優化 */
+            gap: 10px;
             z-index: 50;
+            box-sizing: border-box;
         }
 
         .btn {
             background: #0a0a0a;
             border: 1px solid #444;
             color: #ccc;
-            padding: 8px;
+            padding: 10px;
             cursor: pointer;
             font-size: 10px;
             transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn:active { background: #333; color: #fff; }
 
@@ -117,9 +127,9 @@
             background: #000;
             border: 1px solid #444;
             color: #0f0;
-            padding: 10px;
+            padding: 12px;
             font-size: 14px;
-            margin: 3px;
+            margin: 4px 0;
             width: 100%;
             border-radius: 2px;
         }
@@ -137,12 +147,10 @@
             padding: 20px;
         }
 
-        /* 難度按鈕與選單 */
         .active-diff { border-color: #fff !important; background: #222 !important; color: #fff !important; }
 
-        /* 血量心電圖風格顯示 */
         #status-label {
-            font-size: 10px;
+            font-size: 12px;
             letter-spacing: 1px;
             font-weight: bold;
         }
@@ -157,10 +165,10 @@
     
     <!-- 1. 任務選擇畫面 -->
     <div id="mission-screen" class="overlay-screen">
-        <h1 class="pixel-font text-lg md:text-xl mb-8 flicker" style="color:#ccc">SELECT SECTOR</h1>
+        <h1 class="pixel-font text-lg mb-6 flicker" style="color:#ccc">SELECT SECTOR</h1>
         
         <div class="bg-black p-4 border border-zinc-800 w-full max-w-sm flex flex-col items-center">
-            <div class="w-full mb-6">
+            <div class="w-full mb-4">
                 <p class="text-[8px] text-zinc-600 mb-2 pixel-font">DATA VOLUME</p>
                 <div class="grid grid-cols-5 gap-1">
                     <button onclick="selectBook(1)" class="btn pixel-font book-btn" id="b1">I</button>
@@ -171,7 +179,7 @@
                 </div>
             </div>
 
-            <div class="w-full mb-6">
+            <div class="w-full mb-4">
                 <p class="text-[8px] text-zinc-600 mb-2 pixel-font">SECTOR UNIT</p>
                 <div class="grid grid-cols-3 gap-1">
                     <button onclick="selectLesson(1)" class="btn pixel-font lesson-btn" id="l1">1</button>
@@ -186,30 +194,30 @@
                 </div>
             </div>
 
-            <div id="mission-status" class="text-[8px] pixel-font text-zinc-500 mb-6 h-4">...SYSTEM IDLE...</div>
-            <button onclick="confirmMission()" id="confirm-mission-btn" class="btn w-full py-3 pixel-font text-white bg-blue-900 border-blue-500" disabled>CONFIRM</button>
+            <div id="mission-status" class="text-[8px] pixel-font text-zinc-500 mb-4 h-4">...SYSTEM IDLE...</div>
+            <button onclick="confirmMission()" id="confirm-mission-btn" class="btn w-full py-4 pixel-font text-white bg-blue-900 border-blue-500" disabled>CONFIRM</button>
         </div>
     </div>
 
     <!-- 2. 登錄畫面 -->
     <div id="login-screen" class="overlay-screen hidden">
-        <h1 class="pixel-font text-md mb-6 text-blue-500" id="selected-mission-title">MISSION ID: UNKNOWN</h1>
+        <h1 class="pixel-font text-md mb-4 text-blue-500" id="selected-mission-title">MISSION ID: UNKNOWN</h1>
         <div class="flex flex-col items-center bg-black p-4 border border-zinc-800 w-full max-w-sm">
-            <p class="text-[8px] text-zinc-600 mb-4 pixel-font">MEMBER REGISTRATION</p>
+            <p class="text-[8px] text-zinc-600 mb-4 pixel-font uppercase">Member Registration</p>
             
             <div class="flex gap-1 w-full">
                 <select id="select-grade">
-                    <option value="高一">G10</option>
-                    <option value="高二">G11</option>
-                    <option value="高三">G12</option>
+                    <option value="高一">10</option>
+                    <option value="高二">11</option>
+                    <option value="高三">12</option>
                 </select>
                 <select id="select-class">
-                    <option value="知足">CHIH</option>
-                    <option value="感恩">KAN</option>
-                    <option value="善解">SHAN</option>
-                    <option value="包容">PAO</option>
-                    <option value="大愛">LOVE</option>
-                    <option value="外校">EXT</option>
+                    <option value="知足">知足</option>
+                    <option value="感恩">感恩</option>
+                    <option value="善解">善解</option>
+                    <option value="包容">包容</option>
+                    <option value="大愛">大愛</option>
+                    <option value="外校">外校</option>
                 </select>
             </div>
             
@@ -219,10 +227,10 @@
             <div class="mt-4 w-full">
                 <p class="text-[8px] text-zinc-600 mb-2 pixel-font">DIFFICULTY</p>
                 <div class="grid grid-cols-2 gap-1">
-                    <button onclick="setDifficulty(0.7, 'Rookie (*)')" class="btn diff-btn pixel-font" id="diff-rookie">EASY</button>
-                    <button onclick="setDifficulty(1.0, 'Veteran (**)')" class="btn diff-btn active-diff pixel-font" id="diff-veteran">NORMAL</button>
-                    <button onclick="setDifficulty(1.4, 'Nightmare (***)')" class="btn diff-btn pixel-font" id="diff-nightmare">HARD</button>
-                    <button onclick="setDifficulty(2.2, 'NO HOPE (*****)')" class="btn diff-btn text-red-500 pixel-font" id="diff-nohope">REAL</button>
+                    <button onclick="setDifficulty(0.7, 'Rookie')" class="btn diff-btn pixel-font" id="diff-rookie">Rookie</button>
+                    <button onclick="setDifficulty(1.0, 'Veteran')" class="btn diff-btn active-diff pixel-font" id="diff-veteran">Veteran</button>
+                    <button onclick="setDifficulty(1.5, 'Nightmare')" class="btn diff-btn pixel-font" id="diff-nightmare">Nightmare</button>
+                    <button onclick="setDifficulty(2.5, 'NO HOPE')" class="btn diff-btn text-red-500 pixel-font" id="diff-nohope">NO HOPE</button>
                 </div>
             </div>
 
@@ -277,21 +285,31 @@
         </div>
     </div>
 
-    <canvas id="game-canvas"></canvas>
+    <!-- 遊戲畫布容器 -->
+    <div class="canvas-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
 
-    <!-- 下方 UI Panel: 模仿生存狀態介面 -->
+    <!-- 下方 UI Panel (1/3) -->
     <div class="ui-panel">
-        <div class="flex flex-col justify-center">
-            <div id="status-label" class="pixel-font status-fine">FINE</div>
-            <div id="score-display" class="text-[8px] text-zinc-600 pixel-font mt-1">000000</div>
+        <!-- 第一列：狀態與分數 -->
+        <div class="flex justify-between items-end border-b border-zinc-800 pb-2">
+            <div class="flex flex-col">
+                <div id="status-label" class="pixel-font status-fine">FINE</div>
+                <div id="score-display" class="text-[8px] text-zinc-600 pixel-font mt-1">000000</div>
+            </div>
+            <div id="level-progress-ui" class="text-[7px] text-zinc-700 pixel-font mb-1">SEC 1: 0/10</div>
         </div>
-        <div class="flex flex-col items-center">
-            <div id="level-progress-ui" class="text-[7px] text-zinc-700 mb-1 pixel-font">SECTOR 1: 0/10</div>
-            <div id="current-word-ui" class="text-xs text-zinc-400 font-bold text-center leading-tight uppercase">---</div>
+
+        <!-- 第二列：目前單字 -->
+        <div class="flex items-center justify-center">
+            <div id="current-word-ui" class="text-sm md:text-lg text-zinc-300 font-bold text-center leading-tight uppercase tracking-widest">---</div>
         </div>
-        <div class="flex flex-col items-end justify-center gap-1">
-            <button onclick="togglePause()" class="btn !p-1 text-[7px] w-full pixel-font">PAUSE</button>
-            <button onclick="retreatToMenu()" class="btn !p-1 text-[7px] w-full pixel-font">RETREAT</button>
+
+        <!-- 第三列：操作按鈕 -->
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="togglePause()" class="btn pixel-font !py-3">PAUSE</button>
+            <button onclick="retreatToMenu()" class="btn pixel-font !py-3 bg-zinc-900">RETREAT</button>
         </div>
     </div>
 
@@ -407,7 +425,7 @@
     const LEVEL_GOALS = { 1: 10, 2: 5 }; 
     let state = {
         score: 0, hp: 5, level: 1, levelKills: 0, 
-        difficultyMultiplier: 1.0, difficultyName: "NORMAL",
+        difficultyMultiplier: 1.0, difficultyName: "Veteran",
         isPaused: false, gameActive: false,
         enemies: [], player: { class: "", no: "", name: "" },
         spawnTimer: 0, isFirstSpawn: true
@@ -420,7 +438,8 @@
 
     function handleResize() {
         const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
+        // 獲取容器的實際尺寸，讓 Canvas 完全填滿容器
+        const rect = canvas.parentElement.getBoundingClientRect();
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
         ctx.scale(dpr, dpr);
@@ -454,16 +473,17 @@
     class Enemy {
         constructor(word, lv, isElite = false, forceClose = false) {
             this.word = word;
-            this.z = forceClose ? 0.4 : 0; 
-            const stageFactor = state.level === 2 ? 0.7 : 1.0; 
-            this.speed = (0.0006 + (Math.random() * 0.0004)) * state.difficultyMultiplier * (isElite ? 0.8 : 1) * stageFactor;
-            this.x = (Math.random() - 0.5) * 300;
-            this.y = (Math.random() - 0.5) * 40;
+            this.z = forceClose ? 0.3 : 0; 
+            const stageFactor = state.level === 2 ? 0.8 : 1.1; 
+            this.speed = (0.0008 + (Math.random() * 0.0006)) * state.difficultyMultiplier * (isElite ? 0.9 : 1) * stageFactor;
+            this.x = (Math.random() - 0.5) * 280;
+            this.y = (Math.random() - 0.5) * 50;
             this.isDying = false;
             this.opacity = 0;
             this.isElite = isElite;
-            this.cSkin = isElite ? '#4a008b' : '#3d5c31';
-            this.cShirt = isElite ? 'gold' : '#4a4a4a';
+            this.cSkin = isElite ? '#4a008b' : (Math.random() > 0.5 ? '#3d5c31' : '#567d46');
+            this.cShirt = isElite ? 'gold' : (Math.random() > 0.5 ? '#4a4a4a' : '#2e2e2e');
+            this.bloodColor = Math.random() > 0.5 ? '#8b0000' : '#4a0000';
         }
 
         update() {
@@ -474,29 +494,46 @@
         }
 
         draw() {
-            const w = canvas.width / (window.devicePixelRatio || 1);
-            const h = canvas.height / (window.devicePixelRatio || 1);
-            const size = (this.isElite ? 18 : 10) + (Math.pow(this.z, 1.8) * 150);
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            
+            const size = (this.isElite ? 15 : 8) + (Math.pow(this.z, 2) * 220);
             const xPos = w / 2 + (this.x * this.z);
-            const yPos = h / 2 + (this.y * this.z) + (this.z * 150);
+            // 調整 Y 軸中心點
+            const yPos = h / 2 + (this.y * this.z) + (this.z * (h * 0.3));
             
             ctx.save();
             ctx.globalAlpha = this.opacity;
-            const br = 0.2 + (this.z * 0.8);
+            const br = 0.3 + (this.z * 0.7);
             ctx.filter = `brightness(${br})`;
             
-            // Draw Zombie (Pixel Block Style)
+            // 雙臂
             ctx.fillStyle = this.cSkin;
-            ctx.fillRect(xPos - size/4, yPos - size*1.2, size/2, size/2); 
+            ctx.fillRect(xPos - size*0.5, yPos - size*0.6, size*0.25, size*0.15); 
+            ctx.fillRect(xPos + size*0.25, yPos - size*0.6, size*0.25, size*0.15); 
+
+            // 軀幹
             ctx.fillStyle = this.cShirt;
-            ctx.fillRect(xPos - size/4, yPos - size*0.7, size/2, size/2); 
+            ctx.fillRect(xPos - size*0.3, yPos - size*0.7, size*0.6, size*0.6); 
+
+            // 頭部
+            ctx.fillStyle = this.cSkin;
+            ctx.fillRect(xPos - size*0.2, yPos - size*1.1, size*0.4, size*0.4); 
             
-            const fontSize = Math.max(9, size/8);
+            // 眼睛
+            ctx.fillStyle = this.isElite ? 'cyan' : 'red';
+            ctx.fillRect(xPos - size*0.12, yPos - size*1.0, size*0.06, size*0.06);
+            ctx.fillRect(xPos + size*0.06, yPos - size*1.0, size*0.06, size*0.06);
+
+            // 文字
+            const fontSize = Math.max(10, size/7);
             ctx.fillStyle = this.isElite ? 'gold' : '#fff';
             ctx.font = `bold ${fontSize}px 'Noto Sans TC'`;
             ctx.textAlign = 'center';
             ctx.shadowBlur = 4; ctx.shadowColor = 'red';
-            ctx.fillText(this.word, xPos, yPos - size*1.4);
+            ctx.fillText(this.word, xPos, yPos - size*1.3);
+            
             ctx.restore();
         }
     }
@@ -507,18 +544,20 @@
         document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active-diff'));
         if (val === 0.7) document.getElementById('diff-rookie').classList.add('active-diff');
         if (val === 1.0) document.getElementById('diff-veteran').classList.add('active-diff');
-        if (val === 1.4) document.getElementById('diff-nightmare').classList.add('active-diff');
-        if (val === 2.2) document.getElementById('diff-nohope').classList.add('active-diff');
+        if (val === 1.5) document.getElementById('diff-nightmare').classList.add('active-diff');
+        if (val === 2.5) document.getElementById('diff-nohope').classList.add('active-diff');
     }
 
     function spawnLogic() {
         if (!state.gameActive || state.isPaused) return;
-        if ((state.isFirstSpawn && state.enemies.length === 0) || (state.enemies.length < 3 && Date.now() - state.spawnTimer > 2000 / state.difficultyMultiplier)) {
+        const interval = 1500 / state.difficultyMultiplier;
+        if ((state.isFirstSpawn && state.enemies.length === 0) || (state.enemies.length < 4 && Date.now() - state.spawnTimer > interval)) {
             const list = currentLessonData.stages[state.level.toString()];
             if (!list) return;
             const word = list[Math.floor(Math.random() * list.length)];
             if (!state.enemies.some(e => e.word === word)) {
-                state.enemies.push(new Enemy(word, state.level, Math.random() < 0.15, state.isFirstSpawn));
+                const eliteChance = state.difficultyMultiplier >= 1.5 ? 0.3 : 0.15;
+                state.enemies.push(new Enemy(word, state.level, Math.random() < eliteChance, state.isFirstSpawn));
                 state.spawnTimer = Date.now();
                 state.isFirstSpawn = false;
             }
@@ -557,13 +596,14 @@
 
     function gameLoop() {
         if (!state.gameActive || state.isPaused) return;
-        const w = canvas.width / (window.devicePixelRatio || 1);
-        const h = canvas.height / (window.devicePixelRatio || 1);
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
         
-        ctx.strokeStyle = '#111'; ctx.beginPath();
-        for(let i=0; i<6; i++) {
-            ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/5), h);
+        ctx.strokeStyle = '#080808'; ctx.lineWidth = 1; ctx.beginPath();
+        for(let i=0; i<8; i++) {
+            ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/7), h);
         }
         ctx.stroke();
 
@@ -595,7 +635,7 @@
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('admin-screen').classList.remove('hidden');
         const body = document.getElementById('records-body');
-        body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>ACCESSING...</td></tr>";
+        body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>LOADING...</td></tr>";
         try {
             const { db, appId, collection, getDocs } = window.fbase;
             const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
@@ -605,12 +645,15 @@
             res.forEach(d => {
                 body.insertAdjacentHTML('beforeend', `<tr class="border-b border-zinc-900"><td class="p-2">${d.class}</td><td class="p-2">${d.no}</td><td class="p-2">${d.name}</td><td class="p-2 text-green-500 font-bold">${d.score}</td></tr>`);
             });
-        } catch (e) { body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>FAILED</td></tr>"; }
+        } catch (e) { body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>ERROR</td></tr>"; }
     }
 
     function startGame() {
         state.gameActive = true; state.hp = 5; state.score = 0; state.level = 1; state.levelKills = 0; state.enemies = []; state.isFirstSpawn = true;
-        updateUI(); if (recognition) { try { recognition.start(); } catch(e) {} } gameLoop();
+        updateUI(); 
+        handleResize(); // 啟動時強制重新計算尺寸
+        if (recognition) { try { recognition.start(); } catch(e) {} } 
+        gameLoop();
     }
 
     async function syncData() {
