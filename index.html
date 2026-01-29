@@ -8,7 +8,7 @@
     <title>Voice of the Dead</title>
     <meta name="description" content="Want to Survive? Speak!">
     <meta property="og:title" content="Speak your way out. - Voice of the Dead">
-    <meta property="og:description" content="大聲讀出咒語以驅除喪屍。這是一場結合聲音辨識與可愛節奏的生存挑戰。">
+    <meta property="og:description" content="大聲讀出咒語以驅除喪屍。這是一場結合聲音辨識與節奏的生存挑戰。">
     <meta property="og:image" content="https://d4cheap16.github.io/VoiceoftheDEAD/opentag.png">
     <meta property="og:type" content="website">
 
@@ -31,7 +31,7 @@
             user-select: none; touch-action: manipulation;
         }
 
-        /* 保留淡淡的 CRT 掃描線增加質感，但不產生位移 */
+        /* 簡約背景效果 */
         .crt::before {
             content: " ";
             display: block; position: absolute;
@@ -39,7 +39,7 @@
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
             z-index: 100; background-size: 100% 3px;
             pointer-events: none;
-            opacity: 0.3;
+            opacity: 0.2;
         }
 
         .game-wrapper {
@@ -75,7 +75,26 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); display: flex;
             flex-direction: column; align-items: center; justify-content: center;
-            z-index: 200; text-align: center; padding: 30px;
+            z-index: 200; text-align: center; padding: 20px;
+        }
+
+        .banner-box {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1480 / 450;
+            background: #000;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .banner-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            image-rendering: pixelated;
         }
 
         .active-diff { border-color: #fff !important; background: #222 !important; color: #fff !important; }
@@ -86,7 +105,7 @@
             pointer-events: none; transition: opacity 0.5s; opacity: 0;
             z-index: 150;
         }
-        .boss-word-active { color: #0f0; text-shadow: 0 0 10px #0f0; transform: scale(1.1); }
+        .boss-word-active { color: #0f0; text-shadow: 0 0 10px #0f0; transform: scale(1.05); }
 
         #reward-toast {
             position: absolute; top: 25%; width: 100%; text-align: center;
@@ -111,7 +130,10 @@
 
     <!-- 1. 任務選擇 -->
     <div id="mission-screen" class="overlay-screen">
-        <h1 class="text-lg mb-8 text-red-600 tracking-tighter flicker">VOICE OF THE DEAD</h1>
+        <div class="banner-box">
+            <img src="https://d4cheap16.github.io/VoiceoftheDEAD/indexbanner.png" alt="Index Banner" onerror="this.style.display='none'">
+        </div>
+        <h1 class="text-md mb-6 text-red-600 tracking-tighter flicker">SELECT SECTOR</h1>
         <div class="bg-black p-5 border border-zinc-800 w-full max-w-sm rounded-lg shadow-2xl">
             <p class="text-[8px] text-zinc-500 mb-2 uppercase text-left">Sector Access</p>
             <div class="grid grid-cols-5 gap-2 mb-6" id="book-grid"></div>
@@ -124,6 +146,9 @@
 
     <!-- 2. 登錄與難度 -->
     <div id="login-screen" class="overlay-screen hidden">
+        <div class="banner-box">
+            <img src="https://d4cheap16.github.io/VoiceoftheDEAD/missionbanner.png" alt="Mission Banner" onerror="this.style.display='none'">
+        </div>
         <h2 id="selected-mission-title" class="text-blue-500 mb-6 text-[11px] uppercase tracking-widest">MISSION ID</h2>
         <div class="bg-black p-5 border border-zinc-800 w-full max-w-sm space-y-5 rounded-lg">
             <div class="flex gap-2">
@@ -132,6 +157,7 @@
                 </select>
                 <select id="select-class" class="bg-zinc-900 border border-zinc-700 p-3 text-[10px] w-1/2 text-white">
                     <option value="知足">知足</option><option value="感恩">感恩</option><option value="善解">善解</option><option value="包容">包容</option>
+                    <option value="大愛">大愛</option><option value="外校">外校</option>
                 </select>
             </div>
             <input type="number" id="input-no" placeholder="NUMBER" class="bg-zinc-900 border border-zinc-700 p-4 w-full text-green-500 text-[12px]">
@@ -238,9 +264,10 @@
         difficulty: 1.0, difficultyMode: 'Veteran',
         bossesDefeated: 0, freezeTimer: 0,
         enemies: [], particles: [],
-        bgStars: [], // 背景微星
+        bgStars: [], 
         shake: 0, bossMode: false, bossData: null, bossWordIndex: 0,
-        spawnTimer: 0, player: { name: "", no: "", class: "" }
+        spawnTimer: 0, player: { name: "", no: "", class: "" },
+        wordPool: [] 
     };
 
     const canvas = document.getElementById('game-canvas');
@@ -255,14 +282,13 @@
         document.getElementById('lesson-grid').innerHTML = [1,2,3,4,5,6,7,8,9].map(i => 
             `<button onclick="selectLesson(${i})" class="btn lesson-btn ${i===1?'active-diff':''}" id="l${i}">${i}</button>`).join('');
         
-        // 初始化背景微星
         state.bgStars = [];
-        for(let i=0; i<30; i++) {
+        for(let i=0; i<40; i++) {
             state.bgStars.push({
-                x: (Math.random() - 0.5) * 500,
-                y: (Math.random() - 0.5) * 300,
+                x: (Math.random() - 0.5) * 600,
+                y: (Math.random() - 0.5) * 400,
                 z: Math.random(),
-                s: Math.random() * 2
+                s: Math.random() * 1.5
             });
         }
     }
@@ -306,7 +332,7 @@
     window.confirmMission = () => {
         document.getElementById('mission-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
-        document.getElementById('selected-mission-title').innerText = currentBookData[`L${selectedLesson}`].title;
+        document.getElementById('selected-mission-title').innerText = currentBookData[`L${selectedLesson}`].title.toUpperCase();
     };
     window.backToMission = () => {
         document.getElementById('login-screen').classList.add('hidden');
@@ -324,7 +350,7 @@
     };
 
     function showAdmin() {
-        alert("TERMINAL ACCESS DENIED (LOCAL ONLY)");
+        alert("TERMINAL ACCESS DENIED");
         location.reload(); 
     }
 
@@ -337,8 +363,8 @@
     class Particle {
         constructor(x, y, color) {
             this.x = x; this.y = y; this.color = color;
-            this.vx = (Math.random() - 0.5) * 10; this.vy = (Math.random() - 0.5) * 10;
-            this.alpha = 1; this.size = Math.random() * 4 + 1;
+            this.vx = (Math.random() - 0.5) * 8; this.vy = (Math.random() - 0.5) * 8;
+            this.alpha = 1; this.size = Math.random() * 3 + 1;
         }
         update() { this.x += this.vx; this.y += this.vy; this.alpha -= 0.05; return this.alpha > 0; }
         draw(ctx) { ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.size, this.size); ctx.restore(); }
@@ -347,58 +373,55 @@
     class Enemy {
         constructor(word, isBoss = false) {
             this.word = word; this.isBoss = isBoss; this.z = 0;
-            this.x = (Math.random() - 0.5) * 360; this.y = (Math.random() - 0.5) * 50;
-            this.speed = (0.0010 + Math.random() * 0.0009) * state.difficulty;
+            this.x = (Math.random() - 0.5) * 380; this.y = (Math.random() - 0.5) * 40;
+            this.speed = (0.0012 + Math.random() * 0.0008) * state.difficulty;
             this.isDying = false; this.opacity = 1; this.wobbleSeed = Math.random() * 1000;
-            this.hue = isBoss ? 280 : 120 + (Math.random() * 30);
-            this.armWobble = 0;
+            
+            const skinHues = [80, 100, 140, 160]; 
+            const clothesHues = [200, 220, 260, 20]; 
+            this.skinHue = skinHues[Math.floor(Math.random() * skinHues.length)];
+            this.clothesHue = clothesHues[Math.floor(Math.random() * clothesHues.length)];
+            if (isBoss) { this.skinHue = 280; this.clothesHue = 0; }
         }
         update() {
             if (this.isDying) { this.opacity -= 0.2; return this.opacity <= 0; }
             if (!state.bossMode && state.freezeTimer <= 0) this.z += this.speed;
-            this.armWobble = Math.sin(Date.now() * 0.01 + this.wobbleSeed) * 5;
             return this.z >= 1;
         }
         draw(ctx, w, h, isClosest) {
             const scale = this.isBoss ? 2.5 : 1.0;
-            // 限制最大 size，防止色塊遮蔽全螢幕
-            const size = Math.min(w * 0.8, (15 + Math.pow(this.z, 2) * 320) * scale);
-            const wobbleX = Math.sin(Date.now() * 0.005 + this.wobbleSeed) * 8 * this.z;
+            const size = Math.min(w * 0.7, (18 + Math.pow(this.z, 2) * 300) * scale);
+            const wobbleX = Math.sin(Date.now() * 0.004 + this.wobbleSeed) * 10 * this.z;
             const screenX = w/2 + (this.x * this.z) + wobbleX;
             const screenY = h/2 + (this.y * this.z) + (this.z * h * 0.45);
 
             ctx.save(); ctx.globalAlpha = this.opacity; ctx.translate(screenX, screenY);
             
-            const skinColor = `hsl(${this.hue}, 40%, 60%)`;
-            const eyeColor = "#fff";
+            ctx.fillStyle = `hsl(${this.clothesHue}, 40%, 35%)`;
+            ctx.fillRect(-size/3, -size/2.5, size/1.5, size/1.2);
             
-            // 可愛殭屍外觀
-            ctx.fillStyle = `hsl(${this.hue}, 40%, 40%)`; // 身體
-            ctx.fillRect(-size/2.5, -size/2, size/1.25, size/1.5);
-            
-            ctx.fillStyle = skinColor; // 手
-            ctx.fillRect(-size/2 - size/8, -size/2 + this.armWobble, size/8, size/4); 
-            ctx.fillRect(size/2 - size/8, -size/2 - this.armWobble, size/8, size/4);
+            ctx.fillStyle = `hsl(210, 30%, 20%)`;
+            ctx.fillRect(-size/3, size/4, size/1.5, size/4);
 
-            ctx.fillStyle = skinColor; // 頭
-            ctx.fillRect(-size/3, -size*0.9, size/1.5, size/1.8);
+            ctx.fillStyle = `hsl(${this.skinHue}, 45%, 50%)`;
+            ctx.fillRect(-size/3.5, -size*0.9, size/1.75, size/2.2);
             
-            // 眼睛
-            ctx.fillStyle = eyeColor;
-            ctx.fillRect(-size/4, -size*0.8, size/5, size/5); 
-            ctx.fillRect(size/15, -size*0.8, size/5, size/5); 
             ctx.fillStyle = "#000";
-            ctx.fillRect(-size/5, -size*0.75, size/10, size/10); 
-            ctx.fillRect(size/10, -size*0.75, size/10, size/10); 
+            const eyeSize = size/10;
+            ctx.fillRect(-size/6, -size*0.75, eyeSize, eyeSize);
+            ctx.fillRect(size/15, -size*0.75, eyeSize, eyeSize);
+
+            ctx.fillRect(-size/15, -size*0.6, size/7.5, eyeSize/2);
 
             if (isClosest && !this.isBoss) {
                 ctx.strokeStyle = '#f00'; ctx.lineWidth = 3;
-                ctx.strokeRect(-size/2 - 10, -size - 10, size + 20, size + 20);
+                ctx.strokeRect(-size/2 - 5, -size - 5, size + 10, size + 10);
             }
             if (!this.isBoss) {
-                ctx.font = `bold ${Math.max(9, size/7)}px 'Press Start 2P'`;
-                ctx.fillStyle = isClosest ? '#fff' : '#555'; ctx.textAlign = 'center';
-                ctx.fillText(this.word.toUpperCase(), 0, -size * 1.12);
+                ctx.font = `bold ${Math.max(8, size/7)}px 'Press Start 2P'`;
+                ctx.fillStyle = isClosest ? '#fff' : '#444'; ctx.textAlign = 'center';
+                ctx.shadowBlur = 4; ctx.shadowColor = "#000";
+                ctx.fillText(this.word.toUpperCase(), 0, -size * 1.05);
             }
             ctx.restore();
         }
@@ -423,9 +446,18 @@
         }
     }
 
+    function getNextWord() {
+        if (state.wordPool.length === 0) {
+            const list = currentBookData[`L${selectedLesson}`].stages["1"];
+            state.wordPool = [...list].sort(() => Math.random() - 0.5);
+        }
+        return state.wordPool.pop();
+    }
+
     function startGame() {
         state.gameActive = true; state.hp = 5; state.score = 0; state.kills = 0; state.bossesDefeated = 0;
         state.enemies = []; state.particles = []; state.combo = 0; state.freezeTimer = 0;
+        state.wordPool = []; 
         requestWakeLock(); handleResize(); initSpeech(); requestAnimationFrame(gameLoop);
     }
 
@@ -446,7 +478,7 @@
     function initSpeech() {
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!Speech) return;
-        if (recognition) recognition.stop();
+        if (recognition) try { recognition.stop(); } catch(e) {}
         recognition = new Speech();
         recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
         recognition.onresult = (e) => {
@@ -523,14 +555,13 @@
     function createExplosion(en) {
         const rect = canvas.parentElement.getBoundingClientRect();
         const x = rect.width/2 + (en.x * en.z);
-        const y = rect.height/2 + (en.y * en.z) + (en.z * rect.height * 0.48);
-        for(let i=0; i<15; i++) state.particles.push(new Particle(x, y, `hsl(${en.hue}, 50%, 50%)`));
+        const y = rect.height/2 + (en.y * en.z) + (en.z * rect.height * 0.45);
+        for(let i=0; i<15; i++) state.particles.push(new Particle(x, y, `hsl(${en.skinHue}, 40%, 40%)`));
     }
 
     function triggerDamage() {
         state.hp--; state.shake = 35; state.combo = 0;
-        // 僅保留輕微紅光提示，移除劇烈色塊 Glitch
-        ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+        ctx.fillStyle = "rgba(255, 0, 0, 0.25)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         if (state.hp <= 0) endGame();
     }
@@ -544,21 +575,18 @@
         if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.88; }
         if (state.freezeTimer > 0) state.freezeTimer--;
 
-        // 繪製背景粒子背景
         ctx.fillStyle = "#222";
         state.bgStars.forEach(s => {
-            const starX = w/2 + (s.x * s.z);
-            const starY = h/2 + (s.y * s.z);
-            ctx.globalAlpha = 0.5 * s.z;
-            ctx.fillRect(starX, starY, s.s, s.s);
+            const sx = w/2 + (s.x * s.z); const sy = h/2 + (s.y * s.z);
+            ctx.globalAlpha = 0.4 * s.z;
+            ctx.fillRect(sx, sy, s.s, s.s);
             ctx.globalAlpha = 1;
-            if (state.freezeTimer <= 0) s.z += 0.002;
+            if (state.freezeTimer <= 0) s.z += 0.003;
             if (s.z > 1) s.z = 0;
         });
 
         if (!state.bossMode && state.freezeTimer <= 0 && Date.now() - state.spawnTimer > 1800/state.difficulty) {
-            const list = currentBookData[`L${selectedLesson}`].stages["1"];
-            state.enemies.push(new Enemy(list[Math.floor(Math.random()*list.length)]));
+            state.enemies.push(new Enemy(getNextWord()));
             state.spawnTimer = Date.now();
         }
 
@@ -566,8 +594,8 @@
         for (let i = state.enemies.length - 1; i >= 0; i--) {
             const en = state.enemies[i];
             if (en.update()) {
-                if (!en.isDying) { triggerDamage(); state.enemies.splice(i, 1); }
-                else state.enemies.splice(i, 1);
+                if (!en.isDying) { triggerDamage(); }
+                state.enemies.splice(i, 1);
             } else en.draw(ctx, w, h, en === closest);
         }
         for (let i = state.particles.length - 1; i >= 0; i--) {
