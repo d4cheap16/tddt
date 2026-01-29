@@ -798,46 +798,100 @@
         const rewards = ["RECOVER (+1 HP)", "FLASH (Freeze 3s)", "SHOTGUN (Knockback All)"];
         const roll = Math.floor(Math.random() * rewards.length);
         const toast = document.getElementById('reward-toast');
+        const overlay = document.getElementById('flash-overlay');
+
         toast.innerText = `REWARD: ${rewards[roll]}`;
         toast.classList.add('toast-active');
-        toast.style.color = '#fff';
-        setTimeout(() => toast.classList.remove('toast-active'), 2000);
         
+        // 重置 Overlay 轉場
+        overlay.style.transition = "opacity 0.5s ease-out";
+
         if (roll === 0) {
+            // RECOVER: 綠色主題，更明顯的綠色閃光
             state.hp = Math.min(5, state.hp + 1);
+            
+            toast.style.color = '#4ade80'; // 亮綠色文字
+            toast.style.borderColor = '#4ade80';
+            toast.style.boxShadow = '0 0 25px rgba(74, 222, 128, 0.6)';
+
+            overlay.style.backgroundColor = 'rgba(0, 255, 0, 0.5)'; // 綠色濾鏡
+            overlay.style.opacity = "1";
+            setTimeout(() => overlay.style.opacity = "0", 600);
+
         } else if (roll === 1) {
+            // FLASH: 青色/白色主題，更強烈且持久的白光
             state.freezeTimer = 180; 
-            document.getElementById('flash-overlay').style.opacity = "0.5";
-            setTimeout(() => document.getElementById('flash-overlay').style.opacity = "0", 200);
+            
+            toast.style.color = '#67e8f9'; // 青色文字
+            toast.style.borderColor = '#67e8f9';
+            toast.style.boxShadow = '0 0 25px rgba(103, 232, 249, 0.6)';
+
+            overlay.style.backgroundColor = 'white'; // 純白強光
+            overlay.style.transition = "opacity 1.5s ease-out"; // 延長淡出時間，模擬視覺殘留
+            overlay.style.opacity = "1"; // 全不透明 (致盲感)
+            setTimeout(() => overlay.style.opacity = "0", 1500);
+
         } else if (roll === 2) {
-            // Shotgun 效果：震退所有敵人並產生強烈震動
+            // SHOTGUN: 橘黃色主題，強烈震動 (Shake 已在下面設定)
+            
+            toast.style.color = '#fbbf24'; // 琥珀色文字
+            toast.style.borderColor = '#fbbf24';
+            toast.style.boxShadow = '0 0 25px rgba(251, 191, 36, 0.6)';
+
             state.enemies.forEach(e => {
                 if (!e.isDying) {
-                    // 減少 z 值將敵人推遠，最遠退回 0
                     e.z = Math.max(0, e.z - 0.4);
                 }
             });
-            state.shake = 60; // 強烈震動
-            state.freezeTimer = 60; // 附加短暫定格 (1秒)
+            state.shake = 60; 
+            state.freezeTimer = 60; 
+            
+            // 槍口火光 (瞬間閃黃光)
+            overlay.style.transition = "opacity 0.1s ease-in";
+            overlay.style.backgroundColor = 'rgba(255, 200, 50, 0.6)';
+            overlay.style.opacity = "0.8";
+            setTimeout(() => overlay.style.opacity = "0", 100);
         }
-    }
-
-    function triggerCriticalWipe() {
-        // 觸發爆擊時，將血量補滿
-        state.hp = 5;
-        updateUIPanel(); // 立即更新 UI 以反映血量變化
-
-        const toast = document.getElementById('reward-toast');
-        toast.innerText = "CRITICAL OVERLOAD & FULL HEAL!";
-        toast.classList.add('toast-active');
-        toast.style.color = '#ff00ff'; 
+        
+        // 2秒後重置 Toast 樣式
         setTimeout(() => {
             toast.classList.remove('toast-active');
             toast.style.color = '#fff';
+            toast.style.borderColor = '#fff';
+            toast.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.3)';
+            // Overlay 顏色重置 (避免影響下一次)
+            setTimeout(() => overlay.style.backgroundColor = 'white', 500);
         }, 2000);
+    }
 
-        document.getElementById('flash-overlay').style.opacity = "0.8";
-        setTimeout(() => document.getElementById('flash-overlay').style.opacity = "0", 300);
+    function triggerCriticalWipe() {
+        state.hp = 5;
+        updateUIPanel(); 
+
+        const toast = document.getElementById('reward-toast');
+        const overlay = document.getElementById('flash-overlay');
+
+        toast.innerText = "CRITICAL OVERLOAD & FULL HEAL!";
+        toast.classList.add('toast-active');
+        
+        // 紫色爆擊主題
+        toast.style.color = '#d946ef'; 
+        toast.style.borderColor = '#d946ef';
+        toast.style.boxShadow = '0 0 40px rgba(217, 70, 239, 0.9)'; // 更強的光暈
+
+        // 紫色強光
+        overlay.style.backgroundColor = 'rgba(217, 70, 239, 0.6)';
+        overlay.style.transition = "opacity 0.8s ease-out";
+        overlay.style.opacity = "1";
+        
+        setTimeout(() => {
+            overlay.style.opacity = "0";
+            toast.classList.remove('toast-active');
+            toast.style.color = '#fff';
+            toast.style.borderColor = '#fff';
+            toast.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.3)';
+            setTimeout(() => overlay.style.backgroundColor = 'white', 500);
+        }, 2000);
 
         sfx.reward(); 
 
