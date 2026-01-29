@@ -65,10 +65,25 @@
             background: #111; border: 1px solid #444; color: #ccc;
             padding: 10px; cursor: pointer; font-size: 9px;
             font-family: 'Press Start 2P', cursive;
-            transition: 0.1s; border-radius: 6px;
+            transition: 0.1s; border-radius: 4px;
             display: flex; align-items: center; justify-content: center;
         }
         .btn:active { background: #555; color: #fff; transform: scale(0.95); }
+
+        /* 修復選單樣式 */
+        select, input {
+            background: #0d0d0d !important;
+            border: 1px solid #444 !important;
+            color: #0f0 !important;
+            padding: 12px !important;
+            font-size: 10px !important;
+            margin: 4px 0 !important;
+            width: 100% !important;
+            border-radius: 4px !important;
+            font-family: 'Press Start 2P', 'Noto Sans TC', sans-serif !important;
+            outline: none;
+        }
+        select:focus, input:focus { border-color: #0f0 !important; }
 
         .btn-empty { color: #444 !important; border-style: dashed !important; cursor: not-allowed; background: #050505 !important; }
 
@@ -111,6 +126,8 @@
         .admin-table-container th { padding: 8px; font-size: 8px; color: #666; text-transform: uppercase; }
         .admin-table-container td { padding: 8px; border-bottom: 1px solid #111; }
 
+        #leaderboard-preview { width: 100%; margin-top: 10px; border-top: 1px solid #222; padding-top: 10px; }
+
         @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .flicker { animation: flicker 0.2s infinite; }
     </style>
@@ -126,14 +143,20 @@
         <div class="banner-box">
             <img src="https://d4cheap16.github.io/VoiceoftheDEAD/indexbanner.png" alt="Index Banner" onerror="this.style.display='none'">
         </div>
-        <h1 class="text-md mb-6 text-red-600 tracking-tighter flicker">Voice of the Dead</h1>
-        <div class="bg-black p-5 border border-zinc-800 w-full max-w-sm rounded-lg shadow-2xl">
+        <h1 class="text-md mb-6 text-red-600 tracking-tighter flicker uppercase">Select Sector</h1>
+        <div class="bg-black p-5 border border-zinc-800 w-full max-w-sm rounded-lg shadow-2xl overflow-y-auto max-h-[75%]">
             <p class="text-[8px] text-zinc-500 mb-2 uppercase text-left font-bold">Sector Access</p>
             <div class="grid grid-cols-5 gap-1 mb-6" id="book-grid"></div>
             <p class="text-[8px] text-zinc-500 mb-2 uppercase text-left font-bold">Unit Module</p>
             <div class="grid grid-cols-3 gap-1 mb-6" id="lesson-grid"></div>
             <div id="mission-status" class="text-[7px] text-zinc-400 mb-6 h-4 uppercase">System Ready</div>
-            <button onclick="confirmMission()" id="confirm-mission-btn" class="btn w-full py-5 text-white bg-blue-900 border-blue-500" disabled>ENTER SECTOR</button>
+            
+            <div id="leaderboard-preview" class="hidden bg-zinc-900/50 p-2 rounded">
+                <p class="text-[7px] text-blue-500 mb-2 uppercase text-center font-bold tracking-widest">Sector Top Survivors</p>
+                <div id="top-records-list" class="text-[8px] text-zinc-400 space-y-1 text-left"></div>
+            </div>
+
+            <button onclick="confirmMission()" id="confirm-mission-btn" class="btn w-full py-5 text-white bg-blue-900 border-blue-500 mt-4 uppercase" disabled>Enter Mission</button>
         </div>
     </div>
 
@@ -153,8 +176,8 @@
                     <option value="大愛">大愛</option><option value="外校">外校</option>
                 </select>
             </div>
-            <input type="number" id="input-no" placeholder="NUMBER" class="bg-zinc-900 border border-zinc-700 p-4 w-full text-green-500 text-[12px]">
-            <input type="text" id="input-name" placeholder="NAME" class="bg-zinc-900 border border-zinc-700 p-4 w-full text-green-500 text-[12px]">
+            <input type="number" id="input-no" placeholder="NUMBER" class="input-retro">
+            <input type="text" id="input-name" placeholder="NAME" class="input-retro">
             <div class="grid grid-cols-2 gap-2">
                 <button onclick="setDifficulty(0.7, 'Rookie')" class="btn diff-btn" id="diff-rookie">Rookie</button>
                 <button onclick="setDifficulty(1.0, 'Veteran')" class="btn diff-btn active-diff" id="diff-veteran">Veteran</button>
@@ -162,8 +185,8 @@
                 <button onclick="setDifficulty(2.5, 'NoHope')" class="btn diff-btn text-red-600" id="diff-nohope">NO HOPE</button>
             </div>
             <div class="flex gap-2">
-                <button onclick="backToMission()" class="btn w-1/3">BACK</button>
-                <button id="start-btn" onclick="handleAuth()" class="btn w-2/3 py-5 bg-red-950 border-red-700 text-red-500">INITIATE</button>
+                <button onclick="backToMission()" class="btn w-1/3 text-[8px] uppercase">Back</button>
+                <button id="start-btn" onclick="handleAuth()" class="btn w-2/3 py-5 bg-red-950 border-red-700 text-red-500 uppercase">Initiate</button>
             </div>
         </div>
     </div>
@@ -188,11 +211,11 @@
     <!-- 暫停練習畫面 -->
     <div id="pause-screen" class="overlay-screen hidden">
         <h2 class="text-zinc-500 text-[10px] mb-8 uppercase tracking-widest">Training Mode (Paused)</h2>
-        <div class="bg-zinc-900 border border-zinc-700 p-8 rounded-lg w-full max-w-xs mb-8">
+        <div class="bg-zinc-900 border border-zinc-700 p-8 rounded-lg w-full max-w-xs mb-8 text-center">
             <p class="text-[8px] text-zinc-600 mb-4 uppercase">Target Practice</p>
             <div id="pause-target-word" class="text-white text-[16px] font-bold mb-8 tracking-widest uppercase">---</div>
-            <button onclick="speakTarget()" class="btn w-full bg-blue-900 text-white mb-3 py-4 font-bold">PLAY VOICE</button>
-            <button onclick="togglePause()" class="btn w-full bg-green-950 text-white py-4 font-bold">RESUME</button>
+            <button onclick="speakTarget()" class="btn w-full bg-blue-900 text-white mb-3 py-4 font-bold uppercase">Play Voice</button>
+            <button onclick="togglePause()" class="btn w-full bg-green-950 text-white py-4 font-bold uppercase">Resume</button>
         </div>
         <p class="text-[7px] text-zinc-700">Practice your pronunciation here.</p>
     </div>
@@ -208,13 +231,13 @@
     <!-- 結算畫面 -->
     <div id="win-screen" class="overlay-screen hidden">
         <h1 class="text-green-500 text-2xl mb-4 flicker uppercase">Mission Complete</h1>
-        <p id="win-score-display" class="text-yellow-500 text-5xl mb-12">0</p>
+        <p id="win-score-display" class="text-yellow-500 text-5xl mb-12 uppercase">0</p>
         <button onclick="location.reload()" class="btn px-12 py-5 uppercase">Return Base</button>
     </div>
 
     <div id="game-over-screen" class="overlay-screen hidden">
         <h1 class="text-red-700 text-2xl mb-6 flicker uppercase">You are dead</h1>
-        <p id="fail-score-display" class="text-yellow-500 text-5xl mb-12">0</p>
+        <p id="fail-score-display" class="text-yellow-500 text-5xl mb-12 uppercase">0</p>
         <div class="flex flex-col gap-3 w-full max-w-xs">
             <button onclick="restartGame()" class="btn py-5 bg-red-950 text-white border-red-700 uppercase">Retry Mission</button>
             <button onclick="location.reload()" class="btn py-4 text-zinc-500 uppercase">Back to Login</button>
@@ -233,9 +256,9 @@
             </div>
             <div id="combo-display" class="pixel-font text-yellow-500 text-[11px] opacity-0 font-bold">0 COMBO</div>
         </div>
-        <div class="flex flex-col items-center justify-center bg-zinc-900/40 rounded-lg border border-zinc-800 p-2">
+        <div class="flex flex-col items-center justify-center bg-zinc-900/40 rounded-lg border border-zinc-800 p-2 relative">
             <p class="text-[6px] text-zinc-600 mb-1 uppercase tracking-widest">Targeting</p>
-            <div id="current-word-ui" class="text-[12px] text-center text-white font-bold tracking-wider">AWAITING SIGNAL...</div>
+            <div id="current-word-ui" class="text-[12px] text-center text-white font-bold tracking-wider uppercase">AWAITING SIGNAL...</div>
         </div>
         <div class="grid grid-cols-2 gap-3">
             <button onclick="togglePause()" class="btn py-4 font-bold uppercase">Pause</button>
@@ -267,6 +290,35 @@
 
 <script>
     const ADMIN_KEY = "AdaWong";
+    
+    // --- 8-bit 音效系統 ---
+    const sfx = {
+        ctx: null,
+        init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+        play(freq, type, duration, vol, ramp = true) {
+            try {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                if(ramp) gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            } catch(e) {}
+        },
+        kill() { this.play(440, 'square', 0.1, 0.05); },
+        damage() { this.play(120, 'sawtooth', 0.3, 0.15); },
+        reward() {
+            this.play(660, 'sine', 0.4, 0.05);
+            setTimeout(() => this.play(880, 'sine', 0.4, 0.05), 100);
+        },
+        boss() { this.play(80, 'triangle', 0.8, 0.2, false); }
+    };
+
     let state = {
         score: 0, hp: 5, gameActive: false, isPaused: false,
         level: 1, kills: 0, combo: 0,
@@ -284,24 +336,18 @@
     const ctx = canvas.getContext('2d');
     let currentBookData = {};
     let selectedLesson = 1;
+    let selectedBook = 4;
     let wakeLock = null;
-    let clearConfirm = false; // 用於 Clear All 二次確認
+    let clearConfirm = false; 
 
     function initUI() {
         document.getElementById('book-grid').innerHTML = [1,2,3,4,5].map(i => 
             `<button onclick="selectBook(${i})" class="btn book-btn ${i===4?'active-diff':''}" id="b${i}">${['I','II','III','IV','V'][i-1]}</button>`).join('');
-        
         refreshLessonGrid();
         loadSavedProfile();
-        
         state.bgStars = [];
         for(let i=0; i<40; i++) {
-            state.bgStars.push({
-                x: (Math.random() - 0.5) * 600,
-                y: (Math.random() - 0.5) * 400,
-                z: Math.random(),
-                s: Math.random() * 1.5
-            });
+            state.bgStars.push({ x: (Math.random() - 0.5) * 600, y: (Math.random() - 0.5) * 400, z: Math.random(), s: Math.random() * 1.5 });
         }
     }
 
@@ -335,6 +381,7 @@
     }
 
     async function loadBookData(n) {
+        selectedBook = n;
         const status = document.getElementById('mission-status');
         status.innerText = `CONNECTING ARCHIVE ${n}...`;
         try {
@@ -352,17 +399,42 @@
         document.getElementById(`b${n}`).classList.add('active-diff');
         loadBookData(n);
     };
+
+    async function fetchLessonRankings(lessonId) {
+        const preview = document.getElementById('leaderboard-preview');
+        const list = document.getElementById('top-records-list');
+        list.innerHTML = "SEARCHING RECORDS...";
+        preview.classList.remove('hidden');
+
+        try {
+            const { db, appId, collection, getDocs } = window.fbase;
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
+            let records = [];
+            snap.forEach(d => {
+                const data = d.data();
+                if(data.book == selectedBook && data.lesson == lessonId) records.push(data);
+            });
+            records.sort((a, b) => b.score - a.score);
+            const top3 = records.slice(0, 3);
+            if(top3.length === 0) list.innerHTML = "NO RECORDS IN THIS SECTOR";
+            else list.innerHTML = top3.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${r.name}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
+        } catch (e) { list.innerHTML = "UNABLE TO LOAD RECORDS"; }
+    }
+
     window.selectLesson = (n) => {
         const data = currentBookData[`L${n}`];
         if (!data) {
             document.getElementById('mission-status').innerText = `SECTOR ${n}: COMING SOON`;
+            document.getElementById('leaderboard-preview').classList.add('hidden');
             return;
         }
         selectedLesson = n;
         document.querySelectorAll('.lesson-btn').forEach(b => b.classList.remove('active-diff'));
         document.getElementById(`l${n}`).classList.add('active-diff');
         checkMissionValid();
+        fetchLessonRankings(n);
     };
+
     function checkMissionValid() {
         const btn = document.getElementById('confirm-mission-btn');
         const data = currentBookData[`L${selectedLesson}`];
@@ -409,54 +481,29 @@
             const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
             let res = []; snap.forEach(d => res.push(d.data()));
             res.sort((a,b) => a.class.localeCompare(b.class) || a.no - b.no);
-            body.innerHTML = res.map(d => `
-                <tr>
-                    <td class="text-blue-400 font-bold">${d.class}</td>
-                    <td>${d.no}</td>
-                    <td class="text-zinc-200">${d.name}</td>
-                    <td class="text-green-500 font-bold">${d.score}</td>
-                    <td class="text-zinc-100 text-[14px] font-bold">${d.difficulty || 'N/A'}</td>
-                </tr>`).join('');
+            body.innerHTML = res.map(d => `<tr><td class="text-blue-400 font-bold">${d.class}</td><td>${d.no}</td><td class="text-zinc-200">${d.name}</td><td class="text-green-500 font-bold">${d.score}</td><td class="text-zinc-100 text-[14px] font-bold">${d.difficulty || 'N/A'}</td></tr>`).join('');
         } catch(e) { body.innerHTML = "SYSTEM ERROR"; }
     }
 
-    // 清除資料邏輯 (二次確認)
     window.handleClearData = async () => {
         const btn = document.getElementById('clear-data-btn');
         if (!clearConfirm) {
-            clearConfirm = true;
-            btn.innerText = "ARE YOU SURE?";
-            btn.classList.replace('text-red-500', 'text-white');
-            btn.classList.add('bg-red-600');
-            setTimeout(() => {
-                clearConfirm = false;
-                btn.innerText = "Clear All";
-                btn.classList.replace('text-white', 'text-red-500');
-                btn.classList.remove('bg-red-600');
-            }, 3000);
+            clearConfirm = true; btn.innerText = "ARE YOU SURE?"; btn.classList.add('bg-red-600');
+            setTimeout(() => { clearConfirm = false; btn.innerText = "Clear All"; btn.classList.remove('bg-red-600'); }, 3000);
             return;
         }
-
         const { db, appId, collection, getDocs, deleteDoc, doc } = window.fbase;
-        btn.innerText = "DELETING...";
         try {
             const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
-            const delPromises = [];
-            snap.forEach(d => {
-                delPromises.push(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'scores', d.id)));
-            });
-            await Promise.all(delPromises);
-            clearConfirm = false;
-            btn.innerText = "DONE";
-            setTimeout(() => { btn.innerText = "Clear All"; btn.classList.replace('text-white', 'text-red-500'); btn.classList.remove('bg-red-600'); }, 1000);
-            showAdmin();
+            for(let d of snap.docs) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'scores', d.id));
+            clearConfirm = false; showAdmin();
         } catch (e) { btn.innerText = "ERROR"; }
     };
 
     window.setDifficulty = (val, mode) => {
         state.difficulty = val; state.difficultyMode = mode;
         document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active-diff'));
-        document.getElementById(`diff-${mode.toLowerCase()}`).classList.add('active-diff');
+        document.getElementById(`diff-${mode.toLowerCase().replace(" ", "")}`).classList.add('active-diff');
     };
 
     class Particle {
@@ -483,30 +530,29 @@
         update() {
             if (this.isDying) { this.opacity -= 0.2; return this.opacity <= 0; }
             if (state.freezeTimer <= 0) {
-                if (state.bossMode && this.isBoss) {
-                    this.z += 0.00065 * state.difficulty; 
-                } else if (!state.bossMode) {
-                    this.z += this.speed;
-                }
+                if (state.bossMode && this.isBoss) this.z += 0.00065 * state.difficulty; 
+                else if (!state.bossMode) this.z += this.speed;
             }
             return this.z >= 1;
         }
         draw(ctx, w, h, isClosest) {
             const scale = this.isBoss ? 2.5 : 1.0;
-            const size = Math.min(w * 0.7, (18 + Math.pow(this.z, 2) * 320) * scale);
+            // 強制限制繪圖尺寸，防止撐爆螢幕
+            const size = Math.min(w * 0.6, (15 + Math.pow(this.z, 2) * 280) * scale);
             const wobbleX = Math.sin(Date.now() * 0.004 + this.wobbleSeed) * 10 * this.z;
             const screenX = w/2 + (this.x * this.z) + wobbleX;
-            const screenY = h/2 + (this.y * this.z) + (this.z * h * 0.45);
+            const screenY = h/2 + (this.y * this.z) + (this.z * h * 0.4);
             ctx.save(); ctx.globalAlpha = this.opacity; ctx.translate(screenX, screenY);
             
+            // Minecraft 殭屍
             ctx.fillStyle = `hsl(${this.clothesHue}, 40%, 35%)`;
-            ctx.fillRect(-size/3, -size/2.5, size/1.5, size/1.2); 
+            ctx.fillRect(-size/3, -size/2.5, size/1.5, size/1.2); // 身體
             ctx.fillStyle = `hsl(210, 30%, 20%)`;
-            ctx.fillRect(-size/3, size/4, size/1.5, size/4); 
+            ctx.fillRect(-size/3, size/4, size/1.5, size/4); // 褲子
             ctx.fillStyle = `hsl(${this.skinHue}, 45%, 50%)`;
-            ctx.fillRect(-size/3.5, -size*0.9, size/1.75, size/2.2); 
-            ctx.fillRect(-size/2, -size/3, size/6, size/3); 
-            ctx.fillRect(size/3, -size/3, size/6, size/3); 
+            ctx.fillRect(-size/3.5, -size*0.9, size/1.75, size/2.2); // 頭
+            ctx.fillRect(-size/2, -size/3, size/6, size/3); // 手1
+            ctx.fillRect(size/3, -size/3, size/6, size/3); // 手2
             ctx.fillStyle = "#000"; 
             const eyeS = size/10;
             ctx.fillRect(-size/6, -size*0.75, eyeS, eyeS);
@@ -514,31 +560,28 @@
             ctx.fillRect(-size/15, -size*0.6, size/7.5, eyeS/2); 
 
             if (isClosest && !this.isBoss) {
-                ctx.strokeStyle = '#f00'; ctx.lineWidth = 3;
-                ctx.strokeRect(-size/2 - 5, -size - 5, size + 10, size + 10);
+                ctx.strokeStyle = '#f00'; ctx.lineWidth = 3; ctx.strokeRect(-size/2 - 5, -size - 5, size + 10, size + 10);
             }
             if (!this.isBoss) {
-                ctx.font = `bold ${Math.max(8, size/7)}px 'Press Start 2P'`;
+                ctx.font = `bold ${Math.max(8, size/7.5)}px 'Press Start 2P'`;
                 ctx.fillStyle = isClosest ? '#fff' : '#444'; ctx.textAlign = 'center';
-                ctx.shadowBlur = 4; ctx.shadowColor = "#000";
-                ctx.fillText(this.word.toUpperCase(), 0, -size * 1.05);
+                ctx.shadowBlur = 4; ctx.shadowColor = "#000"; ctx.fillText(this.word.toUpperCase(), 0, -size * 1.05);
             }
             ctx.restore();
         }
     }
 
     function triggerReward() {
+        sfx.reward();
         const rewards = ["RECOVER (+1 HP)", "FLASH (Freeze 3s)", "ELIMINATE (Remove 1)"];
         const roll = Math.floor(Math.random() * rewards.length);
         const toast = document.getElementById('reward-toast');
         toast.innerText = `REWARD: ${rewards[roll]}`;
         toast.classList.add('toast-active');
         setTimeout(() => toast.classList.remove('toast-active'), 2000);
-
         if (roll === 0) state.hp = Math.min(5, state.hp + 1);
         else if (roll === 1) {
-            state.freezeTimer = 180;
-            document.getElementById('flash-overlay').style.opacity = "0.5";
+            state.freezeTimer = 180; document.getElementById('flash-overlay').style.opacity = "0.5";
             setTimeout(() => document.getElementById('flash-overlay').style.opacity = "0", 200);
         } else if (roll === 2) {
             const target = state.enemies.find(e => !e.isDying && !e.isBoss);
@@ -568,13 +611,10 @@
         state.wordPool = []; state.sentencePool = []; state.bossMode = false;
         document.getElementById('boss-ui').style.opacity = '0';
         requestWakeLock(); handleResize(); initSpeech(); requestAnimationFrame(gameLoop);
+        sfx.init();
     }
 
-    window.restartGame = () => {
-        document.getElementById('game-over-screen').classList.add('hidden');
-        document.getElementById('win-screen').classList.add('hidden');
-        startGame();
-    };
+    window.restartGame = () => { document.getElementById('game-over-screen').classList.add('hidden'); startGame(); };
 
     function handleResize() {
         const dpr = window.devicePixelRatio || 1;
@@ -588,39 +628,39 @@
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!Speech) return;
         if (recognition) try { recognition.stop(); } catch(e) {}
-        recognition = new Speech();
-        recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
+        recognition = new Speech(); recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
         recognition.onresult = (e) => {
             if(!state.gameActive || state.isPaused) return;
-            let transcript = "";
-            for (let i = e.resultIndex; i < e.results.length; i++) transcript += e.results[i][0].transcript.toLowerCase();
-            processCommand(transcript);
+            let finalTranscript = "";
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript.toLowerCase();
+            }
+            if(finalTranscript) processCommand(finalTranscript);
         };
         recognition.onend = () => { if(state.gameActive && !state.isPaused) try { recognition.start(); } catch(e){} };
         recognition.start();
     }
 
     function processCommand(text) {
-        const clean = (s) => s.replace(/[.,!?]/g, "").trim();
+        const clean = (s) => s.replace(/[.,!?]/g, "").trim().toLowerCase();
         const input = clean(text);
         if (state.bossMode) {
-            const target = clean(state.bossData.words[state.bossWordIndex].toLowerCase());
+            const target = clean(state.bossData.words[state.bossWordIndex]);
             if (input.includes(target)) hitBoss();
         } else {
             const closest = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
-            if (closest && input.includes(clean(closest.word.toLowerCase()))) killEnemy(state.enemies.indexOf(closest));
+            if (closest && input.includes(clean(closest.word))) killEnemy(state.enemies.indexOf(closest));
         }
     }
 
     function killEnemy(idx, isAuto = false) {
         const en = state.enemies[idx]; if(!en) return;
-        en.isDying = true;
-        state.score += 100 * state.difficulty; 
+        en.isDying = true; state.score += 100 * state.difficulty; 
         if(!isAuto) {
             state.kills++; state.combo++;
             if(state.combo > 0 && state.combo % 10 === 0) triggerReward();
         }
-        createExplosion(en); state.shake = 10;
+        createExplosion(en); state.shake = 10; sfx.kill();
         let trigger = false;
         if(state.difficultyMode==='Rookie' && state.kills>=10) trigger=true;
         else if(state.difficultyMode==='Veteran' && state.kills>=15) trigger=true;
@@ -630,15 +670,12 @@
     }
 
     function startBossBattle() {
-        state.bossMode = true; 
-        state.enemies = [new Enemy("BOSS", true)]; 
-        state.enemies[0].z = 0.35;
-        const full = getNextSentence();
-        state.bossData = { full, words: full.split(' ') }; state.bossWordIndex = 0;
+        state.bossMode = true; state.enemies = [new Enemy("BOSS", true)]; state.enemies[0].z = 0.35;
+        const full = getNextSentence(); state.bossData = { full, words: full.split(' ') }; state.bossWordIndex = 0;
         document.getElementById('boss-ui').style.opacity = '1';
         const container = document.getElementById('boss-sentence');
         container.innerHTML = state.bossData.words.map((w, i) => `<span id="bw-${i}">${w}</span>`).join(' ');
-        updateBossUI();
+        updateBossUI(); sfx.boss();
     }
 
     function updateBossUI() {
@@ -650,7 +687,7 @@
     }
 
     function hitBoss() {
-        state.bossWordIndex++; state.shake = 20; createExplosion(state.enemies[0]);
+        state.bossWordIndex++; state.shake = 20; createExplosion(state.enemies[0]); sfx.kill();
         if (state.enemies[0]) state.enemies[0].z = Math.max(0.2, state.enemies[0].z - 0.1); 
         if (state.bossWordIndex >= state.bossData.words.length) {
             state.enemies[0].isDying = true; state.bossesDefeated++;
@@ -658,9 +695,7 @@
                 let win = false; let next = false;
                 if(state.difficultyMode==='Rookie'||state.difficultyMode==='Veteran') win=true;
                 else if(state.difficultyMode==='Nightmare') { if(state.bossesDefeated<2) next=true; else win=true; }
-                else if(state.difficultyMode==='NoHope') { 
-                    if(state.bossesDefeated<3) { state.kills=0; state.bossMode=false; document.getElementById('boss-ui').style.opacity='0'; } else win=true; 
-                }
+                else if(state.difficultyMode==='NoHope') { if(state.bossesDefeated<3) { state.kills=0; state.bossMode=false; document.getElementById('boss-ui').style.opacity='0'; } else win=true; }
                 if(next) startBossBattle(); else if(win) winGame();
             }, 800);
         } else updateBossUI();
@@ -669,14 +704,12 @@
     function createExplosion(en) {
         const rect = canvas.parentElement.getBoundingClientRect();
         const x = rect.width/2 + (en.x * en.z);
-        const y = rect.height/2 + (en.y * en.z) + (en.z * rect.height * 0.45);
+        const y = rect.height/2 + (en.y * en.z) + (en.z * rect.height * 0.4);
         for(let i=0; i<15; i++) state.particles.push(new Particle(x, y, `hsl(${en.skinHue}, 40%, 40%)`));
     }
 
     function triggerDamage() {
-        state.hp--; state.shake = 35; state.combo = 0;
-        ctx.fillStyle = "rgba(255, 0, 0, 0.25)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        state.hp--; state.shake = 35; state.combo = 0; sfx.damage();
         if (state.bossMode && state.enemies[0]) state.enemies[0].z = 0.4;
         if (state.hp <= 0) endGame();
     }
@@ -685,19 +718,18 @@
         if (!state.gameActive || state.isPaused) return;
         const rect = canvas.parentElement.getBoundingClientRect();
         const w = rect.width; const h = rect.height;
-        ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, w, h); // 每一幀重畫背景，防止殘影
+        
         if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.88; }
         if (state.freezeTimer > 0) state.freezeTimer--;
         ctx.fillStyle = "#222";
         state.bgStars.forEach(s => {
             const sx = w/2 + (s.x * s.z); const sy = h/2 + (s.y * s.z);
             ctx.globalAlpha = 0.4 * s.z; ctx.fillRect(sx, sy, s.s, s.s); ctx.globalAlpha = 1;
-            if (state.freezeTimer <= 0) s.z += 0.003;
-            if (s.z > 1) s.z = 0;
+            if (state.freezeTimer <= 0) s.z += 0.003; if (s.z > 1) s.z = 0;
         });
         if (!state.bossMode && state.freezeTimer <= 0 && Date.now() - state.spawnTimer > 1800/state.difficulty) {
-            state.enemies.push(new Enemy(getNextWord()));
-            state.spawnTimer = Date.now();
+            state.enemies.push(new Enemy(getNextWord())); state.spawnTimer = Date.now();
         }
         const closest = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
         for (let i = state.enemies.length - 1; i >= 0; i--) {
@@ -708,18 +740,15 @@
             } else en.draw(ctx, w, h, en === closest);
         }
         for (let i = state.particles.length - 1; i >= 0; i--) {
-            if (!state.particles[i].update()) state.particles.splice(i, 1);
-            else state.particles[i].draw(ctx);
+            if (!state.particles[i].update()) state.particles.splice(i, 1); else state.particles[i].draw(ctx);
         }
-        ctx.setTransform(1, 0, 0, 1, 0, 0); 
-        updateUIPanel();
-        requestAnimationFrame(gameLoop);
+        ctx.setTransform(1, 0, 0, 1, 0, 0); updateUIPanel(); requestAnimationFrame(gameLoop);
     }
 
     function updateUIPanel() {
         document.getElementById('score-display').innerText = Math.floor(state.score).toString().padStart(6, '0');
         const comboEl = document.getElementById('combo-display');
-        comboEl.style.opacity = state.combo > 1 ? '1' : '0';
+        comboEl.style.opacity = state.combo > 1 ? '1' : '0'; comboEl.innerText = `${state.combo} COMBO`;
         const status = document.getElementById('status-label');
         if (state.hp > 3) { status.innerText = 'FINE'; status.className = 'pixel-font text-green-500 text-[11px] font-bold'; }
         else if (state.hp > 1) { status.innerText = 'CAUTION'; status.className = 'pixel-font text-yellow-500 text-[11px] font-bold'; }
@@ -736,7 +765,7 @@
             const { db, appId, setDoc, doc, serverTimestamp } = window.fbase;
             const rid = `${state.player.class}_${state.player.no}_${Date.now()}`;
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'scores', rid), {
-                ...state.player, score: Math.floor(state.score), difficulty: state.difficultyMode, timestamp: serverTimestamp()
+                ...state.player, score: Math.floor(state.score), difficulty: state.difficultyMode, book: selectedBook, lesson: selectedLesson, timestamp: serverTimestamp()
             });
         } catch(e){}
     }
@@ -757,17 +786,13 @@
             else if (target) targetLabel.innerText = target.word.toUpperCase();
             else targetLabel.innerText = "NO TARGET";
             if(recognition) recognition.stop(); releaseWakeLock();
-        } else { 
-            ps.classList.add('hidden'); requestAnimationFrame(gameLoop); 
-            if(recognition) try{recognition.start();}catch(e){} requestWakeLock();
-        }
+        } else { ps.classList.add('hidden'); requestAnimationFrame(gameLoop); if(recognition) try{recognition.start();}catch(e){} requestWakeLock(); }
     };
 
     window.speakTarget = () => {
         const text = document.getElementById('pause-target-word').innerText;
         if(text === "---" || text === "NO TARGET") return;
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-US'; speechSynthesis.speak(u);
+        const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; speechSynthesis.speak(u);
     };
 
     window.addEventListener('resize', handleResize);
