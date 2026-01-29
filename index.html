@@ -92,7 +92,7 @@
 
         #game-canvas {
             image-rendering: pixelated;
-            background: radial-gradient(circle, #151515 0%, #000 95%);
+            background: radial-gradient(circle, #101010 0%, #000 100%);
             width: 100%;
             height: 100%;
         }
@@ -150,7 +150,7 @@
             padding: 20px;
         }
 
-        /* 後台介面專用字體 (黑體) */
+        /* 後台介面優化 */
         #admin-screen {
             font-family: 'Noto Sans TC', sans-serif !important;
             padding: 0;
@@ -315,11 +315,11 @@
             <table class="w-full text-left">
                 <thead class="bg-zinc-900 sticky top-0">
                     <tr>
-                        <th class="p-3">Class</th>
-                        <th class="p-3">No</th>
-                        <th class="p-3">Name</th>
-                        <th class="p-3">Score</th>
-                        <th class="p-3">Diff</th>
+                        <th>Class</th>
+                        <th>No</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                        <th>Diff</th>
                     </tr>
                 </thead>
                 <tbody id="records-body">
@@ -395,8 +395,8 @@
 
 <script>
     const ADMIN_NAME = "AdaWong";
-    let selectedBook = 4; // 預設 Book IV
-    let selectedLesson = 1; // 預設 Unit 1
+    let selectedBook = 4; 
+    let selectedLesson = 1; 
     let currentBookData = {}; 
     let currentLessonData = null; 
 
@@ -444,7 +444,7 @@
         }
     }
 
-    // 初始化預設值
+    // 初始化載入
     loadBookData(4);
 
     function confirmMission() {
@@ -525,12 +525,21 @@
     class Enemy {
         constructor(word, lv, isElite = false, forceClose = false) {
             this.word = word;
-            this.z = forceClose ? 0.3 : 0; 
-            const stageFactor = state.level === 2 ? 0.8 : 1.1; 
-            this.speed = (0.0008 + (Math.random() * 0.0006)) * state.difficultyMultiplier * (isElite ? 0.9 : 1) * stageFactor;
+            // 隨機初始深度增加景深感 (0.0 到 0.2)
+            this.z = forceClose ? 0.35 : (Math.random() * 0.2); 
             
-            // 分散生成
-            this.x = (Math.random() - 0.5) * 320; 
+            const stageFactor = state.level === 2 ? 0.8 : 1.1; 
+            
+            // 快慢隨機化：分為 慢速(70%), 中速(25%), 快速(5%)
+            let speedRoll = Math.random();
+            let speedBase = 0.0006;
+            if (speedRoll > 0.95) speedBase = 0.0025; // Runner
+            else if (speedRoll > 0.7) speedBase = 0.0012; // Infected
+            
+            this.speed = (speedBase + (Math.random() * 0.0004)) * state.difficultyMultiplier * (isElite ? 0.9 : 1) * stageFactor;
+            
+            // 隨機分佈更廣 (340)
+            this.x = (Math.random() - 0.5) * 340; 
             this.y = (Math.random() - 0.5) * 60;
             
             this.isDying = false;
@@ -551,33 +560,38 @@
             const rect = canvas.parentElement.getBoundingClientRect();
             const w = rect.width;
             const h = rect.height;
-            const size = (this.isElite ? 15 : 8) + (Math.pow(this.z, 2) * 220);
+            
+            // 加入景深非線性縮放 (z=1 時最大)
+            const size = (this.isElite ? 16 : 9) + (Math.pow(this.z, 2.2) * 260);
             const xPos = w / 2 + (this.x * this.z);
-            const yPos = h / 2 + (this.y * this.z) + (this.z * (h * 0.3));
+            const yPos = h / 2 + (this.y * this.z) + (this.z * (h * 0.35));
             
             ctx.save();
             ctx.globalAlpha = this.opacity;
-            const br = 0.3 + (this.z * 0.7);
-            ctx.filter = `brightness(${br})`;
             
-            // 身體
+            // 景深明暗：越遠越暗 (z 越小越暗)
+            const depthBrightness = 0.15 + (Math.pow(this.z, 0.8) * 0.85);
+            ctx.filter = `brightness(${depthBrightness})`;
+            
+            // 繪製身體細節
             ctx.fillStyle = this.cShirt;
             ctx.fillRect(xPos - size*0.3, yPos - size*0.7, size*0.6, size*0.6); 
-            // 頭部
             ctx.fillStyle = this.cSkin;
             ctx.fillRect(xPos - size*0.2, yPos - size*1.1, size*0.4, size*0.4); 
+            
             // 眼睛
             ctx.fillStyle = this.isElite ? 'cyan' : 'red';
             ctx.fillRect(xPos - size*0.12, yPos - size*1.0, size*0.06, size*0.06);
             ctx.fillRect(xPos + size*0.06, yPos - size*1.0, size*0.06, size*0.06);
 
-            const fontSize = Math.max(10, size/7.5);
+            // 單字文字
+            const fontSize = Math.max(9, size/7.5);
             ctx.fillStyle = this.isElite ? 'gold' : '#fff';
-            // 殭屍標籤維持像素字體
             ctx.font = `bold ${fontSize}px 'Press Start 2P'`;
             ctx.textAlign = 'center';
             ctx.shadowBlur = 4; ctx.shadowColor = 'red';
             ctx.fillText(this.word, xPos, yPos - size*1.3);
+            
             ctx.restore();
         }
     }
@@ -587,7 +601,7 @@
         state.difficultyName = name;
         document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active-diff'));
         
-        // 確保 ID 匹配
+        // 精確匹配按鈕 ID
         if (val === 0.7) document.getElementById('diff-rookie').classList.add('active-diff');
         if (val === 1.0) document.getElementById('diff-veteran').classList.add('active-diff');
         if (val === 1.5) document.getElementById('diff-nightmare').classList.add('active-diff');
@@ -596,18 +610,22 @@
 
     function spawnLogic() {
         if (!state.gameActive || state.isPaused) return;
-        const interval = 1500 / state.difficultyMultiplier;
-        if ((state.isFirstSpawn && state.enemies.length === 0) || (state.enemies.length < 4 && Date.now() - state.spawnTimer > interval)) {
+        
+        // 頻率隨難度提高
+        const spawnInterval = 1600 / state.difficultyMultiplier;
+        
+        if ((state.isFirstSpawn && state.enemies.length === 0) || (state.enemies.length < 4 && Date.now() - state.spawnTimer > spawnInterval)) {
             const list = currentLessonData.stages[state.level.toString()];
             const word = list[Math.floor(Math.random() * list.length)];
             
             if (!state.enemies.some(e => e.word === word)) {
                 let newEnemy = new Enemy(word, state.level, Math.random() < 0.15, state.isFirstSpawn);
                 
-                // 檢查水平間距確保不重疊
+                // 強化分散邏輯：檢查水平距離 (x) 且考慮 深度 (z)
+                // 只有當 z 也很接近時，才需要避開 x
                 let attempts = 0;
-                while (attempts < 5 && state.enemies.some(e => Math.abs(e.x - newEnemy.x) < 70)) {
-                    newEnemy.x = (Math.random() - 0.5) * 320;
+                while (attempts < 8 && state.enemies.some(e => Math.abs(e.x - newEnemy.x) < 80 && Math.abs(e.z - newEnemy.z) < 0.15)) {
+                    newEnemy.x = (Math.random() - 0.5) * 340;
                     attempts++;
                 }
 
@@ -655,14 +673,18 @@
         const h = rect.height;
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
         
-        ctx.strokeStyle = '#080808'; ctx.lineWidth = 1; ctx.beginPath();
-        for(let i=0; i<8; i++) {
-            ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/7), h);
+        // 畫出遠方消失點線條，加強空間感
+        ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 1; ctx.beginPath();
+        for(let i=0; i<12; i++) {
+            ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/11), h);
         }
         ctx.stroke();
 
         spawnLogic();
+        
+        // 根據深度 z 排序繪製順序，確保近的蓋過遠的
         state.enemies.sort((a, b) => a.z - b.z);
+        
         for (let i = state.enemies.length - 1; i >= 0; i--) {
             const enemy = state.enemies[i];
             if (enemy.update()) {
@@ -674,10 +696,9 @@
     }
 
     function handleAuth() {
-        const name = document.getElementById('input-name').value.trim();
+        const nameInput = document.getElementById('input-name').value.trim();
         
-        // 管理員後台跳轉
-        if (name === ADMIN_NAME) { 
+        if (nameInput === ADMIN_NAME) { 
             showAdminDashboard(); 
             return; 
         }
@@ -686,8 +707,8 @@
         const grade = document.getElementById('select-grade').value;
         const cls = document.getElementById('select-class').value;
 
-        if (!no || !name) return;
-        state.player = { class: `${grade}${cls}`, no: no, name: name };
+        if (!no || !nameInput) return;
+        state.player = { class: `${grade}${cls}`, no: no, name: nameInput };
         document.getElementById('login-screen').classList.add('hidden');
         startGame();
     }
