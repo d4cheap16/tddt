@@ -418,6 +418,24 @@
         'NoHope': 5
     };
 
+    // BOSS 逼近速度 (攻擊頻率)
+    // 數值越大，BOSS 走得越快。建議範圍 0.0003 (慢) ~ 0.0025 (極快)
+    const BOSS_SPEEDS = {
+        'Rookie': 0.0010,    
+        'Veteran': 0.0013,   
+        'Nightmare': 0.0015, 
+        'NoHope': 0.0020     
+    };
+
+    // 新增：一般敵人逼近速度 (最小值 ~ 最大值)
+    // 遊戲會在此範圍內隨機決定每隻殭屍的速度
+    const ENEMY_SPEEDS = {
+        'Rookie':   { min: 0.0005, max: 0.0010 },
+        'Veteran':  { min: 0.0008, max: 0.0016 },
+        'Nightmare':{ min: 0.0012, max: 0.0020 },
+        'NoHope':   { min: 0.0020, max: 0.0030 }
+    };
+
     // --- 8-bit 音效系統 ---
     const sfx = {
         ctx: null,
@@ -689,8 +707,15 @@
             this.word = word; this.isBoss = isBoss; 
             this.z = (state.difficultyMode === 'Rookie' && !isBoss) ? 0.25 : 0;
             this.x = (Math.random() - 0.5) * 380; this.y = (Math.random() - 0.5) * 30;
-            // 降低速度：從 0.0012 改為 0.0008
-            this.speed = (0.0008 + Math.random() * 0.0008) * state.difficulty;
+            
+            // 修改：使用 ENEMY_SPEEDS 設定表計算速度
+            if (!isBoss) {
+                const settings = ENEMY_SPEEDS[state.difficultyMode] || ENEMY_SPEEDS['Veteran'];
+                this.speed = settings.min + Math.random() * (settings.max - settings.min);
+            } else {
+                this.speed = 0; // Boss 速度由 update 中的 BOSS_SPEEDS 控制
+            }
+
             this.isDying = false; this.opacity = 1; this.wobbleSeed = Math.random() * 1000;
             const greens = [100, 120, 140, 160];
             this.skinHue = greens[Math.floor(Math.random() * greens.length)];
@@ -700,7 +725,10 @@
         update() {
             if (this.isDying) { this.opacity -= 0.2; return this.opacity <= 0; }
             if (state.freezeTimer <= 0) {
-                if (state.bossMode && this.isBoss) this.z += 0.00065 * state.difficulty; 
+                // 修改：BOSS 使用獨立的速度參數表 BOSS_SPEEDS
+                if (state.bossMode && this.isBoss) {
+                    this.z += (BOSS_SPEEDS[state.difficultyMode] || 0.0008); 
+                }
                 else if (!state.bossMode) this.z += this.speed;
             }
             return this.z >= 1;
