@@ -26,7 +26,7 @@
         body {
             background-color: #000;
             color: #ccc;
-            /* 全域英文字體設為 Press Start 2P，中文自動 fallback */
+            /* 全域字體：英文 Press Start 2P，中文自動 fallback */
             font-family: 'Press Start 2P', 'Noto Sans TC', sans-serif;
             margin: 0;
             padding: 0;
@@ -199,11 +199,34 @@
             image-rendering: pixelated;
         }
 
-        /* Combo 動效 */
+        /* Combo 與 獎勵文字動效 */
         #combo-display {
             font-size: 12px;
             color: var(--horror-yellow);
             text-shadow: 0 0 5px orange;
+        }
+        
+        #reward-toast {
+            position: absolute;
+            top: 20%;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            z-index: 100;
+            transition: all 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .toast-active { opacity: 1 !important; transform: translateY(0) !important; }
+
+        /* 閃光彈全屏特效 */
+        #flash-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 67%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 120;
         }
     </style>
 </head>
@@ -211,6 +234,12 @@
 
 <div class="game-wrapper" id="main-container">
     
+    <!-- 獎勵提示文字層 -->
+    <div id="reward-toast" class="pixel-font text-white text-[12px]"></div>
+
+    <!-- 閃光彈視覺層 -->
+    <div id="flash-overlay"></div>
+
     <!-- 1. 任務選擇畫面 -->
     <div id="mission-screen" class="overlay-screen">
         <div class="banner-box">
@@ -298,7 +327,7 @@
 
     <!-- 3. ALL CLEAR -->
     <div id="win-screen" class="overlay-screen hidden">
-        <h1 class="text-green-500 pixel-font text-xl mb-4 flicker uppercase">All Clear</h1>
+        <h1 id="win-title" class="text-green-500 pixel-font text-xl mb-4 flicker uppercase">All Clear</h1>
         <div class="bg-black border border-green-900 p-6 mb-8 w-full max-w-xs text-center text-[10px]">
             <p id="win-score" class="pixel-font text-md text-yellow-500 mb-2 uppercase">Score: 0</p>
             <p id="win-detail" class="text-zinc-500 uppercase mt-2">Area Secured.</p>
@@ -330,9 +359,7 @@
                         <th>Diff</th>
                     </tr>
                 </thead>
-                <tbody id="records-body">
-                    <!-- 資料載入區域 -->
-                </tbody>
+                <tbody id="records-body"></tbody>
             </table>
         </div>
         <div class="p-4 bg-zinc-900 w-full border-t border-zinc-800">
@@ -485,21 +512,22 @@
     // --- Core Game Logic ---
     let state = {
         score: 0, hp: 5, level: 1, levelKills: 0, combo: 0,
-        difficultyMultiplier: 1.0, difficultyName: "Veteran",
+        damageTaken: 0,
         isPaused: false, gameActive: false,
+        isFlashActive: false, // 閃光彈狀態
         enemies: [], player: { class: "", no: "", name: "" },
-        spawnTimer: 0, isFirstSpawn: true
+        spawnTimer: 0, isFirstSpawn: true,
+        difficultyMultiplier: 1.0, difficultyName: "Veteran"
     };
 
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     const bloodOverlay = document.getElementById('blood-splatter');
+    const flashOverlay = document.getElementById('flash-overlay');
     const mainContainer = document.getElementById('main-container');
 
-    // 動態計算過關條件
     function getLevelGoal(lv) {
         const base = lv === 1 ? 10 : 5;
-        // 依照難度提升目標數 (1.0倍, 1.5倍, 2.5倍...)
         return Math.floor(base * state.difficultyMultiplier);
     }
 
@@ -545,7 +573,6 @@
             let speedBase = 0.0006;
             if (speedRoll > 0.95) speedBase = 0.0025; 
             else if (speedRoll > 0.7) speedBase = 0.0012; 
-            
             this.speed = (speedBase + (Math.random() * 0.0004)) * state.difficultyMultiplier * (isElite ? 0.9 : 1) * stageFactor;
             this.x = (Math.random() - 0.5) * 340; 
             this.y = (Math.random() - 0.5) * 60;
@@ -555,14 +582,15 @@
             this.cSkin = isElite ? '#4a008b' : (Math.random() > 0.5 ? '#3d5c31' : '#567d46');
             this.cShirt = isElite ? 'gold' : (Math.random() > 0.5 ? '#4a4a4a' : '#2e2e2e');
         }
-
         update() {
             if (this.isDying) return (this.opacity -= 0.15) <= 0;
-            this.z += this.speed;
+            // 閃光彈啟動時，非死亡中的敵人停止移動
+            if (!state.isFlashActive) {
+                this.z += this.speed;
+            }
             if (this.opacity < 1) this.opacity += 0.1;
             return this.z >= 1;
         }
-
         draw() {
             const rect = canvas.parentElement.getBoundingClientRect();
             const w = rect.width;
@@ -602,7 +630,7 @@
     }
 
     function spawnLogic() {
-        if (!state.gameActive || state.isPaused) return;
+        if (!state.gameActive || state.isPaused || state.isFlashActive) return;
         const spawnInterval = 1600 / state.difficultyMultiplier;
         if ((state.isFirstSpawn && state.enemies.length === 0) || (state.enemies.length < 4 && Date.now() - state.spawnTimer > spawnInterval)) {
             const list = currentLessonData.stages[state.level.toString()];
@@ -621,34 +649,54 @@
         }
     }
 
+    function triggerReward() {
+        const rewards = ["RECOVER (+1 HP)", "FLASH (Freeze 3s)", "ELIMINATE (Remove 1)"];
+        const roll = Math.floor(Math.random() * rewards.length);
+        const toast = document.getElementById('reward-toast');
+        toast.innerText = `REWARD: ${rewards[roll]}`;
+        toast.classList.add('toast-active');
+        setTimeout(() => toast.classList.remove('toast-active'), 2000);
+
+        if (roll === 0) {
+            state.hp = Math.min(5, state.hp + 1);
+        } else if (roll === 1) {
+            state.isFlashActive = true;
+            flashOverlay.style.opacity = "0.8";
+            setTimeout(() => flashOverlay.style.opacity = "0", 300);
+            setTimeout(() => { state.isFlashActive = false; }, 3000);
+        } else if (roll === 2) {
+            const activeEnemies = state.enemies.filter(e => !e.isDying);
+            if (activeEnemies.length > 0) {
+                const target = activeEnemies[Math.floor(Math.random() * activeEnemies.length)];
+                target.isDying = true;
+            }
+        }
+        updateUI();
+    }
+
     function killEnemy(idx) {
         if (!state.enemies[idx]) return;
         state.enemies[idx].isDying = true;
-        
-        // Combo 與 得分邏輯
         state.combo++;
-        const bonus = Math.floor(state.combo / 5) * 50; // 每 5 combo 額外獎勵
-        state.score += ((state.enemies[idx].isElite ? 500 : 100) + bonus) * state.level;
+        if (state.combo > 0 && state.combo % 10 === 0) triggerReward();
         
+        const comboBonus = Math.floor(state.combo / 5) * 50;
+        state.score += ((state.enemies[idx].isElite ? 500 : 100) + comboBonus) * state.level;
         state.levelKills++;
         document.getElementById('current-word-ui').innerText = state.enemies[idx].word.toUpperCase();
         
         const goal = getLevelGoal(state.level);
         if (state.levelKills >= goal) {
-            if (state.level < 2) { 
-                state.level++; 
-                state.levelKills = 0; 
-                state.enemies = []; 
-            } else { 
-                winGame(); 
-            }
+            if (state.level < 2) { state.level++; state.levelKills = 0; state.enemies = []; }
+            else { winGame(); }
         }
         updateUI();
     }
 
     function triggerDamage() {
         state.hp--; 
-        state.combo = 0; // 受傷重置 Combo
+        state.damageTaken++;
+        state.combo = 0; 
         bloodOverlay.style.opacity = "1";
         mainContainer.classList.add('shake-anim');
         setTimeout(() => { bloodOverlay.style.opacity = "0"; mainContainer.classList.remove('shake-anim'); }, 300);
@@ -658,42 +706,25 @@
 
     function updateUI() {
         const statusLabel = document.getElementById('status-label');
-        // 更新血量標籤邏輯
-        if (state.hp >= 4) { 
-            statusLabel.innerText = "FINE"; 
-            statusLabel.className = "pixel-font status-fine"; 
-        } else if (state.hp >= 2) { 
-            statusLabel.innerText = "CAUTION"; 
-            statusLabel.className = "pixel-font status-caution"; 
-        } else { 
-            statusLabel.innerText = "DANGER"; 
-            statusLabel.className = "pixel-font status-danger"; 
-        }
+        if (state.hp >= 4) { statusLabel.innerText = "FINE"; statusLabel.className = "pixel-font status-fine"; }
+        else if (state.hp >= 2) { statusLabel.innerText = "CAUTION"; statusLabel.className = "pixel-font status-caution"; }
+        else { statusLabel.innerText = "DANGER"; statusLabel.className = "pixel-font status-danger"; }
 
-        // Combo 顯示
         const comboEl = document.getElementById('combo-display');
-        if (state.combo >= 2) {
-            comboEl.innerText = `${state.combo} COMBO`;
-            comboEl.style.opacity = "1";
-        } else {
-            comboEl.style.opacity = "0";
-        }
+        if (state.combo >= 2) { comboEl.innerText = `${state.combo} COMBO`; comboEl.style.opacity = "1"; }
+        else { comboEl.style.opacity = "0"; }
 
         document.getElementById('score-display').innerText = state.score.toString().padStart(6, '0');
-        const goal = getLevelGoal(state.level);
-        document.getElementById('level-progress-ui').innerText = `SEC ${state.level}: ${state.levelKills}/${goal}`;
+        document.getElementById('level-progress-ui').innerText = `SEC ${state.level}: ${state.levelKills}/${getLevelGoal(state.level)}`;
     }
 
     function gameLoop() {
         if (!state.gameActive || state.isPaused) return;
         const rect = canvas.parentElement.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
+        const w = rect.width; const h = rect.height;
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
         ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 1; ctx.beginPath();
-        for(let i=0; i<12; i++) {
-            ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/11), h);
-        }
+        for(let i=0; i<12; i++) { ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/11), h); }
         ctx.stroke();
         spawnLogic();
         state.enemies.sort((a, b) => a.z - b.z);
@@ -731,13 +762,13 @@
             res.sort((a,b) => a.class.localeCompare(b.class) || a.no - b.no);
             body.innerHTML = "";
             res.forEach(d => {
-                body.insertAdjacentHTML('beforeend', `<tr><td class="font-bold text-blue-400">${d.class}</td><td>${d.no}</td><td class="text-zinc-200">${d.name}</td><td class="text-green-500 font-bold">${d.score}</td><td class="text-zinc-600 text-[10px]">${d.difficulty || 'Veteran'}</td></tr>`);
+                body.insertAdjacentHTML('beforeend', `<tr><td class="font-bold text-blue-400">${d.class}</td><td>${d.no}</td><td class="text-zinc-200">${d.name}</td><td class="text-green-500 font-bold">${d.score}</td><td class="text-zinc-600 text-[10px]">${d.difficulty || 'Normal'}</td></tr>`);
             });
         } catch (e) { body.innerHTML = "<tr><td colspan='5' class='p-8 text-center text-red-700'>ERROR</td></tr>"; }
     }
 
     function startGame() {
-        state.gameActive = true; state.hp = 5; state.score = 0; state.level = 1; state.levelKills = 0; state.combo = 0; state.enemies = []; state.isFirstSpawn = true;
+        state.gameActive = true; state.hp = 5; state.score = 0; state.level = 1; state.levelKills = 0; state.combo = 0; state.damageTaken = 0; state.enemies = []; state.isFirstSpawn = true;
         updateUI(); handleResize(); 
         if (recognition) { try { recognition.start(); } catch(e) {} } 
         gameLoop();
@@ -755,6 +786,19 @@
 
     function winGame() { 
         state.gameActive = false; 
+        const winTitle = document.getElementById('win-title');
+        const winDetail = document.getElementById('win-detail');
+        if (state.damageTaken === 0) {
+            winTitle.innerText = "PERFECT CLEAR";
+            winTitle.className = "text-yellow-500 pixel-font text-xl mb-4 flicker uppercase";
+            winDetail.innerText = "GODLIKE SURVIVOR. NO DAMAGE TAKEN.";
+            winDetail.className = "text-yellow-600 uppercase mt-2 font-bold";
+        } else {
+            winTitle.innerText = "ALL CLEAR";
+            winTitle.className = "text-green-500 pixel-font text-xl mb-4 flicker uppercase";
+            winDetail.innerText = "AREA SECURED.";
+            winDetail.className = "text-zinc-500 uppercase mt-2";
+        }
         document.getElementById('win-screen').classList.remove('hidden'); 
         document.getElementById('win-score').innerText = `SCORE: ${state.score}`; 
         syncData(); 
