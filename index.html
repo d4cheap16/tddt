@@ -7,7 +7,7 @@
     
     <title>Voice of the Dead</title>
     <meta name="description" content="Want to Survive? Speak!">
-    <meta property="og:title" content="Speak your way out.">
+    <meta property="og:title" content="Speak your way out. - Voice of the Dead">
     <meta property="og:description" content="用聲音在末日中生存。">
     <meta property="og:image" content="https://d4cheap16.github.io/VoiceoftheDEAD/opentag.png">
     <meta property="og:type" content="website">
@@ -196,14 +196,12 @@
             display: none; /* 預設隱藏 */
         }
 
-        /* Debug Panel 樣式 (靠右對齊，避免遮擋) */
+        /* Debug Panel 樣式 (移除 display: flex，避免覆蓋 hidden) */
         #debug-panel {
             position: absolute; top: 0; right: 0; width: 100%; height: 100%;
             background: transparent; pointer-events: none; z-index: 300;
-            display: flex; flex-direction: column; 
-            align-items: flex-end; /* 靠右對齊 */
-            justify-content: flex-start; 
             padding: 10px;
+            /* 修正：移除 flex 設定，改由 HTML class 控制 */
         }
         .debug-controls {
             pointer-events: auto;
@@ -342,7 +340,8 @@
     </div>
 
     <!-- Debug 面板 (遊戲中顯示) -->
-    <div id="debug-panel" class="hidden">
+    <!-- 修正：移除 flex，改用 class 控制 -->
+    <div id="debug-panel" class="hidden flex-col items-end justify-start">
         <div class="debug-controls">
             <div class="text-[10px] mb-2 font-bold uppercase text-center border-b border-green-500 pb-1">Debug Controls</div>
             <button onclick="debugTrigger('RECOVER')" class="debug-btn">1. Trigger Heal (+HP)</button>
@@ -479,7 +478,7 @@
     const BOSS_SPEEDS = {
         'Rookie': 0.0010,    
         'Veteran': 0.0013,   
-        'Nightmare': 0.0016, 
+        'Nightmare': 0.0015, 
         'NoHope': 0.0020     
     };
 
@@ -1023,8 +1022,14 @@
         document.getElementById('perfect-badge').style.display = 'none'; 
         
         // 根據 Debug 模式顯示面板
-        if(state.debugMode) document.getElementById('debug-panel').classList.remove('hidden');
-        else document.getElementById('debug-panel').classList.add('hidden');
+        const dbgPanel = document.getElementById('debug-panel');
+        if(state.debugMode) {
+            dbgPanel.classList.remove('hidden');
+            dbgPanel.classList.add('flex');
+        } else {
+            dbgPanel.classList.add('hidden');
+            dbgPanel.classList.remove('flex');
+        }
 
         requestWakeLock(); handleResize(); initSpeech(); requestAnimationFrame(gameLoop);
         sfx.init();
