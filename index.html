@@ -486,7 +486,7 @@
     // 您可以在這裡調整顏色、文字、持續時間等參數
     const REWARD_CONFIG = {
         'RECOVER': {
-            text: "RECOVER (+1 HP)",
+            text: "RECOVER.",
             textColor: "#4ade80", // 亮綠色
             borderColor: "#4ade80",
             boxShadow: "0 0 25px rgba(74, 222, 128, 0.6)",
@@ -495,16 +495,16 @@
             effect: (state) => { state.hp = Math.min(5, state.hp + 1); }
         },
         'FLASH': {
-            text: "FLASH (Freeze 3s)",
+            text: "FLASH!",
             textColor: "#67e8f9", // 青色
             borderColor: "#67e8f9",
             boxShadow: "0 0 25px rgba(103, 232, 249, 0.6)",
             overlayColor: "white",
             overlayDuration: 1500, // 較長的淡出時間 (致盲感)
-            effect: (state) => { state.freezeTimer = 180; } // 180 frames = 3 seconds
+            effect: (state) => { state.freezeTimer = 120; } // 180 frames = 3 seconds
         },
         'SHOTGUN': {
-            text: "SHOTGUN (Knockback All)",
+            text: "SHOTGUN!",
             textColor: "#fbbf24", // 琥珀色
             borderColor: "#fbbf24",
             boxShadow: "0 0 25px rgba(251, 191, 36, 0.6)",
@@ -516,12 +516,12 @@
             }
         },
         'CRITICAL': {
-            text: "CRITICAL OVERLOAD & FULL HEAL!",
+            text: "WITNESS THE POWER!",
             textColor: "#d946ef", // 紫色
             borderColor: "#d946ef",
             boxShadow: "0 0 40px rgba(217, 70, 239, 0.9)",
             overlayColor: "rgba(217, 70, 239, 0.6)", // 紫色強光
-            overlayDuration: 800,
+            overlayDuration: 700,
             effect: (state) => { state.hp = 5; } // 補滿血 (殺敵邏輯在外部)
         }
     };
