@@ -1,25 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+    <link rel="icon" href="/zombie.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Voice of the Dead</title>
-    <!-- Favicon 設定 -->
-    <link rel="icon" href="/VoiceoftheDEAD/zombie.png" type="image/png">
     
+    <!-- 社群分享標籤 (Open Graph) -->
+    <title>Voice of the Dead</title>
+    <meta name="description" content="Speak to excorcise!">
+    <meta property="og:title" content="Speak your way out!">
+    <meta property="og:description" content="Want to Survive? Speak!">
+    <meta property="og:type" content="website">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --horror-red: #8b0000;
-            --horror-green: #1a3300;
+            --horror-green: #00ff00;
+            --horror-yellow: #ffff00;
+            --ui-blue: #004488;
         }
 
         body {
-            background-color: #050505;
+            background-color: #000;
             color: #ccc;
             font-family: 'Noto Sans TC', sans-serif;
             margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100dvh;
             overflow: hidden;
             user-select: none;
             touch-action: manipulation;
@@ -27,13 +39,13 @@
 
         .pixel-font { font-family: 'Press Start 2P', cursive; }
 
-        /* CRT 掃描線特效 */
+        /* CRT 掃描線與靜電特效 */
         .crt::before {
             content: " ";
             display: block;
             position: absolute;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
             z-index: 100;
             background-size: 100% 3px, 2px 100%;
             pointer-events: none;
@@ -48,38 +60,42 @@
 
         @keyframes shake {
             0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(-4px, 4px); }
-            50% { transform: translate(4px, -4px); }
-            75% { transform: translate(-4px, -4px); }
+            25% { transform: translate(-3px, 3px); }
+            50% { transform: translate(3px, -3px); }
+            75% { transform: translate(-3px, -3px); }
         }
-        .shake { animation: shake 0.3s; }
+        .shake-anim { animation: shake 0.3s; }
 
-        .game-container {
+        /* 強制 9:16 手機比例容器 */
+        .game-wrapper {
             position: relative;
-            width: 100dvw;
-            height: 100dvh;
+            width: 100%;
+            max-width: 500px; 
+            height: 100%;
+            max-height: 100dvh;
+            aspect-ratio: 9 / 16;
+            background: #000;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            background: radial-gradient(circle, #1a1a1a 0%, #000 80%);
+            overflow: hidden;
+            border: 2px solid #222;
         }
 
         #game-canvas {
             image-rendering: pixelated;
-            background: #000;
+            background: radial-gradient(circle, #222 0%, #000 90%);
             width: 100%;
-            height: auto;
-            max-height: 65vh;
+            flex-grow: 1;
             border-bottom: 2px solid var(--horror-red);
         }
 
+        /* 經典 RE 介面配色 */
         .ui-panel {
-            flex-grow: 1;
+            height: 16%;
             width: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            border-top: 2px solid var(--horror-red);
-            padding: 10px 15px;
+            background: #050505;
+            border-top: 2px solid #333;
+            padding: 8px 12px;
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             align-items: center;
@@ -87,35 +103,31 @@
         }
 
         .btn {
-            background: #1a1a1a;
-            border: 2px solid #444;
-            color: #fff;
-            padding: 10px;
+            background: #0a0a0a;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 8px;
             cursor: pointer;
+            font-size: 10px;
             transition: all 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
         }
-        .btn:active { background: var(--horror-red); border-color: #f00; }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; border-color: #333; }
+        .btn:active { background: #333; color: #fff; }
 
         select, input {
-            background: #111;
-            border: 2px solid #444;
+            background: #000;
+            border: 1px solid #444;
             color: #0f0;
-            padding: 12px;
+            padding: 10px;
             font-size: 14px;
-            margin: 4px;
+            margin: 3px;
             width: 100%;
-            border-radius: 4px;
+            border-radius: 2px;
         }
 
         .overlay-screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.98);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -125,42 +137,43 @@
             padding: 20px;
         }
 
-        .diff-btn {
-            flex: 1;
-            font-size: 7px !important;
-            padding: 10px 4px !important;
-            line-height: 1.4;
+        /* 難度按鈕與選單 */
+        .active-diff { border-color: #fff !important; background: #222 !important; color: #fff !important; }
+
+        /* 血量心電圖風格顯示 */
+        #status-label {
+            font-size: 10px;
+            letter-spacing: 1px;
+            font-weight: bold;
         }
-
-        .active-diff { border-color: #ff0000 !important; background: #400 !important; }
-
-        .mission-selector { width: 100%; max-width: 400px; margin-bottom: 20px; }
-        .mission-label { font-size: 10px; color: #888; margin-bottom: 5px; text-align: left; width: 100%; }
+        .status-fine { color: var(--horror-green); }
+        .status-caution { color: var(--horror-yellow); }
+        .status-danger { color: var(--horror-red); }
     </style>
 </head>
 <body class="crt">
 
-<div class="game-container" id="main-container">
+<div class="game-wrapper" id="main-container">
     
     <!-- 1. 任務選擇畫面 -->
     <div id="mission-screen" class="overlay-screen">
-        <h1 class="pixel-font text-2xl md:text-3xl mb-8 flicker" style="color:#8b0000">SELECT MISSION</h1>
+        <h1 class="pixel-font text-lg md:text-xl mb-8 flicker" style="color:#ccc">SELECT SECTOR</h1>
         
-        <div class="bg-zinc-900 p-6 border-2 border-zinc-700 w-full max-w-sm flex flex-col items-center">
-            
-            <div class="mission-selector">
-                <p class="mission-label pixel-font">VOLUME (BOOK)</p>
-                <!-- 預設選擇 Book 4 -->
-                <div class="grid grid-cols-5 gap-1 mb-4">
+        <div class="bg-black p-4 border border-zinc-800 w-full max-w-sm flex flex-col items-center">
+            <div class="w-full mb-6">
+                <p class="text-[8px] text-zinc-600 mb-2 pixel-font">DATA VOLUME</p>
+                <div class="grid grid-cols-5 gap-1">
                     <button onclick="selectBook(1)" class="btn pixel-font book-btn" id="b1">I</button>
-                    <button onclick="selectBook(2)" class="btn pixel-font book-btn" id="b2">II</button>
+                    <button onclick="selectBook(2)" class="btn pixel-font book-btn active-diff" id="b2">II</button>
                     <button onclick="selectBook(3)" class="btn pixel-font book-btn" id="b3">III</button>
-                    <button onclick="selectBook(4)" class="btn pixel-font book-btn active-diff" id="b4">IV</button>
+                    <button onclick="selectBook(4)" class="btn pixel-font book-btn" id="b4">IV</button>
                     <button onclick="selectBook(5)" class="btn pixel-font book-btn" id="b5">V</button>
                 </div>
+            </div>
 
-                <p class="mission-label pixel-font">SECTOR (UNIT)</p>
-                <div class="grid grid-cols-3 gap-2">
+            <div class="w-full mb-6">
+                <p class="text-[8px] text-zinc-600 mb-2 pixel-font">SECTOR UNIT</p>
+                <div class="grid grid-cols-3 gap-1">
                     <button onclick="selectLesson(1)" class="btn pixel-font lesson-btn" id="l1">1</button>
                     <button onclick="selectLesson(2)" class="btn pixel-font lesson-btn active-diff" id="l2">2</button>
                     <button onclick="selectLesson(3)" class="btn pixel-font lesson-btn" id="l3">3</button>
@@ -173,114 +186,116 @@
                 </div>
             </div>
 
-            <div id="mission-status" class="text-xs pixel-font text-yellow-500 mb-4 h-6">INITIALIZING...</div>
-
-            <button onclick="confirmMission()" id="confirm-mission-btn" class="btn w-full py-4 pixel-font !text-[12px] bg-zinc-800" disabled>WAITING FOR DATA</button>
+            <div id="mission-status" class="text-[8px] pixel-font text-zinc-500 mb-6 h-4">...SYSTEM IDLE...</div>
+            <button onclick="confirmMission()" id="confirm-mission-btn" class="btn w-full py-3 pixel-font text-white bg-blue-900 border-blue-500" disabled>CONFIRM</button>
         </div>
     </div>
 
-    <!-- 2. 士兵登錄畫面 -->
+    <!-- 2. 登錄畫面 -->
     <div id="login-screen" class="overlay-screen hidden">
-        <h1 class="pixel-font text-2xl mb-4 flicker" style="color:#8b0000" id="selected-mission-title">MISSION UNKNOWN</h1>
-        <div class="flex flex-col items-center bg-zinc-900 p-5 border-2 border-zinc-700 shadow-2xl w-full max-w-sm">
-            <p class="text-[10px] text-zinc-500 mb-4 pixel-font">SOLDIER REGISTRATION</p>
+        <h1 class="pixel-font text-md mb-6 text-blue-500" id="selected-mission-title">MISSION ID: UNKNOWN</h1>
+        <div class="flex flex-col items-center bg-black p-4 border border-zinc-800 w-full max-w-sm">
+            <p class="text-[8px] text-zinc-600 mb-4 pixel-font">MEMBER REGISTRATION</p>
             
-            <div class="flex gap-2 w-full mb-2">
+            <div class="flex gap-1 w-full">
                 <select id="select-grade">
-                    <option value="高一">高一</option>
-                    <option value="高二">高二</option>
-                    <option value="高三">高三</option>
+                    <option value="高一">G10</option>
+                    <option value="高二">G11</option>
+                    <option value="高三">G12</option>
                 </select>
                 <select id="select-class">
-                    <option value="知足">知足</option>
-                    <option value="感恩">感恩</option>
-                    <option value="善解">善解</option>
-                    <option value="包容">包容</option>
-                    <option value="大愛">大愛</option>
-                    <option value="外校">外校</option>
+                    <option value="知足">CHIH</option>
+                    <option value="感恩">KAN</option>
+                    <option value="善解">SHAN</option>
+                    <option value="包容">PAO</option>
+                    <option value="大愛">LOVE</option>
+                    <option value="外校">EXT</option>
                 </select>
             </div>
             
-            <input type="text" id="input-no" placeholder="座號 (01-50 或 ADMIN ID)" class="text-center">
-            <input type="text" id="input-name" placeholder="姓名 (或 ADMIN PWD)" class="text-center">
+            <input type="number" id="input-no" placeholder="NUMBER" pattern="\d*">
+            <input type="text" id="input-name" placeholder="NAME">
             
             <div class="mt-4 w-full">
-                <p class="text-[10px] text-zinc-400 mb-3 pixel-font">DIFFICULTY</p>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="setDifficulty(0.7, 'Rookie (*)')" class="btn diff-btn pixel-font" id="diff-rookie">Rookie<br>(*)</button>
-                    <button onclick="setDifficulty(1.0, 'Veteran (**)')" class="btn diff-btn active-diff pixel-font" id="diff-veteran">Veteran<br>(**)</button>
-                    <button onclick="setDifficulty(1.4, 'Nightmare (***)')" class="btn diff-btn pixel-font" id="diff-nightmare">Nightmare<br>(***)</button>
-                    <button onclick="setDifficulty(2.2, 'NO HOPE (*****)')" class="btn diff-btn text-red-500 pixel-font" id="diff-nohope">NO HOPE<br>(*****)</button>
+                <p class="text-[8px] text-zinc-600 mb-2 pixel-font">DIFFICULTY</p>
+                <div class="grid grid-cols-2 gap-1">
+                    <button onclick="setDifficulty(0.7, 'Rookie (*)')" class="btn diff-btn pixel-font" id="diff-rookie">EASY</button>
+                    <button onclick="setDifficulty(1.0, 'Veteran (**)')" class="btn diff-btn active-diff pixel-font" id="diff-veteran">NORMAL</button>
+                    <button onclick="setDifficulty(1.4, 'Nightmare (***)')" class="btn diff-btn pixel-font" id="diff-nightmare">HARD</button>
+                    <button onclick="setDifficulty(2.2, 'NO HOPE (*****)')" class="btn diff-btn text-red-500 pixel-font" id="diff-nohope">REAL</button>
                 </div>
             </div>
 
             <div class="flex gap-2 w-full mt-6">
-                 <button onclick="backToMissionSelect()" class="btn w-1/3 py-4 pixel-font !text-[10px] bg-zinc-800">BACK</button>
-                 <button id="start-btn" onclick="handleAuth()" class="btn w-2/3 py-4 pixel-font !text-[12px] bg-red-900 border-red-500">START</button>
+                 <button onclick="backToMissionSelect()" class="btn w-1/3 pixel-font bg-zinc-900">BACK</button>
+                 <button id="start-btn" onclick="handleAuth()" class="btn w-2/3 pixel-font bg-red-950 border-red-700 text-red-500">INITIATE</button>
             </div>
         </div>
     </div>
 
-    <!-- 3. ALL CLEAR 畫面 -->
+    <!-- 3. ALL CLEAR -->
     <div id="win-screen" class="overlay-screen hidden">
-        <h1 class="text-green-500 pixel-font text-4xl mb-4 flicker">ALL CLEAR</h1>
-        <p class="text-white text-lg mb-6">任務達成 (MISSION ACCOMPLISHED)</p>
-        <div class="bg-zinc-900 border-2 border-green-700 p-6 mb-8 w-full max-w-xs">
-            <p id="win-score" class="pixel-font text-xl text-yellow-500 mb-2">SCORE: 0</p>
-            <p class="text-[14px] font-bold">該區域威脅已清除。</p>
+        <h1 class="text-green-500 pixel-font text-2xl mb-4 flicker">ALL CLEAR</h1>
+        <p class="text-zinc-500 text-[10px] mb-8 pixel-font">MISSION ACCOMPLISHED</p>
+        <div class="bg-black border border-green-900 p-6 mb-8 w-full max-w-xs">
+            <p id="win-score" class="pixel-font text-lg text-yellow-500 mb-2">SCORE: 0</p>
         </div>
-        <button onclick="location.reload()" class="btn w-full max-w-xs py-4 pixel-font">返回基地 (EXIT)</button>
-    </div>
-
-    <!-- Admin Screen -->
-    <div id="admin-screen" class="overlay-screen hidden">
-        <h2 class="pixel-font text-red-600 mb-4">數據中心 (CLASSIFIED)</h2>
-        <div class="w-full max-w-md bg-black border-2 border-zinc-800 overflow-x-auto">
-            <table class="w-full text-[12px] text-left">
-                <thead class="border-b border-zinc-700 text-red-500 font-bold">
-                    <tr><th class="p-2">班級</th><th class="p-2">座號</th><th class="p-2">姓名</th><th class="p-2">分數</th></tr>
-                </thead>
-                <tbody id="records-body"></tbody>
-            </table>
-        </div>
-        <button onclick="location.reload()" class="btn mt-6 py-3 px-8 pixel-font">關閉</button>
-    </div>
-
-    <!-- Pause Screen -->
-    <div id="pause-screen" class="overlay-screen hidden" style="background: rgba(0,0,0,0.95);">
-        <h2 class="pixel-font text-red-600 text-2xl mb-4">暫停中</h2>
-        <div id="target-word-hint" class="text-xl text-white font-bold mb-10 border-y border-zinc-700 py-6 w-full px-4 text-center">WORD</div>
-        <div class="flex flex-col gap-4 w-full max-w-xs px-4">
-            <button onclick="speakTarget()" class="btn bg-blue-900 py-4 pixel-font">聽發音 (LISTEN)</button>
-            <button onclick="resumeGame()" class="btn bg-green-900 py-4 pixel-font">繼續 (RESUME)</button>
-        </div>
+        <button onclick="retreatToMenu()" class="btn w-full max-w-xs py-4 pixel-font">RETURN TO BASE</button>
     </div>
 
     <!-- Game Over Screen -->
     <div id="game-over-screen" class="overlay-screen hidden">
-        <h2 class="pixel-font text-red-600 text-4xl mb-6 flicker">你死了</h2>
-        <p id="final-score-display" class="pixel-font text-lg mb-8"></p>
-        <button onclick="location.reload()" class="btn w-full max-w-xs py-4 pixel-font">重新嘗試 (RETRY)</button>
+        <h2 class="pixel-font text-red-700 text-2xl mb-6 flicker uppercase">You are dead.</h2>
+        <p id="final-score-display" class="pixel-font text-[10px] text-zinc-500 mb-8"></p>
+        <div class="flex flex-col gap-3 w-full max-w-xs">
+            <button onclick="restartCurrentGame()" class="btn w-full py-4 pixel-font bg-red-950 text-red-500 border-red-700">RETRY</button>
+            <button onclick="retreatToMenu()" class="btn w-full py-4 pixel-font">GIVE UP</button>
+        </div>
+    </div>
+
+    <!-- Admin Screen -->
+    <div id="admin-screen" class="overlay-screen hidden">
+        <h2 class="pixel-font text-blue-600 mb-4">ARCHIVE DATA</h2>
+        <div class="w-full max-w-md bg-black border border-zinc-800 overflow-x-auto">
+            <table class="w-full text-[9px] text-left">
+                <thead class="border-b border-zinc-800 text-zinc-500 font-bold uppercase">
+                    <tr><th class="p-2">Class</th><th class="p-2">No</th><th class="p-2">Name</th><th class="p-2">Score</th></tr>
+                </thead>
+                <tbody id="records-body"></tbody>
+            </table>
+        </div>
+        <button onclick="location.reload()" class="btn mt-6 py-3 px-8 pixel-font">LOGOUT</button>
+    </div>
+
+    <!-- Pause Screen -->
+    <div id="pause-screen" class="overlay-screen hidden">
+        <h2 class="pixel-font text-zinc-500 text-xl mb-4">PAUSED</h2>
+        <div id="target-word-hint" class="text-xl text-white font-bold mb-10 border-y border-zinc-800 py-6 w-full px-4 text-center">---</div>
+        <div class="flex flex-col gap-4 w-full max-w-xs px-4">
+            <button onclick="speakTarget()" class="btn bg-blue-900 py-4 pixel-font">PLAY VOICE</button>
+            <button onclick="resumeGame()" class="btn bg-green-950 py-4 pixel-font">RESUME</button>
+        </div>
     </div>
 
     <canvas id="game-canvas"></canvas>
 
+    <!-- 下方 UI Panel: 模仿生存狀態介面 -->
     <div class="ui-panel">
-        <div class="flex flex-col gap-1">
-            <div id="hp-display" class="text-lg">❤️❤️❤️❤️❤️</div>
-            <div id="score-display" class="text-[10px] text-zinc-500 pixel-font">000000</div>
+        <div class="flex flex-col justify-center">
+            <div id="status-label" class="pixel-font status-fine">FINE</div>
+            <div id="score-display" class="text-[8px] text-zinc-600 pixel-font mt-1">000000</div>
         </div>
         <div class="flex flex-col items-center">
-            <div id="level-progress-ui" class="text-[10px] text-zinc-500 mb-1 pixel-font">STAGE 1: 0/10</div>
-            <div id="current-word-ui" class="text-sm md:text-lg text-white font-bold text-center leading-tight">---</div>
+            <div id="level-progress-ui" class="text-[7px] text-zinc-700 mb-1 pixel-font">SECTOR 1: 0/10</div>
+            <div id="current-word-ui" class="text-xs text-zinc-400 font-bold text-center leading-tight uppercase">---</div>
         </div>
-        <div class="flex flex-col items-end gap-2">
-            <div id="difficulty-ui" class="text-[8px] text-green-600 pixel-font">ROOKIE (*)</div>
-            <button onclick="togglePause()" class="btn !p-2 text-[10px] w-full pixel-font">暫停</button>
+        <div class="flex flex-col items-end justify-center gap-1">
+            <button onclick="togglePause()" class="btn !p-1 text-[7px] w-full pixel-font">PAUSE</button>
+            <button onclick="retreatToMenu()" class="btn !p-1 text-[7px] w-full pixel-font">RETREAT</button>
         </div>
     </div>
 
-    <div id="blood-splatter" class="fixed inset-0 pointer-events-none bg-red-900/20 opacity-0 transition-opacity duration-300 z-[150]"></div>
+    <div id="blood-splatter" class="fixed inset-0 pointer-events-none bg-red-900/30 opacity-0 transition-opacity duration-300 z-[150]"></div>
 </div>
 
 <script type="module">
@@ -288,7 +303,6 @@
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDocs, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- Firebase 設定 ---
     const firebaseConfig = {
         apiKey: "AIzaSyBKiz17S_mjAEcat-oT0EDVnvKxhTzxQe8",
         authDomain: "voiceofthedead.firebaseapp.com",
@@ -304,42 +318,31 @@
         auth = getAuth(app);
         db = getFirestore(app);
         window.fbase = { db, auth, setDoc, doc, collection, serverTimestamp, getDocs };
-        signInAnonymously(auth).catch(console.error);
-        onAuthStateChanged(auth, (u) => { window.currentUser = u; });
-    } catch (e) {
-        console.error("Firebase init failed:", e);
-    }
-    
+        signInAnonymously(auth);
+    } catch (e) { console.error(e); }
     window.appId = 'voice-shooter-101';
 </script>
 
 <script>
-    // 管理員密碼 (Base64 編碼: AdaWong)
-    const ADMIN_KEY = "QWRhV29uZw==";
-    
-    let selectedBook = 4;
-    let selectedLesson = 1;
-    let currentBookData = {};
-    let currentLessonData = null;
+    const ADMIN_CODE = "teacher999";
+    let selectedBook = 2; 
+    let selectedLesson = 2; 
+    let currentBookData = {}; 
+    let currentLessonData = null; 
 
     async function loadBookData(bookNum) {
         const statusEl = document.getElementById('mission-status');
         const btn = document.getElementById('confirm-mission-btn');
-        statusEl.innerText = `CONNECTING TO BOOK ${bookNum}...`;
-        statusEl.style.color = "#ffff00";
-        btn.disabled = true;
-
+        statusEl.innerText = `ACCESSING ARCHIVE ${bookNum}...`;
         try {
             const response = await fetch(`book${bookNum}.json`);
-            if (!response.ok) throw new Error("File not found");
+            if (!response.ok) throw new Error();
             currentBookData = await response.json();
-            statusEl.innerText = `BOOK ${bookNum} LOADED`;
-            statusEl.style.color = "#00ff00";
+            statusEl.innerText = `ARCHIVE ${bookNum} READY`;
             checkDataAvailability();
         } catch (error) {
-            currentBookData = {};
-            statusEl.innerText = `BOOK ${bookNum} NOT FOUND (OFFLINE)`;
-            statusEl.style.color = "#ff0000";
+            currentBookData = {}; 
+            statusEl.innerText = `ACCESS DENIED`;
             checkDataAvailability();
         }
     }
@@ -362,29 +365,23 @@
         const key = `L${selectedLesson}`;
         const statusEl = document.getElementById('mission-status');
         const btn = document.getElementById('confirm-mission-btn');
-        if (currentBookData && currentBookData[key] && currentBookData[key].stages) {
-            statusEl.innerText = `TARGET: ${currentBookData[key].title}`;
-            statusEl.style.color = "#00ff00";
+        if (currentBookData && currentBookData[key]) {
+            statusEl.innerText = `READY: ${currentBookData[key].title.toUpperCase()}`;
             btn.disabled = false;
-            btn.innerText = "CONFIRM TARGET";
         } else {
-            if (Object.keys(currentBookData).length > 0) {
-                statusEl.innerText = "SECTOR LOCKED / NO DATA";
-                statusEl.style.color = "#888";
-            }
             btn.disabled = true;
-            btn.innerText = "ACCESS DENIED";
+            statusEl.innerText = "NO DATA FOUND";
         }
     }
 
-    loadBookData(4);
+    loadBookData(2);
 
     function confirmMission() {
         const key = `L${selectedLesson}`;
         currentLessonData = currentBookData[key];
         document.getElementById('mission-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
-        document.getElementById('selected-mission-title').innerText = currentLessonData.title;
+        document.getElementById('selected-mission-title').innerText = currentLessonData.title.toUpperCase();
     }
 
     function backToMissionSelect() {
@@ -392,25 +389,28 @@
         document.getElementById('mission-screen').classList.remove('hidden');
     }
 
-    // --- 遊戲核心邏輯 ---
+    function retreatToMenu() {
+        state.gameActive = false;
+        if (recognition) recognition.stop();
+        document.getElementById('win-screen').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('pause-screen').classList.add('hidden');
+        document.getElementById('mission-screen').classList.remove('hidden');
+    }
 
+    function restartCurrentGame() {
+        document.getElementById('game-over-screen').classList.add('hidden');
+        startGame();
+    }
+
+    // --- Core Game Logic ---
     const LEVEL_GOALS = { 1: 10, 2: 5 }; 
-    const COLORS = {
-        skin: ['#567d46', '#3d5c31'],
-        shirt: ['#3c44aa', '#8b0000', '#4a4a4a'],
-        pants: ['#2e2e2e', '#1a1a1a'],
-        eliteSkin: '#4a008b',
-        eliteShirt: '#ffd700'
-    };
-
     let state = {
-        score: 0, hp: 5, level: 1, combo: 0, levelKills: 0, 
-        difficultyMultiplier: 1.0, difficultyName: "Rookie (*)",
+        score: 0, hp: 5, level: 1, levelKills: 0, 
+        difficultyMultiplier: 1.0, difficultyName: "NORMAL",
         isPaused: false, gameActive: false,
         enemies: [], player: { class: "", no: "", name: "" },
-        spawnTimer: 0, maxEnemies: 3, isFirstSpawn: true,
-        // 九宮格佔用表 (0-8)
-        gridOccupied: Array(9).fill(false) 
+        spawnTimer: 0, isFirstSpawn: true
     };
 
     const canvas = document.getElementById('game-canvas');
@@ -435,7 +435,6 @@
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'en-US';
-
         recognition.onresult = (event) => {
             if (state.isPaused || !state.gameActive) return;
             let transcript = "";
@@ -444,9 +443,8 @@
             }
             state.enemies.forEach((enemy, index) => {
                 if (!enemy.isDying) {
-                    const cleanWord = enemy.word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-                    const cleanTranscript = transcript.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-                    if (cleanTranscript.includes(cleanWord)) killEnemy(index);
+                    const cleanWord = enemy.word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toUpperCase();
+                    if (transcript.includes(cleanWord)) killEnemy(index);
                 }
             });
         };
@@ -456,126 +454,49 @@
     class Enemy {
         constructor(word, lv, isElite = false, forceClose = false) {
             this.word = word;
-            this.z = forceClose ? 0.6 : 0; 
+            this.z = forceClose ? 0.4 : 0; 
             const stageFactor = state.level === 2 ? 0.7 : 1.0; 
-            
-            // 速度提升：基礎速度增加 2 倍，難度係數影響更大
-            this.speed = (0.0012 + (Math.random() * 0.0005)) * state.difficultyMultiplier * (isElite ? 0.9 : 1.1) * stageFactor;
-            
+            this.speed = (0.0006 + (Math.random() * 0.0004)) * state.difficultyMultiplier * (isElite ? 0.8 : 1) * stageFactor;
+            this.x = (Math.random() - 0.5) * 300;
+            this.y = (Math.random() - 0.5) * 40;
             this.isDying = false;
             this.opacity = 0;
             this.isElite = isElite;
-            this.cSkin = isElite ? COLORS.eliteSkin : COLORS.skin[Math.floor(Math.random() * COLORS.skin.length)];
-            this.cShirt = isElite ? COLORS.eliteShirt : COLORS.shirt[Math.floor(Math.random() * COLORS.shirt.length)];
-            this.cPants = COLORS.pants[Math.floor(Math.random() * COLORS.pants.length)];
-
-            // 九宮格位置分配 (Grid 0-8)
-            this.gridIndex = this.findFreeGrid();
-            if (this.gridIndex === -1) {
-                // 如果沒格子，這隻就不生成了 (邏輯上交給下一次 spawnLogic)
-                this.isDying = true; 
-                this.opacity = 0;
-            } else {
-                state.gridOccupied[this.gridIndex] = true;
-                // 計算 Grid 對應的 X, Y
-                // 3x3 Grid: 
-                // 0 1 2
-                // 3 4 5
-                // 6 7 8
-                const col = this.gridIndex % 3; // 0, 1, 2
-                const row = Math.floor(this.gridIndex / 3); // 0, 1, 2
-                
-                // 將 Grid 映射到 Canvas 座標 (-200 到 200 左右)
-                // X: 左(-150) 中(0) 右(150) + 隨機偏移
-                // Y: 上(-60) 中(0) 下(60) + 隨機偏移
-                this.x = (col - 1) * 200 + (Math.random() - 0.5) * 50;
-                this.y = (row - 1) * 80 + (Math.random() - 0.5) * 20;
-            }
-        }
-
-        findFreeGrid() {
-            // 隨機嘗試找一個空位
-            const available = [];
-            for(let i=0; i<9; i++) {
-                if (!state.gridOccupied[i]) available.push(i);
-            }
-            if (available.length === 0) return -1;
-            return available[Math.floor(Math.random() * available.length)];
+            this.cSkin = isElite ? '#4a008b' : '#3d5c31';
+            this.cShirt = isElite ? 'gold' : '#4a4a4a';
         }
 
         update() {
-            if (this.isDying) {
-                this.opacity -= 0.15;
-                if (this.opacity <= 0) {
-                    // 死透了，釋放格子
-                    if (this.gridIndex !== -1) state.gridOccupied[this.gridIndex] = false;
-                    return true; // Remove me
-                }
-                return false;
-            }
-            
+            if (this.isDying) return (this.opacity -= 0.15) <= 0;
             this.z += this.speed;
             if (this.opacity < 1) this.opacity += 0.1;
-            
-            if (this.z >= 1) {
-                if (this.gridIndex !== -1) state.gridOccupied[this.gridIndex] = false;
-                return true; // Hit player
-            }
-            return false;
+            return this.z >= 1;
         }
 
         draw() {
-            if (this.isDying && this.opacity <= 0) return;
-
             const w = canvas.width / (window.devicePixelRatio || 1);
             const h = canvas.height / (window.devicePixelRatio || 1);
-            
-            const baseSize = this.isElite ? 25 : 18;
-            const growth = this.isElite ? 220 : 160;
-            const size = baseSize + (Math.pow(this.z, 1.6) * growth);
+            const size = (this.isElite ? 18 : 10) + (Math.pow(this.z, 1.8) * 150);
             const xPos = w / 2 + (this.x * this.z);
-            const yPos = h / 2 + (this.y * this.z) + (this.z * 100);
+            const yPos = h / 2 + (this.y * this.z) + (this.z * 150);
             
             ctx.save();
             ctx.globalAlpha = this.opacity;
             const br = 0.2 + (this.z * 0.8);
             ctx.filter = `brightness(${br})`;
             
+            // Draw Zombie (Pixel Block Style)
             ctx.fillStyle = this.cSkin;
             ctx.fillRect(xPos - size/4, yPos - size*1.2, size/2, size/2); 
             ctx.fillStyle = this.cShirt;
             ctx.fillRect(xPos - size/4, yPos - size*0.7, size/2, size/2); 
-            ctx.fillStyle = this.cSkin;
-            ctx.fillRect(xPos - size/2, yPos - size*0.7, size/4, size/8); 
-            ctx.fillRect(xPos + size/4, yPos - size*0.7, size/4, size/8); 
-            ctx.fillStyle = this.cPants;
-            ctx.fillRect(xPos - size/4, yPos - size*0.2, size/5, size/4); 
-            ctx.fillRect(xPos + size/20, yPos - size*0.2, size/5, size/4); 
             
-            if (this.isElite) {
-                ctx.strokeStyle = '#ffd700';
-                ctx.setLineDash([2, 2]);
-                ctx.strokeRect(xPos - size/2, yPos - size*1.3, size, size*1.5);
-            }
-
-            const isSentence = this.word.includes(" ");
-            const fontSize = isSentence ? Math.max(9, size/9) : Math.max(11, size/7);
-            
-            ctx.fillStyle = this.isElite ? '#ffd700' : '#fff';
+            const fontSize = Math.max(9, size/8);
+            ctx.fillStyle = this.isElite ? 'gold' : '#fff';
             ctx.font = `bold ${fontSize}px 'Noto Sans TC'`;
             ctx.textAlign = 'center';
-            ctx.shadowBlur = 8; ctx.shadowColor = this.isElite ? 'gold' : 'red';
-            
-            if (this.word.length > 25) {
-                 const words = this.word.split(" ");
-                 const mid = Math.floor(words.length / 2);
-                 const line1 = words.slice(0, mid).join(" ");
-                 const line2 = words.slice(mid).join(" ");
-                 ctx.fillText(line1, xPos, yPos - size*1.6);
-                 ctx.fillText(line2, xPos, yPos - size*1.4);
-            } else {
-                 ctx.fillText(this.word, xPos, yPos - size*1.4);
-            }
+            ctx.shadowBlur = 4; ctx.shadowColor = 'red';
+            ctx.fillText(this.word, xPos, yPos - size*1.4);
             ctx.restore();
         }
     }
@@ -592,92 +513,57 @@
 
     function spawnLogic() {
         if (!state.gameActive || state.isPaused) return;
-        
-        // NO HOPE (2.2) 模式下，最大敵人數量增加到 6
-        state.maxEnemies = state.difficultyMultiplier > 2 ? 6 : (state.level === 1 ? 4 : 3);
-        
-        // 生成間隔大幅縮短
-        // Rookie (0.7) -> 2000 / 0.7 = 2857ms
-        // No Hope (2.2) -> 1200 / 2.2 = 545ms (極快)
-        const baseInterval = state.difficultyMultiplier > 2 ? 1200 : 2000;
-        
-        if ((state.isFirstSpawn && state.enemies.length === 0) || (state.enemies.length < state.maxEnemies && Date.now() - state.spawnTimer > baseInterval / state.difficultyMultiplier)) {
-            if (!currentLessonData || !currentLessonData.stages) return;
+        if ((state.isFirstSpawn && state.enemies.length === 0) || (state.enemies.length < 3 && Date.now() - state.spawnTimer > 2000 / state.difficultyMultiplier)) {
             const list = currentLessonData.stages[state.level.toString()];
             if (!list) return;
-
             const word = list[Math.floor(Math.random() * list.length)];
-            
-            // 檢查單字重複 (只檢查活著的)
-            const activeEnemies = state.enemies.filter(e => !e.isDying);
-            if (!activeEnemies.some(e => e.word === word)) {
-                const eliteChance = state.difficultyMultiplier > 2 ? 0.3 : 0.12;
-                const isElite = Math.random() < (eliteChance * state.difficultyMultiplier);
-                
-                // 嘗試生成，如果沒格子 (findFreeGrid 返回 -1) 建構子會標記 isDying
-                const newEnemy = new Enemy(word, state.level, isElite, state.isFirstSpawn);
-                if (!newEnemy.isDying) {
-                    state.enemies.push(newEnemy);
-                    state.spawnTimer = Date.now();
-                    state.isFirstSpawn = false;
-                }
+            if (!state.enemies.some(e => e.word === word)) {
+                state.enemies.push(new Enemy(word, state.level, Math.random() < 0.15, state.isFirstSpawn));
+                state.spawnTimer = Date.now();
+                state.isFirstSpawn = false;
             }
         }
     }
 
     function killEnemy(idx) {
         if (!state.enemies[idx]) return;
-        const enemy = state.enemies[idx];
-        enemy.isDying = true;
-        // 立即釋放格子，讓新怪能馬上補位
-        if (enemy.gridIndex !== -1) {
-            state.gridOccupied[enemy.gridIndex] = false;
-            enemy.gridIndex = -1; 
-        }
-
-        state.score += (enemy.isElite ? 500 : 100) * state.level;
+        state.enemies[idx].isDying = true;
+        state.score += (state.enemies[idx].isElite ? 500 : 100) * state.level;
         state.levelKills++;
-        document.getElementById('current-word-ui').innerText = enemy.word;
-        
-        const goal = LEVEL_GOALS[state.level];
-        if (state.levelKills >= goal) {
-            if (state.level < 2) { 
-                state.level++; 
-                state.levelKills = 0; 
-                state.enemies = []; 
-                state.gridOccupied.fill(false); // 清空格子
-            } else { 
-                winGame(); 
-            }
+        document.getElementById('current-word-ui').innerText = state.enemies[idx].word.toUpperCase();
+        if (state.levelKills >= LEVEL_GOALS[state.level]) {
+            if (state.level < 2) { state.level++; state.levelKills = 0; state.enemies = []; }
+            else { winGame(); }
         }
         updateUI();
     }
 
     function triggerDamage() {
         state.hp--; bloodOverlay.style.opacity = "1";
-        mainContainer.classList.add('shake');
-        setTimeout(() => { bloodOverlay.style.opacity = "0"; mainContainer.classList.remove('shake'); }, 300);
+        mainContainer.classList.add('shake-anim');
+        setTimeout(() => { bloodOverlay.style.opacity = "0"; mainContainer.classList.remove('shake-anim'); }, 300);
         updateUI(); if (state.hp <= 0) endGame();
     }
 
     function updateUI() {
-        document.getElementById('hp-display').innerText = '❤️'.repeat(Math.max(0, state.hp));
+        const statusLabel = document.getElementById('status-label');
+        if (state.hp >= 5) { statusLabel.innerText = "FINE"; statusLabel.className = "pixel-font status-fine"; }
+        else if (state.hp >= 3) { statusLabel.innerText = "CAUTION"; statusLabel.className = "pixel-font status-caution"; }
+        else { statusLabel.innerText = "DANGER"; statusLabel.className = "pixel-font status-danger"; }
+
         document.getElementById('score-display').innerText = state.score.toString().padStart(6, '0');
-        const goal = LEVEL_GOALS[state.level];
-        const stageName = state.level === 1 ? "STAGE 1" : "STAGE 2";
-        document.getElementById('level-progress-ui').innerText = `${stageName}: ${state.levelKills}/${goal}`;
+        document.getElementById('level-progress-ui').innerText = `SEC ${state.level}: ${state.levelKills}/${LEVEL_GOALS[state.level]}`;
     }
 
     function gameLoop() {
         if (!state.gameActive || state.isPaused) return;
         const w = canvas.width / (window.devicePixelRatio || 1);
         const h = canvas.height / (window.devicePixelRatio || 1);
-        ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
         
-        ctx.strokeStyle = '#111'; ctx.lineWidth = 1; ctx.beginPath();
-        for(let i=0; i<10; i++) {
-            ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/9), h);
-            ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/9), 0);
+        ctx.strokeStyle = '#111'; ctx.beginPath();
+        for(let i=0; i<6; i++) {
+            ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/5), h);
         }
         ctx.stroke();
 
@@ -686,92 +572,69 @@
         for (let i = state.enemies.length - 1; i >= 0; i--) {
             const enemy = state.enemies[i];
             if (enemy.update()) {
-                if (!enemy.isDying) { 
-                    // 撞到玩家
-                    state.enemies.splice(i, 1); 
-                    triggerDamage(); 
-                } else { 
-                    // 死亡動畫播完
-                    state.enemies.splice(i, 1); 
-                }
+                if (!enemy.isDying) { state.enemies.splice(i, 1); triggerDamage(); }
+                else { state.enemies.splice(i, 1); }
             } else { enemy.draw(); }
         }
         requestAnimationFrame(gameLoop);
     }
 
     function handleAuth() {
-        const no = document.getElementById('input-no').value.trim();
-        const name = document.getElementById('input-name').value.trim();
-        
-        // Base64 驗證: AdaWong -> QWRhV29uZw==
-        const encodedNo = btoa(no);
-        const encodedName = btoa(name);
-
-        if (encodedNo === ADMIN_KEY && encodedName === ADMIN_KEY) {
-            showAdminDashboard();
-            return;
-        }
-
-        if (!no || !name) { alert("請填寫正確資訊。"); return; }
-        
         const grade = document.getElementById('select-grade').value;
         const cls = document.getElementById('select-class').value;
+        const no = document.getElementById('input-no').value.trim();
+        const name = document.getElementById('input-name').value.trim();
+        if (name === ADMIN_CODE) { showAdminDashboard(); return; }
+        if (!no || !name) return;
         state.player = { class: `${grade}${cls}`, no: no, name: name };
         document.getElementById('login-screen').classList.add('hidden');
         startGame();
     }
 
     async function showAdminDashboard() {
-        document.getElementById('mission-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('admin-screen').classList.remove('hidden');
         const body = document.getElementById('records-body');
-        body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>載入中...</td></tr>";
+        body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>ACCESSING...</td></tr>";
         try {
             const { db, appId, collection, getDocs } = window.fbase;
-            const q = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-            const snap = await getDocs(q);
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
             let res = []; snap.forEach(d => res.push(d.data()));
             res.sort((a,b) => a.class.localeCompare(b.class) || a.no - b.no);
             body.innerHTML = "";
             res.forEach(d => {
                 body.insertAdjacentHTML('beforeend', `<tr class="border-b border-zinc-900"><td class="p-2">${d.class}</td><td class="p-2">${d.no}</td><td class="p-2">${d.name}</td><td class="p-2 text-green-500 font-bold">${d.score}</td></tr>`);
             });
-        } catch (e) { body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>連線失敗</td></tr>"; }
+        } catch (e) { body.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>FAILED</td></tr>"; }
     }
 
     function startGame() {
         state.gameActive = true; state.hp = 5; state.score = 0; state.level = 1; state.levelKills = 0; state.enemies = []; state.isFirstSpawn = true;
-        state.gridOccupied.fill(false);
         updateUI(); if (recognition) { try { recognition.start(); } catch(e) {} } gameLoop();
     }
 
     async function syncData() {
         try {
             const { db, appId, setDoc, doc, serverTimestamp } = window.fbase;
-            if (!db) return;
             const rid = `${state.player.class}_${state.player.no}_${Date.now()}`;
-            const missionId = `B${selectedBook}L${selectedLesson}`;
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'scores', rid), {
-                ...state.player, 
-                score: state.score, 
-                mission: missionId,
-                difficulty: state.difficultyName, 
-                timestamp: serverTimestamp()
+                ...state.player, score: state.score, timestamp: serverTimestamp()
             });
         } catch (e) {}
     }
 
     function winGame() { state.gameActive = false; document.getElementById('win-screen').classList.remove('hidden'); document.getElementById('win-score').innerText = `SCORE: ${state.score}`; syncData(); }
     function endGame() { state.gameActive = false; document.getElementById('game-over-screen').classList.remove('hidden'); document.getElementById('final-score-display').innerText = `SCORE: ${state.score}`; syncData(); }
+    
     function togglePause() { 
+        if (!state.gameActive) return;
         state.isPaused = !state.isPaused; 
         document.getElementById('pause-screen').classList.toggle('hidden');
-        if (state.isPaused) { if (state.enemies[0]) document.getElementById('target-word-hint').innerText = state.enemies[0].word; if (recognition) recognition.stop(); }
+        if (state.isPaused) { if (recognition) recognition.stop(); if (state.enemies[0]) document.getElementById('target-word-hint').innerText = state.enemies[0].word.toUpperCase(); }
         else { if (recognition) try { recognition.start(); } catch(e) {} gameLoop(); }
     }
     function resumeGame() { togglePause(); }
-    function speakTarget() { const u = new SpeechSynthesisUtterance(document.getElementById('target-word-hint').innerText); u.lang = 'en-US'; u.rate = 0.8; speechSynthesis.speak(u); }
+    function speakTarget() { const u = new SpeechSynthesisUtterance(document.getElementById('target-word-hint').innerText); u.lang = 'en-US'; speechSynthesis.speak(u); }
 </script>
 </body>
 </html>
