@@ -3,341 +3,43 @@
     "title": "Unit 1: The Bet",
     "stages": {
       "1": [
-        "BET", "FINANCIAL", "FUND", "MILLION", "VOLUNTARY", 
-        "PUNISHMENT", "IMPRISON", "IMPRISONMENT", "LAWYER", "SUFFER", 
-        "BANKER", "EARTHLY", "DESPISE", "MATERIAL", "SPIRITUAL", 
-        "CONFINEMENT", "CONFINE", "FLEE", "WISDOM", "CAPTIVE", 
-        "RENEW", "ALLOWANCE", "CAPITAL",
-        "MAKE A BET", "CAST ASIDE", "IN EXCHANGE FOR", "LOCK UP", "PASS THE TIME", "GIVE UP"
+        "BET", "FINANCIAL", "ALLOWANCE", "APPLICATION", "CHERISH", "FUND", "MILLION", "VOLUNTARY", "PUNISHMENT", "IMPRISON", "IMPRISONMENT", "LAWYER", "SUFFER", "BANKER", "EARTHLY", "DESPISE", "MATERIAL", "SPIRITUAL", "CONFINEMENT", "CONFINE", "FLEE", "WISDOM", "CAPTIVE",
+        "MAKE A BET", "CAST ASIDE", "IN EXCHANGE FOR", "LOCK UP", "PASS THE TIME", "GIVE UP", "NO LONGER"
       ],
       "2": [
         "I BET YOU CANNOT DO IT",
         "THE COMPANY HAS FINANCIAL ISSUES",
+        "HE RECEIVES A MONTHLY ALLOWANCE FROM HIS PARENTS",
+        "HER APPLICATION FOR THE JOB WAS REJECTED",
+        "ANNIE REALLY CHERISHES HER DOLL",
         "WE RAISED A FUND FOR CHARITY",
         "HE WON A MILLION DOLLARS",
         "IT WAS A VOLUNTARY CHOICE",
         "HE ESCAPED PUNISHMENT",
-        "THE THIEF WAS IMPRISONED",
-        "HE WAS SENTENCED TO IMPRISONMENT",
-        "THE LAWYER DEFENDED HIM",
-        "SHE SUFFERED FROM A COLD",
+        "THE THIEF WAS IMPRISONED FOR TWO YEARS",
+        "HE WAS SENTENCED TO LIFE IMPRISONMENT",
+        "THE LAWYER DEFENDED HIM IN COURT",
+        "SHE SUFFERED FROM A SEVERE HEADACHE",
         "THE BANKER IS VERY RICH",
-        "HE DESPISED EARTHLY GOODS",
+        "HE DESPISED ALL EARTHLY POSSESSIONS",
         "DO NOT DESPISE THE POOR",
         "MATERIAL THINGS ARE NOT EVERYTHING",
-        "HE SEEKS SPIRITUAL PEACE",
-        "HE WAS IN SOLITARY CONFINEMENT",
-        "PLEASE CONFINE YOUR DOG",
-        "THE ENEMY FLED THE BATTLE",
-        "LISTEN TO HIS WORDS OF WISDOM",
-        "THE CAPTIVE WAS RELEASED",
-        "PLEASE RENEW YOUR MEMBERSHIP",
-        "HE RECEIVES A MONTHLY ALLOWANCE",
-        "PARIS IS THE CAPITAL OF FRANCE",
-        "THEY MADE A BET ON THE GAME",
-        "CAST ASIDE YOUR FEARS",
-        "I GAVE MONEY IN EXCHANGE FOR FOOD",
-        "LOCK UP THE HOUSE AT NIGHT",
-        "READING HELPS PASS THE TIME",
-        "NEVER GIVE UP HOPE"
+        "HE SEEKS SPIRITUAL PEACE THROUGH MEDITATION",
+        "HE WAS HELD IN SOLITARY CONFINEMENT",
+        "PLEASE CONFINE YOUR DOG TO THE YARD",
+        "THE PRISONER TRIED TO FLEE",
+        "HE HAS GREAT WISDOM FOR HIS AGE",
+        "THE CAPTIVE WAS FINALLY RELEASED",
+        "THEY MADE A BET ON THE HORSE RACE",
+        "YOU SHOULD CAST ASIDE YOUR FEARS",
+        "HE GAVE HER A BOOK IN EXCHANGE FOR THE PEN",
+        "THE PRISONER WAS LOCKED UP IN A SMALL CELL",
+        "HE READ BOOKS TO PASS THE TIME",
+        "NEVER GIVE UP ON YOUR DREAMS",
+        "HE IS NO LONGER WORKING FOR THIS COMPANY"
       ]
     }
   },
   "L2": {
-    "title": "Unit 2: Boat Schools",
-    "stages": {
-      "1": [
-        "FLOOD", "APPROPRIATE", "PROMISING", "ARCHED", "SOLAR", 
-        "PANEL", "INSTALL", "MUDDY", "SESSION", "PROJECT", 
-        "PRACTICAL", "ISSUE", "NUTRITION", "HYGIENE", "RESISTANT", 
-        "PRODUCTIVITY", "SUFFICIENT", "INCOME", "RISK", "GEOGRAPHICAL", 
-        "BARRIER", "INDEED", "OPPORTUNITY", "SEVERE", "ACCESS",
-        "MAKE WAVES", "AT A TIME", "BASE ON", "AT RISK OF", "RISE ABOVE"
-      ],
-      "2": [
-        "THE RAIN FLOODED THE STREETS",
-        "WEAR APPROPRIATE CLOTHES",
-        "HE IS A PROMISING STUDENT",
-        "THE BRIDGE IS ARCHED",
-        "USE SOLAR ENERGY",
-        "THE SOLAR PANEL IS NEW",
-        "INSTALL THE SOFTWARE NOW",
-        "THE ROAD IS VERY MUDDY",
-        "THE TRAINING SESSION IS LONG",
-        "THIS IS A BIG PROJECT",
-        "IT IS A PRACTICAL SOLUTION",
-        "DISCUSS THE ENVIRONMENTAL ISSUE",
-        "GOOD NUTRITION IS VITAL",
-        "MAINTAIN PERSONAL HYGIENE",
-        "IT IS WATER RESISTANT",
-        "INCREASE YOUR PRODUCTIVITY",
-        "WE HAVE SUFFICIENT FOOD",
-        "HIS INCOME IS HIGH",
-        "IT IS A BIG RISK",
-        "STUDY THE GEOGRAPHICAL AREA",
-        "LANGUAGE IS A BARRIER",
-        "IT IS INDEED A GOOD DAY",
-        "TAKE THIS OPPORTUNITY",
-        "HE HAS A SEVERE INJURY",
-        "KIDS NEED ACCESS TO SCHOOL",
-        "THE NEWS IS MAKING WAVES",
-        "ONE STEP AT A TIME",
-        "BASE YOUR ANSWER ON FACTS",
-        "HE IS AT RISK OF LOSING",
-        "RISE ABOVE THE PROBLEMS"
-      ]
-    }
-  },
-  "L3": {
-    "title": "Unit 3: Progress and Preservation",
-    "stages": {
-      "1": [
-        "PRESERVATION", "PRESERVE", "HERITAGE", "APPROPRIATE", "ARCHITECTURE", 
-        "CONSTRUCTION", "CONSTRUCT", "SITE", "DAM", "RELOCATE", 
-        "RESIDENT", "FEATURE", "TOURIST", "CULTURE", "DAMAGE", 
-        "RESTORE", "RESTORATION", "BALANCE",
-        "IN COMMON", "ON THE OTHER HAND", "TEAR DOWN", "DATE BACK TO", "STRIKE A BALANCE"
-      ],
-      "2": [
-        "FIGHT FOR PRESERVATION",
-        "PRESERVE THE OLD BUILDING",
-        "THIS IS OUR CULTURAL HERITAGE",
-        "IS THIS APPROPRIATE BEHAVIOR",
-        "I LOVE THE ARCHITECTURE",
-        "THE CONSTRUCTION IS NOISY",
-        "THEY CONSTRUCTED A BRIDGE",
-        "VISIT THE CONSTRUCTION SITE",
-        "THE DAM HOLDS WATER",
-        "THEY RELOCATED THE TEMPLE",
-        "I AM A RESIDENT HERE",
-        "THIS PHONE HAS NEW FEATURES",
-        "MANY TOURISTS VISIT HERE",
-        "RESPECT THE LOCAL CULTURE",
-        "THE STORM CAUSED DAMAGE",
-        "RESTORE THE OLD PAINTING",
-        "THE RESTORATION TOOK YEARS",
-        "KEEP YOUR BALANCE",
-        "WE HAVE MUCH IN COMMON",
-        "ON THE OTHER HAND I AGREE",
-        "DO NOT TEAR DOWN THE WALL",
-        "IT DATES BACK TO THE WAR",
-        "WE MUST STRIKE A BALANCE"
-      ]
-    }
-  },
-  "L4": {
-    "title": "Unit 4: Living under Nature's Wing",
-    "stages": {
-      "1": [
-        "SUSTAINABLE", "SUSTAIN", "INSPIRE", "INSPIRATION", "SOLUTION", 
-        "EFFICIENT", "TEXTURE", "SURFACE", "SHARK", "BUMP", 
-        "BACTERIA", "METHOD", "MARINE", "RESOURCE", "CHAIN", 
-        "COASTAL", "AWARENESS",
-        "LOOK TO", "WIPE OUT", "PREVENT FROM", "RELY ON", "COPY FROM"
-      ],
-      "2": [
-        "USE SUSTAINABLE ENERGY",
-        "FOOD SUSTAINS LIFE",
-        "NATURE INSPIRES ME",
-        "SHE IS MY INSPIRATION",
-        "FIND A SOLUTION",
-        "THIS METHOD IS EFFICIENT",
-        "FEEL THE ROUGH TEXTURE",
-        "THE SURFACE IS SMOOTH",
-        "SHARKS SWIM FAST",
-        "THERE IS A BUMP ON THE ROAD",
-        "WASH AWAY THE BACTERIA",
-        "TRY A NEW METHOD",
-        "PROTECT MARINE LIFE",
-        "SAVE NATURAL RESOURCES",
-        "THE FOOD CHAIN IS COMPLEX",
-        "VISIT THE COASTAL CITY",
-        "RAISE PUBLIC AWARENESS",
-        "LOOK TO NATURE FOR IDEAS",
-        "THE VIRUS WIPED OUT THE TOWN",
-        "PREVENT HIM FROM GOING",
-        "DO NOT RELY ON LUCK",
-        "DO NOT COPY FROM OTHERS"
-      ]
-    }
-  },
-  "L5": {
-    "title": "Unit 5: Irena Sendler",
-    "stages": {
-      "1": [
-        "RESCUE", "SMUGGLE", "EXECUTION", "IDENTITY", "JAR", 
-        "REUNITE", "TORTURE", "REFUSE", "LIST", "JEWISH", 
-        "NAZI", "SOLDIER", "COFFIN", "AMBULANCE", "SACK", 
-        "DIG", "HORROR",
-        "RISK ONES LIFE", "BREAK OUT", "PASS AWAY", "KEEP A DIARY", "DIG UP"
-      ],
-      "2": [
-        "RESCUE THE CAT",
-        "SMUGGLE THE GOODS",
-        "FACE EXECUTION",
-        "HIDE YOUR IDENTITY",
-        "PUT IT IN A JAR",
-        "REUNITE WITH FAMILY",
-        "STOP THE TORTURE",
-        "I REFUSE TO GO",
-        "MAKE A SHOPPING LIST",
-        "HE IS A JEWISH BOY",
-        "THE NAZI SOLDIERS CAME",
-        "THE SOLDIER STOOD GUARD",
-        "A WOODEN COFFIN",
-        "CALL AN AMBULANCE",
-        "A SACK OF POTATOES",
-        "DIG A HOLE",
-        "THE MOVIE WAS A HORROR",
-        "SHE RISKED HER LIFE",
-        "WAR BROKE OUT",
-        "HE PASSED AWAY YESTERDAY",
-        "I KEEP A DIARY",
-        "DIG UP THE TREASURE"
-      ]
-    }
-  },
-  "L6": {
-    "title": "Unit 6: Dabbawalas",
-    "stages": {
-      "1": [
-        "DELIVERY", "DELIVER", "LUNCHBOX", "CONTAINER", "ACCURACY", 
-        "ACCURATE", "CODE", "ILLITERATE", "DESTINATION", "SORT", 
-        "EFFICIENT", "SYSTEM", "ERROR", "INDIVIDUAL", "TRANSPORT", 
-        "RAILWAY", "COLLECT",
-        "PASS ON", "PICK UP", "RAIN OR SHINE", "MIX UP", "ON TIME"
-      ],
-      "2": [
-        "FREE PIZZA DELIVERY",
-        "DELIVER THE PACKAGE",
-        "EAT YOUR LUNCHBOX",
-        "USE A PLASTIC CONTAINER",
-        "CHECK THE ACCURACY",
-        "THE WATCH IS ACCURATE",
-        "SCAN THE QR CODE",
-        "HE IS ILLITERATE",
-        "REACH THE DESTINATION",
-        "SORT THE MAIL",
-        "WORK IN AN EFFICIENT WAY",
-        "THE SYSTEM IS DOWN",
-        "A COMPUTER ERROR",
-        "EVERY INDIVIDUAL COUNTS",
-        "PUBLIC TRANSPORT",
-        "THE RAILWAY STATION",
-        "COLLECT THE TRASH",
-        "PASS ON THE MESSAGE",
-        "PICK UP THE PACKAGE LATER",
-        "WE GO RAIN OR SHINE",
-        "DO NOT MIX UP THE NAMES",
-        "THE BUS IS ON TIME"
-      ]
-    }
-  },
-  "L7": {
-    "title": "Unit 7: Iceland's Road to Equality",
-    "stages": {
-      "1": [
-        "MARATHON", "EQUALITY", "EQUAL", "DISCRIMINATION", "DISCRIMINATE", 
-        "COVERAGE", "GENDER", "GAP", "STRIKE", "PROTEST", 
-        "PARLIAMENT", "WAGE", "ACHIEVE", "ACHIEVEMENT", "BAN", 
-        "OFFICIAL", "FEMALE", "RIGHT",
-        "STAND UP FOR", "PAY ATTENTION TO", "PARTICIPATE IN", "MAKE HISTORY", "BREAK THE RULES"
-      ],
-      "2": [
-        "RUN A MARATHON",
-        "FIGHT FOR EQUALITY",
-        "WE ARE ALL EQUAL",
-        "END RACIAL DISCRIMINATION",
-        "DO NOT DISCRIMINATE",
-        "LIVE NEWS COVERAGE",
-        "GENDER ROLES",
-        "MIND THE GAP",
-        "GO ON STRIKE",
-        "A PEACEFUL PROTEST",
-        "MEMBER OF PARLIAMENT",
-        "MINIMUM WAGE",
-        "ACHIEVE YOUR DREAMS",
-        "A GREAT ACHIEVEMENT",
-        "BAN SMOKING HERE",
-        "AN OFFICIAL DOCUMENT",
-        "THE FEMALE LEAD",
-        "HUMAN RIGHTS",
-        "STAND UP FOR YOURSELF",
-        "PAY ATTENTION TO ME",
-        "PARTICIPATE IN CLASS",
-        "SHE MADE HISTORY",
-        "DO NOT BREAK THE RULES"
-      ]
-    }
-  },
-  "L8": {
-    "title": "Unit 8: Overtourism in Barcelona",
-    "stages": {
-      "1": [
-        "POPULATION", "RESIDENT", "PROTEST", "SOLUTION", "TOURISM", 
-        "TOURIST", "FLOCK", "DISTURB", "RENT", "IMPOSE", 
-        "FINE", "CROWDED", "ECONOMY", "QUALITY", "COMPLAIN", 
-        "VISITOR",
-        "DRIVE OUT", "RESULT IN", "DEAL WITH", "LINE UP", "LIMIT THE NUMBER"
-      ],
-      "2": [
-        "A LARGE POPULATION",
-        "I AM A LOCAL RESIDENT",
-        "A STREET PROTEST",
-        "A GOOD SOLUTION",
-        "GROWTH IN TOURISM",
-        "A FOREIGN TOURIST",
-        "BIRDS FLOCK TOGETHER",
-        "DO NOT DISTURB ME",
-        "PAY THE RENT",
-        "IMPOSE A NEW TAX",
-        "PAY A HEAVY FINE",
-        "THE ROOM IS CROWDED",
-        "THE GLOBAL ECONOMY",
-        "HIGH QUALITY GOODS",
-        "STOP COMPLAINING",
-        "WELCOME THE VISITOR",
-        "DRIVE OUT THE ENEMY",
-        "IT RESULTED IN CHAOS",
-        "DEAL WITH IT",
-        "LINE UP PLEASE",
-        "LIMIT THE NUMBER OF PEOPLE"
-      ]
-    }
-  },
-  "L9": {
-    "title": "Unit 9: To Kill a Mockingbird",
-    "stages": {
-      "1": [
-        "INNOCENT", "INNOCENCE", "DISABLED", "EXPOSE", "RESCUE", 
-        "RACIAL", "PREJUDICE", "TRIAL", "LAWYER", "DEFEND", 
-        "SIN", "MOCK", "COURAGE", "JUDGE", "EVIDENCE", 
-        "GUILTY",
-        "STAND ASIDE", "GROW UP", "ACCUSE OF", "LOOK AFTER", "BELIEVE IN"
-      ],
-      "2": [
-        "HE IS INNOCENT",
-        "PROVE HIS INNOCENCE",
-        "A DISABLED PARKING SPOT",
-        "EXPOSE THE TRUTH",
-        "RESCUE THE VICTIM",
-        "RACIAL HARMONY",
-        "NO PREJUDICE",
-        "A FAIR TRIAL",
-        "CALL MY LAWYER",
-        "DEFEND YOUR COUNTRY",
-        "IT IS A SIN",
-        "DO NOT MOCK HIM",
-        "SHOW SOME COURAGE",
-        "THE JUDGE DECIDES",
-        "NO HARD EVIDENCE",
-        "NOT GUILTY",
-        "PLEASE STAND ASIDE",
-        "WHEN I GROW UP",
-        "ACCUSE HIM OF THEFT",
-        "LOOK AFTER THE BABY",
-        "I BELIEVE IN GHOSTS"
-      ]
-    }
-  }
+
 }
