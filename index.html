@@ -26,6 +26,7 @@
         body {
             background-color: #000;
             color: #ccc;
+            /* 全域英文字體設為 Press Start 2P，中文自動 fallback */
             font-family: 'Press Start 2P', 'Noto Sans TC', sans-serif;
             margin: 0;
             padding: 0;
@@ -40,6 +41,7 @@
 
         .pixel-font { font-family: 'Press Start 2P', cursive; }
 
+        /* CRT 特效 */
         .crt::before {
             content: " ";
             display: block;
@@ -79,6 +81,7 @@
             border-right: 2px solid #222;
         }
 
+        /* 2/3 遊戲畫面 */
         .canvas-container {
             width: 100%;
             height: 67%;
@@ -89,11 +92,12 @@
 
         #game-canvas {
             image-rendering: pixelated;
-            background: radial-gradient(circle, #101010 0%, #000 100%);
+            background: radial-gradient(circle, #151515 0%, #000 100%);
             width: 100%;
             height: 100%;
         }
 
+        /* 1/3 UI 面板 */
         .ui-panel {
             height: 33%;
             width: 100%;
@@ -146,25 +150,6 @@
             padding: 20px;
         }
 
-        #admin-screen {
-            font-family: 'Noto Sans TC', sans-serif !important;
-            padding: 0;
-        }
-        #admin-screen h2 {
-            font-family: 'Press Start 2P', cursive !important;
-            margin-top: 20px;
-        }
-        .admin-table-container {
-            flex-grow: 1;
-            width: 100%;
-            overflow-y: auto;
-            background: #000;
-            font-size: 14px;
-        }
-        #records-body tr:nth-child(even) { background: #0a0a0a; }
-        #records-body td, #records-body th { padding: 12px 8px; border-bottom: 1px solid #1a1a1a; }
-        #records-body th { color: #555; font-size: 12px; text-transform: uppercase; text-align: left;}
-
         .active-diff { border-color: #fff !important; background: #222 !important; color: #fff !important; }
 
         #status-label {
@@ -216,7 +201,6 @@
             z-index: 120;
         }
 
-        /* 句子閱讀優化：下方 UI 單字顯示區 */
         #current-word-ui {
             background: rgba(20, 20, 20, 0.8);
             padding: 8px;
@@ -238,7 +222,7 @@
     <!-- 1. 任務選擇畫面 -->
     <div id="mission-screen" class="overlay-screen">
         <div class="banner-box">
-            <img src="https://d4cheap16.github.io/VoiceoftheDEAD/indexbanner.png" alt="" onerror="this.style.display='none'">
+            <img src="https://d4cheap16.github.io/VoiceoftheDEAD/indexbanner.png" alt="Banner" onerror="this.style.display='none'">
         </div>
         <h1 class="pixel-font text-md mb-4 flicker" style="color:#ccc">SELECT SECTOR</h1>
         <div class="bg-black p-4 border border-zinc-800 w-full max-w-sm flex flex-col items-center">
@@ -274,7 +258,7 @@
     <!-- 2. 登錄畫面 -->
     <div id="login-screen" class="overlay-screen hidden">
         <div class="banner-box">
-            <img src="https://d4cheap16.github.io/VoiceoftheDEAD/missionbanner.png" alt="" onerror="this.style.display='none'">
+            <img src="https://d4cheap16.github.io/VoiceoftheDEAD/missionbanner.png" alt="Banner" onerror="this.style.display='none'">
         </div>
         <h1 class="pixel-font text-sm mb-4 text-blue-500 uppercase" id="selected-mission-title">MISSION ID</h1>
         <div class="flex flex-col items-center bg-black p-4 border border-zinc-800 w-full max-w-sm">
@@ -372,7 +356,6 @@
             <div id="combo-display" class="pixel-font opacity-0 transition-opacity">0 COMBO</div>
             <div id="level-progress-ui" class="text-[6px] text-zinc-700 pixel-font mb-1 uppercase">Sec 1: 0/10</div>
         </div>
-        <!-- 核心優化：鎖定最近目標的文字顯示 -->
         <div class="flex items-center justify-center">
             <div id="current-word-ui" class="text-[9px] md:text-[11px] text-zinc-300 font-bold text-center leading-tight uppercase tracking-widest">AWAITING TARGET...</div>
         </div>
@@ -416,6 +399,27 @@
     let selectedLesson = 1; 
     let currentBookData = {}; 
     let currentLessonData = null; 
+    let wakeLock = null; // 用於儲存螢幕鎖定物件
+
+    // 防止手機螢幕自動關閉
+    async function requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Wake Lock is active');
+            }
+        } catch (err) {
+            console.error(`${err.name}, ${err.message}`);
+        }
+    }
+
+    function releaseWakeLock() {
+        if (wakeLock !== null) {
+            wakeLock.release();
+            wakeLock = null;
+            console.log('Wake Lock released');
+        }
+    }
 
     async function loadBookData(bookNum) {
         const statusEl = document.getElementById('mission-status');
@@ -478,6 +482,7 @@
 
     function retreatToMenu() {
         state.gameActive = false;
+        releaseWakeLock(); // 退出時釋放鎖定
         if (recognition) recognition.stop();
         document.getElementById('win-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
@@ -536,7 +541,6 @@
                 transcript += event.results[i][0].transcript.toUpperCase();
             }
             
-            // 優化的辨識邏輯：對長句子更友善
             const cleanText = (t) => t.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s+/g, ' ').trim();
             const cleanTranscript = cleanText(transcript);
 
@@ -553,26 +557,26 @@
     class Enemy {
         constructor(word, lv, isElite = false, forceClose = false) {
             this.word = word;
-            this.z = forceClose ? 0.35 : (Math.random() * 0.2); 
+            this.z = forceClose ? 0.45 : (Math.random() * 0.2); 
             
-            // 句子優化：偵測句子長度來調整速度
             const wordCount = word.split(' ').length;
             const sentenceSlowdown = wordCount > 3 ? 0.7 : 1.0; 
 
             const stageFactor = state.level === 2 ? 0.8 : 1.1; 
             let speedRoll = Math.random();
-            let speedBase = 0.0006;
-            if (speedRoll > 0.95) speedBase = 0.0025; 
-            else if (speedRoll > 0.7) speedBase = 0.0012; 
+            let speedBase = 0.0007; // 稍微調快基礎速度
+            if (speedRoll > 0.95) speedBase = 0.0028; 
+            else if (speedRoll > 0.75) speedBase = 0.0014; 
             
-            this.speed = (speedBase + (Math.random() * 0.0004)) * state.difficultyMultiplier * (isElite ? 0.9 : 1) * stageFactor * sentenceSlowdown;
-            this.x = (Math.random() - 0.5) * 340; 
+            this.speed = (speedBase + (Math.random() * 0.0005)) * state.difficultyMultiplier * (isElite ? 0.85 : 1) * stageFactor * sentenceSlowdown;
+            this.x = (Math.random() - 0.5) * 360; 
             this.y = (Math.random() - 0.5) * 60;
             this.isDying = false;
             this.opacity = 0;
             this.isElite = isElite;
-            this.cSkin = isElite ? '#4a008b' : (Math.random() > 0.5 ? '#3d5c31' : '#567d46');
-            this.cShirt = isElite ? 'gold' : (Math.random() > 0.5 ? '#4a4a4a' : '#2e2e2e');
+            // 菁英怪隨機詭異配色
+            this.cSkin = isElite ? (Math.random() > 0.5 ? '#4a008b' : '#005f5f') : (Math.random() > 0.5 ? '#3d5c31' : '#567d46');
+            this.cShirt = isElite ? (Math.random() > 0.5 ? '#ffd700' : '#ff00ff') : (Math.random() > 0.5 ? '#4a4a4a' : '#2e2e2e');
         }
         update() {
             if (this.isDying) return (this.opacity -= 0.15) <= 0;
@@ -583,46 +587,67 @@
         draw() {
             const rect = canvas.parentElement.getBoundingClientRect();
             const w = rect.width; const h = rect.height;
-            const size = (this.isElite ? 16 : 9) + (Math.pow(this.z, 2.2) * 260);
+            
+            // 強化壓迫感：增加基礎 size 與 scaling 常數
+            const baseSize = this.isElite ? 22 : 12;
+            const size = baseSize + (Math.pow(this.z, 2.0) * 350); 
+            
             const xPos = w / 2 + (this.x * this.z);
-            const yPos = h / 2 + (this.y * this.z) + (this.z * (h * 0.35));
+            const yPos = h / 2 + (this.y * this.z) + (this.z * (h * 0.4));
             
             ctx.save();
             ctx.globalAlpha = this.opacity;
-            const depthBrightness = 0.15 + (Math.pow(this.z, 0.8) * 0.85);
+            const depthBrightness = 0.2 + (Math.pow(this.z, 0.7) * 0.8);
             ctx.filter = `brightness(${depthBrightness})`;
             
+            // 菁英怪氣場特效
+            if (this.isElite) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = (Date.now() % 400 < 200) ? 'purple' : 'cyan';
+            }
+
+            // 身體 (菁英怪更寬)
+            const bodyW = this.isElite ? size*0.8 : size*0.6;
             ctx.fillStyle = this.cShirt;
-            ctx.fillRect(xPos - size*0.3, yPos - size*0.7, size*0.6, size*0.6); 
+            ctx.fillRect(xPos - bodyW/2, yPos - size*0.7, bodyW, size*0.6); 
+            
+            // 頭部 (菁英怪造型誇張：更尖或更高)
             ctx.fillStyle = this.cSkin;
-            ctx.fillRect(xPos - size*0.2, yPos - size*1.1, size*0.4, size*0.4); 
-            ctx.fillStyle = this.isElite ? 'cyan' : 'red';
+            if (this.isElite) {
+                // 尖頭形狀
+                ctx.beginPath();
+                ctx.moveTo(xPos - size*0.25, yPos - size*0.7);
+                ctx.lineTo(xPos, yPos - size*1.3);
+                ctx.lineTo(xPos + size*0.25, yPos - size*0.7);
+                ctx.fill();
+            } else {
+                ctx.fillRect(xPos - size*0.2, yPos - size*1.1, size*0.4, size*0.4); 
+            }
+            
+            // 眼睛 (閃爍感)
+            ctx.fillStyle = this.isElite ? ((Date.now() % 200 < 100) ? 'white' : 'cyan') : 'red';
             ctx.fillRect(xPos - size*0.12, yPos - size*1.0, size*0.06, size*0.06);
             ctx.fillRect(xPos + size*0.06, yPos - size*1.0, size*0.06, size*0.06);
 
-            // 文字優化：長句子背景遮罩
-            const fontSize = Math.max(8, Math.min(10, size/7.5));
+            // 文字 UI 優化
+            const fontSize = Math.max(9, Math.min(12, size/7));
             ctx.font = `bold ${fontSize}px 'Press Start 2P'`;
             const textWidth = ctx.measureText(this.word).width;
-            
-            // 繪製半透明文字背景，增加可讀性
-            ctx.fillStyle = "rgba(0,0,0,0.6)";
-            ctx.fillRect(xPos - (textWidth/2) - 5, yPos - size*1.3 - fontSize, textWidth + 10, fontSize + 8);
-
+            ctx.fillStyle = "rgba(0,0,0,0.7)";
+            ctx.fillRect(xPos - (textWidth/2) - 5, yPos - size*1.4 - fontSize, textWidth + 10, fontSize + 8);
             ctx.fillStyle = this.isElite ? 'gold' : '#fff';
             ctx.textAlign = 'center';
-            ctx.shadowBlur = 2; ctx.shadowColor = 'red';
+            ctx.shadowBlur = 4; ctx.shadowColor = 'red';
             
-            // 長句子自動分行顯示 (如果長度超過一定限制)
             if (this.word.length > 20) {
                 const mid = Math.floor(this.word.length / 2);
                 const spaceIdx = this.word.lastIndexOf(' ', mid);
                 const line1 = this.word.substring(0, spaceIdx);
                 const line2 = this.word.substring(spaceIdx + 1);
-                ctx.fillText(line1, xPos, yPos - size*1.4);
-                ctx.fillText(line2, xPos, yPos - size*1.25);
+                ctx.fillText(line1, xPos, yPos - size*1.5);
+                ctx.fillText(line2, xPos, yPos - size*1.3);
             } else {
-                ctx.fillText(this.word, xPos, yPos - size*1.35);
+                ctx.fillText(this.word, xPos, yPos - size*1.4);
             }
             
             ctx.restore();
@@ -641,15 +666,15 @@
 
     function spawnLogic() {
         if (!state.gameActive || state.isPaused || state.isFlashActive) return;
-        const spawnInterval = 1600 / state.difficultyMultiplier;
+        const spawnInterval = 1500 / state.difficultyMultiplier;
         if ((state.isFirstSpawn && state.enemies.length === 0) || (state.enemies.length < 4 && Date.now() - state.spawnTimer > spawnInterval)) {
             const list = currentLessonData.stages[state.level.toString()];
             const word = list[Math.floor(Math.random() * list.length)];
             if (!state.enemies.some(e => e.word === word)) {
-                let newEnemy = new Enemy(word, state.level, Math.random() < 0.15, state.isFirstSpawn);
+                let newEnemy = new Enemy(word, state.level, Math.random() < 0.2, state.isFirstSpawn);
                 let attempts = 0;
-                while (attempts < 8 && state.enemies.some(e => Math.abs(e.x - newEnemy.x) < 80 && Math.abs(e.z - newEnemy.z) < 0.15)) {
-                    newEnemy.x = (Math.random() - 0.5) * 340;
+                while (attempts < 8 && state.enemies.some(e => Math.abs(e.x - newEnemy.x) < 90 && Math.abs(e.z - newEnemy.z) < 0.15)) {
+                    newEnemy.x = (Math.random() - 0.5) * 360;
                     attempts++;
                 }
                 state.enemies.push(newEnemy);
@@ -670,7 +695,7 @@
         if (roll === 0) state.hp = Math.min(5, state.hp + 1);
         else if (roll === 1) {
             state.isFlashActive = true;
-            flashOverlay.style.opacity = "0.6";
+            flashOverlay.style.opacity = "0.7";
             setTimeout(() => flashOverlay.style.opacity = "0", 300);
             setTimeout(() => { state.isFlashActive = false; }, 3000);
         } else if (roll === 2) {
@@ -687,7 +712,7 @@
         if (state.combo > 0 && state.combo % 10 === 0) triggerReward();
         
         const comboBonus = Math.floor(state.combo / 5) * 50;
-        state.score += ((state.enemies[idx].isElite ? 500 : 100) + comboBonus) * state.level;
+        state.score += ((state.enemies[idx].isElite ? 600 : 100) + comboBonus) * state.level;
         state.levelKills++;
         
         const goal = getLevelGoal(state.level);
@@ -722,7 +747,6 @@
         document.getElementById('score-display').innerText = state.score.toString().padStart(6, '0');
         document.getElementById('level-progress-ui').innerText = `SEC ${state.level}: ${state.levelKills}/${getLevelGoal(state.level)}`;
         
-        // 更新鎖定目標 UI：找到畫面上 z 值最大的（最接近的）殭屍
         const target = state.enemies.filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
         const uiWord = document.getElementById('current-word-ui');
         if (target) {
@@ -741,9 +765,11 @@
         const rect = canvas.parentElement.getBoundingClientRect();
         const w = rect.width; const h = rect.height;
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 1; ctx.beginPath();
-        for(let i=0; i<12; i++) { ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/11), h); }
+        
+        ctx.strokeStyle = '#0e0e0e'; ctx.lineWidth = 1; ctx.beginPath();
+        for(let i=0; i<16; i++) { ctx.moveTo(w/2, h/2); ctx.lineTo(i * (w/15), h); }
         ctx.stroke();
+        
         spawnLogic();
         state.enemies.sort((a, b) => a.z - b.z);
         for (let i = state.enemies.length - 1; i >= 0; i--) {
@@ -753,7 +779,6 @@
                 else { state.enemies.splice(i, 1); }
             } else { enemy.draw(); }
         }
-        // 即時更新最近目標
         updateUI();
         requestAnimationFrame(gameLoop);
     }
@@ -788,7 +813,11 @@
     }
 
     function startGame() {
-        state.gameActive = true; state.hp = 5; state.score = 0; state.level = 1; state.levelKills = 0; state.combo = 0; state.damageTaken = 0; state.enemies = []; state.isFirstSpawn = true;
+        state.gameActive = true; 
+        state.hp = 5; state.score = 0; state.level = 1; state.levelKills = 0; state.combo = 0; state.damageTaken = 0; state.enemies = []; state.isFirstSpawn = true;
+        
+        requestWakeLock(); // 請求螢幕常亮鎖定
+        
         updateUI(); handleResize(); 
         if (recognition) { try { recognition.start(); } catch(e) {} } 
         gameLoop();
@@ -806,6 +835,7 @@
 
     function winGame() { 
         state.gameActive = false; 
+        releaseWakeLock(); // 釋放鎖定
         const winTitle = document.getElementById('win-title');
         const winDetail = document.getElementById('win-detail');
         if (state.damageTaken === 0) {
@@ -825,6 +855,7 @@
     }
     function endGame() { 
         state.gameActive = false; 
+        releaseWakeLock(); // 釋放鎖定
         document.getElementById('game-over-screen').classList.remove('hidden'); 
         document.getElementById('final-score-display').innerText = `SCORE: ${state.score}`; 
         syncData(); 
@@ -834,8 +865,16 @@
         if (!state.gameActive) return;
         state.isPaused = !state.isPaused; 
         document.getElementById('pause-screen').classList.toggle('hidden');
-        if (state.isPaused) { if (recognition) recognition.stop(); if (state.enemies[0]) document.getElementById('target-word-hint').innerText = state.enemies[0].word.toUpperCase(); }
-        else { if (recognition) try { recognition.start(); } catch(e) {} gameLoop(); }
+        if (state.isPaused) { 
+            releaseWakeLock(); // 暫停時釋放鎖定
+            if (recognition) recognition.stop(); 
+            if (state.enemies[0]) document.getElementById('target-word-hint').innerText = state.enemies[0].word.toUpperCase(); 
+        }
+        else { 
+            requestWakeLock(); // 恢復時重新鎖定
+            if (recognition) try { recognition.start(); } catch(e) {} 
+            gameLoop(); 
+        }
     }
     function resumeGame() { togglePause(); }
     function speakTarget() { const u = new SpeechSynthesisUtterance(document.getElementById('target-word-hint').innerText); u.lang = 'en-US'; speechSynthesis.speak(u); }
