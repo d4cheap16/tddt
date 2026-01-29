@@ -31,7 +31,6 @@
             user-select: none; touch-action: manipulation;
         }
 
-        /* CRT 掃描線特效 */
         .crt::before {
             content: " ";
             display: block; position: absolute;
@@ -48,7 +47,6 @@
             overflow: hidden; border-left: 2px solid #222; border-right: 2px solid #222;
         }
 
-        /* 遊戲畫面容器與背景圖片處理 */
         .canvas-container {
             width: 100%; height: 65%;
             position: relative; border-bottom: 2px solid var(--horror-red);
@@ -56,26 +54,24 @@
             background-color: #050505;
             background-size: cover;
             background-position: center;
-            /* 讓背景圖暗化且不鮮艷，避免干擾 */
             transition: background-image 0.5s ease-in-out;
         }
 
-        /* 增加一層深色遮罩在 Canvas 之下，圖片之上 */
         .canvas-container::after {
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.65); /* 確保背景圖很暗 */
+            background: rgba(0, 0, 0, 0.65);
             pointer-events: none;
             z-index: 1;
         }
 
         #game-canvas { 
             position: relative;
-            z-index: 10; /* Canvas 在最上層 */
+            z-index: 10;
             image-rendering: pixelated; 
             width: 100%; height: 100%; 
-            background: transparent; /* 重要：讓背景圖片穿透 */
+            background: transparent;
         }
 
         .ui-panel {
@@ -124,7 +120,6 @@
         }
         .banner-box img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
 
-        /* 難度顏色提示樣式 */
         .diff-rookie.active-diff { background: #063d19 !important; border-color: #0f0 !important; color: #0f0 !important; box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); }
         .diff-veteran.active-diff { background: #002244 !important; border-color: #0af !important; color: #0af !important; box-shadow: 0 0 15px rgba(0, 170, 255, 0.3); }
         .diff-nightmare.active-diff { background: #330044 !important; border-color: #f0f !important; color: #f0f !important; box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); }
@@ -556,7 +551,9 @@
 
     class Enemy {
         constructor(word, isBoss = false) {
-            this.word = word; this.isBoss = isBoss; this.z = 0;
+            this.word = word; this.isBoss = isBoss; 
+            // 優化：Rookie 難度讓殭屍起始距離更近 (z 值較大)
+            this.z = (state.difficultyMode === 'Rookie' && !isBoss) ? 0.25 : 0;
             this.x = (Math.random() - 0.5) * 380; this.y = (Math.random() - 0.5) * 30;
             this.speed = (0.0012 + Math.random() * 0.0008) * state.difficulty;
             this.isDying = false; this.opacity = 1; this.wobbleSeed = Math.random() * 1000;
@@ -642,10 +639,8 @@
     }
 
     function startGame() {
-        // 開始時隨機切換背景
         const randomBg = BGS[Math.floor(Math.random() * BGS.length)];
         document.getElementById('canvas-holder').style.backgroundImage = `url('${randomBg}')`;
-
         state.gameActive = true; state.hp = 5; state.score = 0; state.kills = 0; state.bossesDefeated = 0;
         state.enemies = []; state.particles = []; state.combo = 0; state.freezeTimer = 0;
         state.wordPool = []; state.sentencePool = []; state.bossMode = false;
@@ -769,28 +764,18 @@
         if (!state.gameActive || state.isPaused) return;
         const rect = canvas.parentElement.getBoundingClientRect();
         const w = rect.width; const h = rect.height;
-        
-        ctx.setTransform(1, 0, 0, 1, 0, 0); 
-        ctx.clearRect(0, 0, w, h); // 改為 ClearRect 以讓背景圖片顯現
-        
-        if (state.shake > 0) { 
-            ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); 
-            state.shake *= 0.88; 
-        }
-
+        ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, w, h); 
+        if (state.shake > 0) { ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); state.shake *= 0.88; }
         if (state.freezeTimer > 0) state.freezeTimer--;
-        
         ctx.fillStyle = "#222";
         state.bgStars.forEach(s => {
             const sx = w/2 + (s.x * s.z); const sy = h/2 + (s.y * s.z);
             ctx.globalAlpha = 0.4 * s.z; ctx.fillRect(sx, sy, s.s, s.s); ctx.globalAlpha = 1;
             if (state.freezeTimer <= 0) s.z += 0.003; if (s.z > 1) s.z = 0;
         });
-
         if (!state.bossMode && state.freezeTimer <= 0 && Date.now() - state.spawnTimer > 1800/state.difficulty) {
             state.enemies.push(new Enemy(getNextWord())); state.spawnTimer = Date.now();
         }
-
         const closest = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
         for (let i = state.enemies.length - 1; i >= 0; i--) {
             const en = state.enemies[i];
@@ -802,15 +787,13 @@
         for (let i = state.particles.length - 1; i >= 0; i--) {
             if (!state.particles[i].update()) state.particles.splice(i, 1); else state.particles[i].draw(ctx);
         }
-
         updateUIPanel(); requestAnimationFrame(gameLoop);
     }
 
     function updateUIPanel() {
         document.getElementById('score-display').innerText = Math.floor(state.score).toString().padStart(6, '0');
         const comboEl = document.getElementById('combo-display');
-        comboEl.style.opacity = state.combo > 1 ? '1' : '0'; 
-        comboEl.innerText = `${state.combo} COMBO`;
+        comboEl.style.opacity = state.combo > 1 ? '1' : '0'; comboEl.innerText = `${state.combo} COMBO`;
         const status = document.getElementById('status-label');
         if (state.hp > 3) { status.innerText = 'FINE'; status.className = 'pixel-font text-green-500 text-[11px] font-bold'; }
         else if (state.hp > 1) { status.innerText = 'CAUTION'; status.className = 'pixel-font text-yellow-500 text-[11px] font-bold'; }
