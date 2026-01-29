@@ -259,6 +259,7 @@
             <input type="text" id="input-name" placeholder="NAME" class="input-retro">
             <p class="text-[8px] text-zinc-600 mt-4 mb-1 uppercase px-1">Challenge Level</p>
             <div class="grid grid-cols-2 gap-2">
+                <!-- 更新難度按鈕文字，顯示倍率 -->
                 <button onclick="setDifficulty(0.7, 'Rookie')" class="btn diff-btn diff-rookie" id="diff-rookie">Rookie</button>
                 <button onclick="setDifficulty(1.0, 'Veteran')" class="btn diff-btn diff-veteran active-diff" id="diff-veteran">Veteran</button>
                 <button onclick="setDifficulty(1.5, 'Nightmare')" class="btn diff-btn diff-nightmare" id="diff-nightmare">Nightmare</button>
@@ -700,8 +701,16 @@
             const scale = this.isBoss ? 2.5 : 1.0;
             const size = Math.min(w * 0.55, (15 + Math.pow(this.z, 2) * 280) * scale);
             const wobbleX = Math.sin(Date.now() * 0.004 + this.wobbleSeed) * 10 * this.z;
+            
+            // 新增：走路上下起伏 (Bobbing)
+            // Math.sin 產生 -1 到 1 的值，Math.abs 讓它變成 0 到 1 (只會向上彈跳)
+            // 乘以 z 讓遠處起伏小，近處起伏大
+            const walkBounce = Math.abs(Math.sin(Date.now() * 0.008 + this.wobbleSeed)) * 20 * this.z;
+
             const screenX = w/2 + (this.x * this.z) + wobbleX;
-            const screenY = h/2 + (this.y * this.z) + (this.z * h * 0.4);
+            // 將起伏應用在 Y 軸，減去 walkBounce 代表向上移動
+            const screenY = h/2 + (this.y * this.z) + (this.z * h * 0.4) - walkBounce;
+            
             ctx.save(); ctx.globalAlpha = this.opacity; ctx.translate(screenX, screenY);
             
             ctx.fillStyle = `hsl(${this.clothesHue}, 40%, 35%)`;
@@ -750,8 +759,12 @@
     }
 
     function triggerCriticalWipe() {
+        // 觸發爆擊時，將血量補滿
+        state.hp = 5;
+        updateUIPanel(); // 立即更新 UI 以反映血量變化
+
         const toast = document.getElementById('reward-toast');
-        toast.innerText = "CRITICAL OVERLOAD!";
+        toast.innerText = "CRITICAL OVERLOAD & FULL HEAL!";
         toast.classList.add('toast-active');
         toast.style.color = '#ff00ff'; 
         setTimeout(() => {
@@ -856,13 +869,18 @@
 
     function killEnemy(idx, isAuto = false) {
         const en = state.enemies[idx]; if(!en) return;
-        en.isDying = true; state.score += 100 * state.difficulty; 
+        en.isDying = true; 
+        
+        // 新的分數計算：基礎分(100) + Combo加成(Combo*10) * 難度倍率
+        let scoreGain = (100 + (state.combo * 10)) * state.difficulty;
+        state.score += scoreGain;
 
         state.kills++; 
         
         if(!isAuto) {
             state.combo++;
-            if(state.combo > 0 && state.combo % 10 === 0) triggerReward();
+            // 修改：Combo 獎勵改為連續 7 次殺敵
+            if(state.combo > 0 && state.combo % 7 === 0) triggerReward();
             
             if (Math.random() < 0.01 && !state.bossMode) {
                 triggerCriticalWipe();
@@ -942,10 +960,21 @@
         ctx.setTransform(1, 0, 0, 1, 0, 0); 
         ctx.clearRect(0, 0, canvas.width, canvas.height); 
         
+        // 2. 震動效果 (受傷或其他)
         if (state.shake > 0) { 
             ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); 
             state.shake *= 0.88; 
             if(state.shake < 0.5) state.shake = 0;
+        }
+
+        // 新增：BOSS 逼近震動 (腳步壓迫感)
+        const boss = state.enemies.find(e => e.isBoss);
+        // 當 BOSS 距離大於 0.4 (接近玩家) 時開始震動
+        if (state.bossMode && boss && boss.z > 0.4) {
+            // 震動幅度隨距離增加 (0.4 -> 1.0)
+            const proximityIntensity = (boss.z - 0.4) * 20; 
+            const shakeY = (Math.random() - 0.5) * proximityIntensity;
+            ctx.translate(0, shakeY);
         }
 
         if (state.freezeTimer > 0) state.freezeTimer--;
