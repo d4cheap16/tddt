@@ -95,6 +95,16 @@
         }
         select:focus, input:focus { border-color: #0f0 !important; }
 
+        /* 隱藏數字輸入框的上下箭頭 (Spin Buttons) */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+
         .btn {
             background: #111; border: 1px solid #444; color: #ccc;
             padding: 10px; cursor: pointer; font-size: 9px;
@@ -674,6 +684,7 @@
         const toast = document.getElementById('reward-toast');
         toast.innerText = `REWARD: ${rewards[roll]}`;
         toast.classList.add('toast-active');
+        toast.style.color = '#fff';
         setTimeout(() => toast.classList.remove('toast-active'), 2000);
         if (roll === 0) state.hp = Math.min(5, state.hp + 1);
         else if (roll === 1) {
@@ -683,6 +694,32 @@
             const target = state.enemies.find(e => !e.isDying && !e.isBoss);
             if (target) killEnemy(state.enemies.indexOf(target), true);
         }
+    }
+
+    // 新增：觸發爆擊清場 (1%機率)
+    function triggerCriticalWipe() {
+        // 視覺特效
+        const toast = document.getElementById('reward-toast');
+        toast.innerText = "CRITICAL OVERLOAD!";
+        toast.classList.add('toast-active');
+        toast.style.color = '#ff00ff'; // 紫色爆擊字體
+        setTimeout(() => {
+            toast.classList.remove('toast-active');
+            toast.style.color = '#fff'; // 還原白色
+        }, 2000);
+
+        // 強烈閃光
+        document.getElementById('flash-overlay').style.opacity = "0.8";
+        setTimeout(() => document.getElementById('flash-overlay').style.opacity = "0", 300);
+
+        sfx.reward(); // 播放音效
+
+        // 清除所有普通敵人 (防止 Boss 被秒殺)
+        state.enemies.forEach((e, i) => {
+            if (!e.isDying && !e.isBoss) {
+                killEnemy(i, true); // 呼叫 killEnemy (isAuto=true)
+            }
+        });
     }
 
     function getNextWord() {
@@ -762,16 +799,28 @@
     function killEnemy(idx, isAuto = false) {
         const en = state.enemies[idx]; if(!en) return;
         en.isDying = true; state.score += 100 * state.difficulty; 
+
+        // 修正：無論是否為 Auto 消除，都增加殺敵數，確保學生努力不被道具/爆擊吃掉
+        state.kills++; 
+        
         if(!isAuto) {
-            state.kills++; state.combo++;
+            state.combo++;
             if(state.combo > 0 && state.combo % 10 === 0) triggerReward();
+            
+            // 新增：1% 機率觸發爆擊 (僅限玩家親自唸對時)
+            if (Math.random() < 0.01 && !state.bossMode) {
+                triggerCriticalWipe();
+            }
         }
+
         createExplosion(en); state.shake = 10; sfx.kill();
         let trigger = false;
+        // Boss 觸發條件 (累積殺敵)
         if(state.difficultyMode==='Rookie' && state.kills>=10) trigger=true;
         else if(state.difficultyMode==='Veteran' && state.kills>=15) trigger=true;
         else if(state.difficultyMode==='Nightmare' && state.kills>=15) trigger=true;
         else if(state.difficultyMode==='NoHope' && state.kills>=10) trigger=true;
+        
         if(trigger && !state.bossMode) startBossBattle();
     }
 
@@ -829,9 +878,10 @@
         const rect = canvas.parentElement.getBoundingClientRect();
         const w = rect.width; const h = rect.height;
         
-        // 1. 清除畫布
+        // 1. 清除畫布 - 重要修正：改用 canvas.width/height 以覆蓋整個緩衝區
+        // 這是解決殘影的關鍵。原本使用 w, h 可能因為螢幕縮放比 (DPR) 導致清除範圍不足。
         ctx.setTransform(1, 0, 0, 1, 0, 0); 
-        ctx.clearRect(0, 0, w, h); 
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
         
         // 2. 震動效果
         if (state.shake > 0) { 
@@ -876,11 +926,11 @@
             if (!state.particles[i].update()) state.particles.splice(i, 1); else state.particles[i].draw(ctx);
         }
 
-        // 7. 統一繪製受傷紅光 (解決殘留色塊問題)
+        // 7. 統一繪製受傷紅光 (解決殘留色塊問題) - 同樣修正為使用 canvas.width/height
         if (state.damageAlpha > 0.01) {
             ctx.setTransform(1, 0, 0, 1, 0, 0); // 確保紅光覆蓋全螢幕且不被震動位移
             ctx.fillStyle = `rgba(255, 0, 0, ${state.damageAlpha * 0.4})`;
-            ctx.fillRect(0, 0, w, h);
+            ctx.fillRect(0, 0, canvas.width, canvas.height); // 覆蓋全實際畫布
             state.damageAlpha *= 0.9; // 淡出
         }
 
