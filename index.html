@@ -8,7 +8,7 @@
     <title>Voice of the Dead</title>
     <meta name="description" content="Want to Survive? Speak!">
     <meta property="og:title" content="Speak your way out. - Voice of the Dead">
-    <meta property="og:description" content="用聲音在末日中生存。">
+    <meta property="og:description" content="面對恐懼，用聲音在末日中生存。這是一場結合聲音辨識與節奏的生存挑戰。">
     <meta property="og:image" content="https://d4cheap16.github.io/VoiceoftheDEAD/opentag.png">
     <meta property="og:type" content="website">
 
@@ -162,6 +162,23 @@
 
         @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .flicker { animation: flicker 0.2s infinite; }
+        
+        /* 完美通關特效 */
+        @keyframes shine { 
+            0% { transform: scale(1); text-shadow: 0 0 10px gold; } 
+            50% { transform: scale(1.1); text-shadow: 0 0 30px yellow, 0 0 50px orange; } 
+            100% { transform: scale(1); text-shadow: 0 0 10px gold; } 
+        }
+        .perfect-badge {
+            color: #FFD700;
+            animation: shine 1.5s infinite ease-in-out;
+            border: 2px solid #FFD700;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 215, 0, 0.1);
+            margin-bottom: 20px;
+            display: none; /* 預設隱藏 */
+        }
 
         /* 心電圖動畫 */
         .ecg-container {
@@ -203,7 +220,7 @@
         <div class="banner-box">
             <img src="https://d4cheap16.github.io/VoiceoftheDEAD/indexbanner.png" alt="Index Banner" onerror="this.style.display='none'">
         </div>
-        <h1 class="text-md mb-6 text-red-600 tracking-tighter flicker uppercase">Voice of the Dead</h1>
+        <h1 class="text-md mb-6 text-red-600 tracking-tighter flicker uppercase">Select Sector</h1>
         <div class="bg-black p-5 border border-zinc-800 w-full max-w-sm rounded-lg shadow-2xl overflow-y-auto max-h-[75%]">
             <p class="text-[8px] text-zinc-500 mb-2 uppercase text-left font-bold">Sector Access</p>
             <div class="grid grid-cols-5 gap-1 mb-6" id="book-grid"></div>
@@ -293,8 +310,16 @@
     <!-- 結算畫面 -->
     <div id="win-screen" class="overlay-screen hidden">
         <h1 class="text-green-500 text-2xl mb-4 flicker uppercase">Mission Complete</h1>
+        <div id="perfect-badge" class="perfect-badge">
+            <div class="text-[12px] font-bold">PERFECT SURVIVOR</div>
+            <div class="text-[8px]">NO DAMAGE TAKEN</div>
+        </div>
         <p id="win-score-display" class="text-yellow-500 text-5xl mb-12 uppercase">0</p>
-        <button onclick="location.reload()" class="btn px-12 py-5 uppercase">Return Base</button>
+        
+        <div class="flex flex-col gap-3 w-full max-w-xs">
+            <button id="next-level-btn" onclick="challengeNextLevel()" class="btn py-5 bg-blue-900 text-white border-blue-500 uppercase hidden">Challenge Next Level</button>
+            <button onclick="location.reload()" class="btn py-4 uppercase">Return Base</button>
+        </div>
     </div>
 
     <div id="game-over-screen" class="overlay-screen hidden">
@@ -375,6 +400,14 @@
         "https://d4cheap16.github.io/VoiceoftheDEAD/BG05.png"
     ];
 
+    // BOSS 戰句子數量設定 (血量)
+    const BOSS_QUOTAS = {
+        'Rookie': 1,
+        'Veteran': 2,
+        'Nightmare': 3,
+        'NoHope': 5
+    };
+
     // --- 8-bit 音效系統 ---
     const sfx = {
         ctx: null,
@@ -400,6 +433,12 @@
             this.play(660, 'sine', 0.4, 0.05);
             setTimeout(() => this.play(880, 'sine', 0.4, 0.05), 100);
         },
+        perfect() { // 完美通關音效
+             this.play(523.25, 'sine', 0.1, 0.2); // C5
+             setTimeout(() => this.play(659.25, 'sine', 0.1, 0.2), 100); // E5
+             setTimeout(() => this.play(783.99, 'sine', 0.2, 0.2), 200); // G5
+             setTimeout(() => this.play(1046.50, 'sine', 0.4, 0.2), 300); // C6
+        },
         boss() { this.play(80, 'triangle', 0.8, 0.2, false); }
     };
 
@@ -414,7 +453,8 @@
         spawnTimer: 0, player: { name: "", no: "", class: "" },
         wordPool: [],
         sentencePool: [],
-        damageAlpha: 0 // 新增：用於受傷紅光閃爍，解決殘影問題
+        damageAlpha: 0,
+        damageTaken: 0 // 新增：追蹤受傷次數
     };
 
     const canvas = document.getElementById('game-canvas');
@@ -430,7 +470,6 @@
         document.getElementById('canvas-holder').style.backgroundImage = `url('${randomBg}')`;
     }
     
-    // 新增：預先載入所有背景圖片
     function preloadImages() {
         BGS.forEach(src => {
             const img = new Image();
@@ -443,8 +482,8 @@
             `<button onclick="selectBook(${i})" class="btn book-btn ${i===4?'active-diff':''}" id="b${i}">${['I','II','III','IV','V'][i-1]}</button>`).join('');
         refreshLessonGrid();
         loadSavedProfile();
-        randomizeBackground(); // 初始化時就隨機背景
-        preloadImages(); // 呼叫預載
+        randomizeBackground(); 
+        preloadImages(); 
         state.bgStars = [];
         for(let i=0; i<40; i++) {
             state.bgStars.push({ x: (Math.random() - 0.5) * 600, y: (Math.random() - 0.5) * 400, z: Math.random(), s: Math.random() * 1.5 });
@@ -512,7 +551,6 @@
             let records = [];
             snap.forEach(d => {
                 const data = d.data();
-                // 過濾掉管理員 AdaWong 的紀錄
                 if(data.book == selectedBook && data.lesson == lessonId && data.name !== ADMIN_KEY) records.push(data);
             });
             records.sort((a, b) => b.score - a.score);
@@ -583,7 +621,6 @@
             let res = []; 
             snap.forEach(d => {
                 const data = d.data();
-                // 為了避免混淆，管理員介面也過濾掉自己的測試數據 (如果不需要過濾這行，可以把 if 拿掉)
                 if (data.name !== ADMIN_KEY) res.push(data);
             });
             res.sort((a,b) => a.class.localeCompare(b.class) || a.no - b.no);
@@ -612,6 +649,21 @@
         document.getElementById(`diff-${mode.toLowerCase().replace(" ", "")}`).classList.add('active-diff');
     };
 
+    // 新增：挑戰下一個難度
+    window.challengeNextLevel = () => {
+        const diffMap = {
+            'Rookie': { val: 1.0, mode: 'Veteran' },
+            'Veteran': { val: 1.5, mode: 'Nightmare' },
+            'Nightmare': { val: 2.5, mode: 'NoHope' }
+        };
+        const next = diffMap[state.difficultyMode];
+        if (next) {
+            setDifficulty(next.val, next.mode);
+            document.getElementById('win-screen').classList.add('hidden');
+            startGame();
+        }
+    };
+
     class Particle {
         constructor(x, y, color) {
             this.x = x; this.y = y; this.color = color;
@@ -625,7 +677,6 @@
     class Enemy {
         constructor(word, isBoss = false) {
             this.word = word; this.isBoss = isBoss; 
-            // 優化：Rookie 難度讓殭屍起始距離更近 (z 值較大)
             this.z = (state.difficultyMode === 'Rookie' && !isBoss) ? 0.25 : 0;
             this.x = (Math.random() - 0.5) * 380; this.y = (Math.random() - 0.5) * 30;
             this.speed = (0.0012 + Math.random() * 0.0008) * state.difficulty;
@@ -696,28 +747,24 @@
         }
     }
 
-    // 新增：觸發爆擊清場 (1%機率)
     function triggerCriticalWipe() {
-        // 視覺特效
         const toast = document.getElementById('reward-toast');
         toast.innerText = "CRITICAL OVERLOAD!";
         toast.classList.add('toast-active');
-        toast.style.color = '#ff00ff'; // 紫色爆擊字體
+        toast.style.color = '#ff00ff'; 
         setTimeout(() => {
             toast.classList.remove('toast-active');
-            toast.style.color = '#fff'; // 還原白色
+            toast.style.color = '#fff';
         }, 2000);
 
-        // 強烈閃光
         document.getElementById('flash-overlay').style.opacity = "0.8";
         setTimeout(() => document.getElementById('flash-overlay').style.opacity = "0", 300);
 
-        sfx.reward(); // 播放音效
+        sfx.reward(); 
 
-        // 清除所有普通敵人 (防止 Boss 被秒殺)
         state.enemies.forEach((e, i) => {
             if (!e.isDying && !e.isBoss) {
-                killEnemy(i, true); // 呼叫 killEnemy (isAuto=true)
+                killEnemy(i, true);
             }
         });
     }
@@ -739,12 +786,14 @@
     }
 
     function startGame() {
-        randomizeBackground(); // 開始遊戲時也隨機一次
+        randomizeBackground(); 
         state.gameActive = true; state.hp = 5; state.score = 0; state.kills = 0; state.bossesDefeated = 0;
         state.enemies = []; state.particles = []; state.combo = 0; state.freezeTimer = 0;
         state.wordPool = []; state.sentencePool = []; state.bossMode = false;
-        state.damageAlpha = 0; // 重置傷害紅光
+        state.damageAlpha = 0; 
+        state.damageTaken = 0; // 重置受傷次數
         document.getElementById('boss-ui').style.opacity = '0';
+        document.getElementById('perfect-badge').style.display = 'none'; // 隱藏完美徽章
         requestWakeLock(); handleResize(); initSpeech(); requestAnimationFrame(gameLoop);
         sfx.init();
     }
@@ -800,14 +849,12 @@
         const en = state.enemies[idx]; if(!en) return;
         en.isDying = true; state.score += 100 * state.difficulty; 
 
-        // 修正：無論是否為 Auto 消除，都增加殺敵數，確保學生努力不被道具/爆擊吃掉
         state.kills++; 
         
         if(!isAuto) {
             state.combo++;
             if(state.combo > 0 && state.combo % 10 === 0) triggerReward();
             
-            // 新增：1% 機率觸發爆擊 (僅限玩家親自唸對時)
             if (Math.random() < 0.01 && !state.bossMode) {
                 triggerCriticalWipe();
             }
@@ -815,7 +862,7 @@
 
         createExplosion(en); state.shake = 10; sfx.kill();
         let trigger = false;
-        // Boss 觸發條件 (累積殺敵)
+        
         if(state.difficultyMode==='Rookie' && state.kills>=10) trigger=true;
         else if(state.difficultyMode==='Veteran' && state.kills>=15) trigger=true;
         else if(state.difficultyMode==='Nightmare' && state.kills>=15) trigger=true;
@@ -846,12 +893,16 @@
         if (state.enemies[0]) state.enemies[0].z = Math.max(0.2, state.enemies[0].z - 0.1); 
         if (state.bossWordIndex >= state.bossData.words.length) {
             state.enemies[0].isDying = true; state.bossesDefeated++;
+            
+            // 修正 Boss 邏輯: 依照難度決定是否通關
             setTimeout(() => {
-                let win = false; let next = false;
-                if(state.difficultyMode==='Rookie'||state.difficultyMode==='Veteran') win=true;
-                else if(state.difficultyMode==='Nightmare') { if(state.bossesDefeated<2) next=true; else win=true; }
-                else if(state.difficultyMode==='NoHope') { if(state.bossesDefeated<3) { state.kills=0; state.bossMode=false; document.getElementById('boss-ui').style.opacity='0'; } else win=true; }
-                if(next) startBossBattle(); else if(win) winGame();
+                const required = BOSS_QUOTAS[state.difficultyMode] || 1;
+                
+                if (state.bossesDefeated < required) {
+                     startBossBattle(); // 繼續打下一隻 Boss
+                } else {
+                     winGame(); // 通關
+                }
             }, 800);
         } else updateBossUI();
     }
@@ -864,9 +915,10 @@
     }
 
     function triggerDamage() {
-        state.hp--; state.shake = 35; state.combo = 0; sfx.damage();
+        state.hp--; state.shake = 35; state.combo = 0; 
+        state.damageTaken++; // 記錄受傷
+        sfx.damage();
         
-        // 修改：不直接繪製，而是設定 alpha 值，由 gameLoop 統一繪製
         state.damageAlpha = 0.8; 
 
         if (state.bossMode && state.enemies[0]) state.enemies[0].z = 0.4;
@@ -878,12 +930,9 @@
         const rect = canvas.parentElement.getBoundingClientRect();
         const w = rect.width; const h = rect.height;
         
-        // 1. 清除畫布 - 重要修正：改用 canvas.width/height 以覆蓋整個緩衝區
-        // 這是解決殘影的關鍵。原本使用 w, h 可能因為螢幕縮放比 (DPR) 導致清除範圍不足。
         ctx.setTransform(1, 0, 0, 1, 0, 0); 
         ctx.clearRect(0, 0, canvas.width, canvas.height); 
         
-        // 2. 震動效果
         if (state.shake > 0) { 
             ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); 
             state.shake *= 0.88; 
@@ -892,7 +941,6 @@
 
         if (state.freezeTimer > 0) state.freezeTimer--;
         
-        // 3. 繪製背景星星
         ctx.fillStyle = "#222";
         state.bgStars.forEach(s => {
             const sx = w/2 + (s.x * s.z); const sy = h/2 + (s.y * s.z);
@@ -900,38 +948,32 @@
             if (state.freezeTimer <= 0) s.z += 0.003; if (s.z > 1) s.z = 0;
         });
 
-        // 4. 生成敵人
         if (!state.bossMode && state.freezeTimer <= 0 && Date.now() - state.spawnTimer > 1800/state.difficulty) {
             state.enemies.push(new Enemy(getNextWord())); state.spawnTimer = Date.now();
         }
 
         const closest = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
         
-        // 5. 更新與繪製敵人 (從遠到近)
         state.enemies.sort((a,b) => a.z - b.z);
         for (let i = state.enemies.length - 1; i >= 0; i--) {
             const en = state.enemies[i];
-            // 更新邏輯
             if (en.update()) {
                 if (!en.isDying) triggerDamage(); 
                 if (!en.isBoss) state.enemies.splice(i, 1); 
             } else {
-                // 繪製邏輯
                 en.draw(ctx, w, h, en === closest);
             }
         }
 
-        // 6. 粒子效果
         for (let i = state.particles.length - 1; i >= 0; i--) {
             if (!state.particles[i].update()) state.particles.splice(i, 1); else state.particles[i].draw(ctx);
         }
 
-        // 7. 統一繪製受傷紅光 (解決殘留色塊問題) - 同樣修正為使用 canvas.width/height
         if (state.damageAlpha > 0.01) {
-            ctx.setTransform(1, 0, 0, 1, 0, 0); // 確保紅光覆蓋全螢幕且不被震動位移
+            ctx.setTransform(1, 0, 0, 1, 0, 0); 
             ctx.fillStyle = `rgba(255, 0, 0, ${state.damageAlpha * 0.4})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height); // 覆蓋全實際畫布
-            state.damageAlpha *= 0.9; // 淡出
+            ctx.fillRect(0, 0, canvas.width, canvas.height); 
+            state.damageAlpha *= 0.9; 
         }
 
         updateUIPanel(); requestAnimationFrame(gameLoop);
@@ -946,7 +988,6 @@
         const ecgPath = document.getElementById('ecg-path');
         const ecgLine = document.querySelector('.ecg-line');
         
-        // 更新 ECG 與狀態文字顏色
         if (state.hp > 3) { 
             status.innerText = 'VITAL: STABLE'; 
             status.className = 'pixel-font text-green-500 text-[8px] font-bold'; 
@@ -957,18 +998,19 @@
             status.innerText = 'VITAL: CAUTION'; 
             status.className = 'pixel-font text-yellow-500 text-[8px] font-bold'; 
             ecgPath.setAttribute('stroke', 'yellow');
-            ecgLine.style.animationDuration = "1s"; // 心跳變快
+            ecgLine.style.animationDuration = "1s"; 
         }
         else { 
             status.innerText = 'VITAL: CRITICAL'; 
             status.className = 'pixel-font text-red-600 text-[8px] font-bold flicker'; 
             ecgPath.setAttribute('stroke', 'red');
-            ecgLine.style.animationDuration = "0.5s"; // 心跳急促
+            ecgLine.style.animationDuration = "0.5s"; 
         }
 
         const target = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
         let t = "AWAITING...";
-        if (state.bossMode) t = `BOSS STAGE (${state.bossesDefeated+1})`;
+        const required = BOSS_QUOTAS[state.difficultyMode] || 1;
+        if (state.bossMode) t = `BOSS STAGE (${state.bossesDefeated+1}/${required})`;
         else if (target) t = target.word.toUpperCase();
         document.getElementById('current-word-ui').innerText = t;
     }
@@ -983,7 +1025,32 @@
         } catch(e){}
     }
 
-    function winGame() { state.gameActive = false; if(wakeLock) releaseWakeLock(); document.getElementById('win-score-display').innerText = Math.floor(state.score); document.getElementById('win-screen').classList.remove('hidden'); syncData(); }
+    function winGame() { 
+        state.gameActive = false; 
+        if(wakeLock) releaseWakeLock(); 
+        document.getElementById('win-score-display').innerText = Math.floor(state.score); 
+        document.getElementById('win-screen').classList.remove('hidden'); 
+
+        // 判斷是否顯示完美通關勳章
+        if (state.damageTaken === 0) {
+            const badge = document.getElementById('perfect-badge');
+            badge.style.display = 'block';
+            sfx.perfect();
+        }
+
+        // 判斷是否顯示 "Challenge Next Level" 按鈕
+        const btn = document.getElementById('next-level-btn');
+        if (state.difficultyMode !== 'NoHope') {
+            btn.classList.remove('hidden');
+            const nextMode = { 'Rookie': 'Veteran', 'Veteran': 'Nightmare', 'Nightmare': 'NoHope' }[state.difficultyMode];
+            btn.innerText = `CHALLENGE: ${nextMode}`;
+        } else {
+            btn.classList.add('hidden');
+        }
+
+        syncData(); 
+    }
+    
     function endGame() { state.gameActive = false; if(wakeLock) releaseWakeLock(); document.getElementById('fail-score-display').innerText = Math.floor(state.score); document.getElementById('game-over-screen').classList.remove('hidden'); syncData(); }
     function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } }
 
