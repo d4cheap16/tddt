@@ -196,33 +196,7 @@
             background: rgba(255, 215, 0, 0.1); margin-bottom: 20px; display: none;
         }
 
-        #debug-panel {
-            position: absolute; top: 10px; right: 10px; width: auto; height: auto;
-            background: transparent; pointer-events: none; z-index: 300;
-        }
-        .debug-controls {
-            pointer-events: auto; background: rgba(0,0,0,0.6); 
-            border: 1px solid #333;
-            padding: 5px; border-radius: 50px; 
-            display: flex; gap: 8px; flex-direction: row;
-        }
-        .debug-btn {
-            width: 32px; height: 32px;
-            background: #222; border: 2px solid #555; color: #fff;
-            padding: 0; margin: 0; cursor: pointer; 
-            font-size: 10px; font-weight: bold; font-family: 'Press Start 2P', cursive;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.1s;
-        }
-        .debug-btn:active { transform: scale(0.9); }
-        .dbg-heal { border-color: #00ff00; color: #00ff00; }
-        .dbg-flash { border-color: #00ffff; color: #00ffff; }
-        .dbg-shot { border-color: #ffff00; color: #ffff00; }
-        .dbg-crit { border-color: #ff00ff; color: #ff00ff; }
-        .dbg-kill { border-color: #ff0000; color: #ff0000; background: #330000; }
-        .dbg-exit { border-color: #ffffff; color: #ffffff; background: #333; font-size: 8px; }
-        .debug-info { display: none; }
+        /* 移除了 Debug Panel 相關 CSS */
 
         .ecg-container {
             width: 100%; height: 30px; background: #000; border: 1px solid #222;
@@ -299,14 +273,7 @@
         </div>
     </div>
 
-    <div id="admin-choice-screen" class="overlay-screen hidden">
-        <h2 class="text-blue-600 mb-6 uppercase text-[14px]">System Access Granted</h2>
-        <div class="flex flex-col gap-4 w-full max-w-xs">
-            <button onclick="showAdmin()" class="btn py-5 bg-zinc-800 text-white border-zinc-500 uppercase">Archive Terminal (Records)</button>
-            <button onclick="enterDebugMode()" class="btn py-5 bg-green-900 text-white border-green-500 uppercase">Combat Sim (Debug/Test)</button>
-            <button onclick="location.reload()" class="btn py-3 text-zinc-500 uppercase mt-4">Logout</button>
-        </div>
-    </div>
+    <!-- 移除了 Admin Choice Screen (因為已無 Debug 按鈕需求) -->
 
     <div id="admin-screen" class="overlay-screen hidden">
         <h2 class="text-blue-600 mb-4 uppercase">Archive Terminal</h2>
@@ -320,22 +287,15 @@
         </div>
         <div class="grid grid-cols-2 gap-2 w-full max-w-sm mt-6">
             <button onclick="exportToCSV()" class="btn py-4 bg-blue-900 border-blue-600 text-white uppercase col-span-2">Export CSV Data</button>
+            <!-- 新增: GOD MODE 入口 -->
+            <button onclick="startGodMode()" class="btn py-4 bg-green-900 border-green-600 text-green-400 uppercase font-bold col-span-2 flicker">DEPLOY (GOD MODE)</button>
+            
             <button onclick="handleClearData()" id="clear-data-btn" class="btn py-4 bg-red-950 border-red-700 text-red-500 uppercase">Clear All</button>
             <button onclick="location.reload()" class="btn py-4 bg-zinc-900 uppercase">Logout</button>
         </div>
     </div>
 
-    <div id="debug-panel" class="hidden flex-col items-end justify-start">
-        <div class="debug-controls">
-            <button onclick="debugTrigger('RECOVER')" class="debug-btn dbg-heal" title="Heal">H</button>
-            <button onclick="debugTrigger('FLASH')" class="debug-btn dbg-flash" title="Flash">F</button>
-            <button onclick="debugTrigger('SHOTGUN')" class="debug-btn dbg-shot" title="Shotgun">S</button>
-            <button onclick="debugCritical()" class="debug-btn dbg-crit" title="Critical Wipe">K</button>
-            <button onclick="debugKillClosest()" class="debug-btn dbg-kill" title="Kill/Hit Closest">X</button>
-            <button onclick="exitDebugMode()" class="debug-btn dbg-exit" title="Exit">Ex</button>
-        </div>
-        <div id="debug-params" class="debug-info"></div>
-    </div>
+    <!-- 移除了 Debug Panel HTML 結構 -->
 
     <div id="pause-screen" class="overlay-screen hidden">
         <h2 class="text-zinc-500 text-[10px] mb-8 uppercase tracking-widest">Training Mode (Paused)</h2>
@@ -353,7 +313,6 @@
         <div class="w-full bg-zinc-900 h-3 border-2 border-white mb-2 overflow-hidden rounded-full">
             <div id="boss-hp-bar" class="h-full bg-red-600 transition-all duration-300" style="width: 100%"></div>
         </div>
-        <!-- 移除 boss-sentence，將內容移至 UI 面板 -->
     </div>
 
     <div id="win-screen" class="overlay-screen hidden">
@@ -405,7 +364,6 @@
 
         <div class="flex flex-col items-center justify-center bg-zinc-900/40 rounded-lg border border-zinc-800 p-2 relative h-full">
             <p id="targeting-label" class="text-[6px] text-zinc-600 mb-1 uppercase tracking-widest">Targeting</p>
-            <!-- 允許句子換行顯示 -->
             <div id="current-word-ui" class="text-[12px] text-center text-white font-bold tracking-wider uppercase flex flex-wrap justify-center gap-1 w-full overflow-hidden">AWAITING SIGNAL...</div>
         </div>
         <div class="grid grid-cols-2 gap-3 mt-1">
@@ -446,27 +404,20 @@
         "https://d4cheap16.github.io/tddt/BG05.png"
     ];
 
-    /* --- [教學] BOSS 戰參數設定區 --- */
-    // 這裡調整 BOSS 的「速度」與「起始距離」。
-    // 速度 (speed) 越低，BOSS 走得越慢，玩家存活時間越長。
-    // 建議：考慮到語音延遲，建議將速度稍微調慢一點點。
+    /* BOSS 戰參數設定 (包含修正後的 NoHope 速度) */
     const BOSS_CONFIG_DATA = {
-        'Rookie':    { startZ: 0.10, speed: 0.0015, sentencesRequired: 2 }, // 速度由 0.0015 降為 0.0012 (更簡單)
-        'Veteran':   { startZ: 0.10, speed: 0.0016, sentencesRequired: 3 }, // 速度由 0.0018 降為 0.0016 (平衡)
-        'Nightmare': { startZ: 0.10, speed: 0.0019, sentencesRequired: 4 }, // 速度由 0.0020 降為 0.0019 (考慮延遲)
-        'NoHope':    { startZ: 0.10, speed: 0.0022, sentencesRequired: 5 }  // 速度由 0.0015 降為 0.0014 (極限生存)
+        'Rookie':    { startZ: 0.15, speed: 0.0015, sentencesRequired: 2 },
+        'Veteran':   { startZ: 0.15, speed: 0.0016, sentencesRequired: 3 },
+        'Nightmare': { startZ: 0.10, speed: 0.0019, sentencesRequired: 4 },
+        'NoHope':    { startZ: 0.10, speed: 0.0022, sentencesRequired: 5 } // 速度修正為 0.0022
     };
 
-    /* --- [教學] BOSS 震動參數設定區 (新增) --- */
-    // 這裡獨立設定每個難度的震動效果
-    // startZ: BOSS 走到多近開始震動 (0.1 = 很遠不震, 0.5 = 走到一半開始震, 0.8 = 貼臉才震)
-    // intensity: 震動強烈程度 (數值越大越晃)
-    // axis: 'Y' = 只有上下震動, 'XY' = 上下左右亂震 (更暈)
+    /* BOSS 震動參數 */
     const BOSS_SHAKE_CONFIG = {
-        'Rookie':    { startZ: 0.5, intensity: 10, axis: 'Y' },  // 輕微上下晃動
-        'Veteran':   { startZ: 0.4, intensity: 20, axis: 'Y' },  // 中等上下晃動
-        'Nightmare': { startZ: 0.3, intensity: 40, axis: 'XY' }, // 強烈亂震 (增加壓迫感)
-        'NoHope':    { startZ: 0.2, intensity: 60, axis: 'XY' }  // 極度強烈亂震 (從很遠就開始)
+        'Rookie':    { startZ: 0.5, intensity: 10, axis: 'Y' },
+        'Veteran':   { startZ: 0.4, intensity: 20, axis: 'Y' },
+        'Nightmare': { startZ: 0.3, intensity: 40, axis: 'XY' },
+        'NoHope':    { startZ: 0.2, intensity: 60, axis: 'XY' }
     };
 
     const BOSS_BEHAVIOR = { 
@@ -475,7 +426,6 @@
         pushback: { 'Rookie': 0.4, 'Veteran': 0.35, 'Nightmare': 0.3, 'NoHope': 0.25 }
     };
     
-    // BOSS 戰鬥細節 (暈眩、擊退等)
     const BOSS_BATTLE_CONFIG = {
         'Rookie':    { criticalChance: 0.05, stunDuration: 50,  pushback: 0.1, scoreMult: 2.0 },
         'Veteran':   { criticalChance: 0.04, stunDuration: 40,  pushback: 0.2, scoreMult: 2.0 },
@@ -490,7 +440,6 @@
         'NoHope':   { min: 0.0020, max: 0.0030 }
     };
     
-    // 遊戲行為定義
     const ENEMY_BEHAVIOR = { sprintZ: 0.75, sprintMultiplier: 1.4 };
 
     const GAME_BALANCE = {
@@ -511,7 +460,7 @@
             'Rookie':    { deathZ: 0.95 },
             'Veteran':   { deathZ: 0.90 },
             'Nightmare': { deathZ: 0.85 },
-            'NoHope':    { deathZ: 0.80 }
+            'NoHope':    { deathZ: 0.85 }
         }
     };
 
@@ -535,7 +484,6 @@
         }
     };
     
-    // 當擊殺多少敵人後觸發 BOSS
     const BOSS_TRIGGER_KILLS = { 'Rookie': 10, 'Veteran': 13, 'Nightmare': 15, 'NoHope': 20 };
 
     const sfx = {
@@ -570,7 +518,6 @@
         score: 0, hp: 5, gameActive: false, isPaused: false,
         level: 1, kills: 0, combo: 0,
         difficulty: 1.0, difficultyMode: 'Veteran',
-        // 修改: 改為累積制，不再計算 defeated count
         bossSentencesCleared: 0, 
         bossSentencesRequired: 1,
         freezeTimer: 0,
@@ -581,8 +528,8 @@
         wordPool: [],
         sentencePool: [],
         damageAlpha: 0,
-        damageTaken: 0,
-        debugMode: false 
+        damageTaken: 0
+        // debugMode 已移除
     };
 
     const canvas = document.getElementById('game-canvas');
@@ -733,8 +680,9 @@
     window.handleAuth = async () => {
         const nameInput = document.getElementById('input-name').value.trim();
         if(nameInput === ADMIN_KEY) {
+            // 管理員登入後，直接進入 Admin Screen 查看資料或開始無敵模式
             document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('admin-choice-screen').classList.remove('hidden');
+            showAdmin();
             return;
         }
         const grade = document.getElementById('select-grade').value;
@@ -750,8 +698,6 @@
     let cachedAdminData = [];
 
     async function showAdmin() {
-        document.getElementById('admin-choice-screen').classList.add('hidden'); 
-        document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('admin-screen').classList.remove('hidden');
         const body = document.getElementById('records-body');
         body.innerHTML = "<tr><td colspan='5' class='p-4 text-center'>FETCHING ARCHIVE...</td></tr>";
@@ -826,16 +772,11 @@
         document.body.removeChild(link);
     };
 
-    window.enterDebugMode = () => {
-        document.getElementById('admin-choice-screen').classList.add('hidden');
-        state.debugMode = true;
-        state.player = { name: "TEST_UNIT", no: "00", class: "DEBUG" };
+    // 新增：GOD MODE 啟動函式
+    window.startGodMode = () => {
+        document.getElementById('admin-screen').classList.add('hidden');
+        state.player = { name: ADMIN_KEY, no: "00", class: "GOD MODE" };
         startGame();
-    };
-
-    window.exitDebugMode = () => {
-        document.getElementById('debug-panel').classList.add('hidden');
-        location.reload();
     };
 
     function executeReward(key) {
@@ -862,21 +803,14 @@
         }, 2000);
     }
 
-    window.debugTrigger = (key) => { executeReward(key); };
-    window.debugCritical = () => { triggerCriticalWipe(); };
-    window.debugKillClosest = () => {
-        const alive = state.enemies.filter(e => !e.isDying);
-        if (alive.length > 0) {
-            alive.sort((a,b) => b.z - a.z);
-            const target = alive[0];
-            
-            if (state.bossMode) {
-                 hitBoss();
-            } else {
-                 killEnemy(state.enemies.indexOf(target));
+    function triggerCriticalWipe() {
+        executeReward('CRITICAL');
+        state.enemies.forEach((e, i) => {
+            if (!e.isDying && !e.isBoss) {
+                killEnemy(i, false);
             }
-        }
-    };
+        });
+    }
 
     window.handleClearData = async () => {
         const btn = document.getElementById('clear-data-btn');
@@ -933,7 +867,6 @@
                 const settings = ENEMY_SPEEDS[state.difficultyMode] || ENEMY_SPEEDS['Veteran'];
                 this.speed = settings.min + Math.random() * (settings.max - settings.min);
             } else {
-                // 修改：BOSS 使用獨立的速度參數
                 const bConfig = BOSS_CONFIG_DATA[state.difficultyMode] || BOSS_CONFIG_DATA['Veteran'];
                 this.speed = bConfig.speed; 
             }
@@ -948,8 +881,7 @@
             if (this.isDying) { this.opacity -= 0.2; return this.opacity <= 0; }
             if (state.freezeTimer <= 0) {
                 if (state.bossMode && this.isBoss) {
-                    // 修改：BOSS 行為邏輯使用新參數
-                    let s = this.speed; // 使用建構時設定的 BOSS 專屬速度
+                    let s = this.speed; 
                     if (this.z > BOSS_BEHAVIOR.sprintZ) s *= BOSS_BEHAVIOR.sprintMultiplier; 
                     this.z += s; 
                 }
@@ -959,7 +891,6 @@
                      this.z += s;
                 }
             }
-            // 讀取當前難度的判定參數
             const thresholds = GAME_BALANCE.THRESHOLDS[state.difficultyMode] || GAME_BALANCE.THRESHOLDS['Veteran'];
             return this.z >= thresholds.deathZ;
         }
@@ -1187,9 +1118,10 @@
                     ctx.restore();
                 }
 
-                if (state.debugMode) {
-                    ctx.font = `8px monospace`; ctx.fillStyle = "#fff"; ctx.textAlign = "center";
-                    ctx.fillText(`BOSS: ${state.difficultyMode.toUpperCase()}`, 0, -size * 1.6);
+                if (state.player.name === ADMIN_KEY) {
+                    // 顯示 GOD MODE 字樣
+                    ctx.font = `8px monospace`; ctx.fillStyle = "#0f0"; ctx.textAlign = "center";
+                    ctx.fillText(`GOD MODE: ON`, 0, -size * 1.6);
                 }
                 ctx.restore();
                 return; // BOSS 繪製結束
@@ -1209,7 +1141,6 @@
             const eyeS = size/10; ctx.fillRect(-size/6, -size*0.75, eyeS, eyeS); ctx.fillRect(size/15, -size*0.75, eyeS, eyeS); ctx.fillRect(-size/15, -size*0.6, size/7.5, eyeS/2); 
             if (isClosest) { ctx.strokeStyle = '#f00'; ctx.lineWidth = 3; ctx.strokeRect(-size/2 - 5, -size - 5, size + 10, size + 10); }
             ctx.font = `bold ${Math.max(8, size/7.5)}px 'Press Start 2P'`; ctx.fillStyle = isClosest ? '#fff' : '#444'; ctx.textAlign = 'center'; ctx.shadowBlur = 4; ctx.shadowColor = "#000"; ctx.fillText(this.word.toUpperCase(), 0, -size * 1.05);
-            if (state.debugMode) { ctx.font = `8px monospace`; ctx.fillStyle = "#0f0"; ctx.fillText(`SPD:${this.speed.toFixed(5)}`, 0, -size * 1.3); }
             ctx.restore();
         }
     }
@@ -1218,15 +1149,6 @@
         const rewards = ["RECOVER", "FLASH", "SHOTGUN"];
         const roll = Math.floor(Math.random() * rewards.length);
         executeReward(rewards[roll]);
-    }
-
-    function triggerCriticalWipe() {
-        executeReward('CRITICAL');
-        state.enemies.forEach((e, i) => {
-            if (!e.isDying && !e.isBoss) {
-                killEnemy(i, false);
-            }
-        });
     }
 
     function getNextWord() {
@@ -1270,8 +1192,7 @@
         document.getElementById('boss-ui').style.opacity = '0';
         document.getElementById('perfect-badge').style.display = 'none'; 
         updateUIPanel();
-        const dbgPanel = document.getElementById('debug-panel');
-        if(state.debugMode) { dbgPanel.classList.remove('hidden'); dbgPanel.classList.add('flex'); } else { dbgPanel.classList.add('hidden'); dbgPanel.classList.remove('flex'); }
+        // 移除了 Debug Panel 顯示邏輯
         requestWakeLock(); handleResize(); initSpeech(); requestAnimationFrame(gameLoop);
         sfx.init();
     }
@@ -1360,18 +1281,13 @@
         state.bossMode = true; 
         state.bossSentencesCleared = 0; // 重置已完成句數
 
-        // 讀取新的 BOSS 設定
         const bConfig = BOSS_CONFIG_DATA[state.difficultyMode] || BOSS_CONFIG_DATA['Veteran'];
         state.bossSentencesRequired = bConfig.sentencesRequired;
 
-        // 生成 BOSS，設定其初始 Z 軸位置
         const boss = new Enemy("BOSS", true);
-        boss.z = bConfig.startZ; // 使用設定的起始距離
+        boss.z = bConfig.startZ; 
         state.enemies = [boss];
         
-        // --- 修正：強制解凍 ---
-        // 在一般模式下，殺死最後一隻小怪可能觸發獎勵(如FLASH/SHOTGUN)，導致freezeTimer > 0。
-        // BOSS 出場時必須無視之前的凍結狀態，否則會呆站幾秒。
         state.freezeTimer = 0;
 
         loadNextBossSentence();
@@ -1380,13 +1296,11 @@
         sfx.boss();
     }
 
-    // 載入下一句 (不重生 BOSS)
     function loadNextBossSentence() {
         const full = getNextSentence(); 
         state.bossData = { full, words: full.split(' ') }; 
         state.bossWordIndex = 0;
         
-        // 更新文字 UI (直接寫入下方的 current-word-ui)
         const container = document.getElementById('current-word-ui');
         container.innerHTML = state.bossData.words.map((w, i) => `<span id="bw-${i}" class="boss-word-pending">${w}</span>`).join(' ');
         updateBossUI();
@@ -1395,34 +1309,24 @@
     function updateBossUI() {
         state.bossData.words.forEach((_, i) => {
             const el = document.getElementById(`bw-${i}`);
-            // 更新下方單字的狀態：劃掉 vs 高亮 vs 普通
             if (el) {
                 el.className = i < state.bossWordIndex ? 'text-zinc-600 line-through' : (i === state.bossWordIndex ? 'boss-word-active font-bold text-green-400' : 'text-white');
             }
         });
         
-        // --- 修正血條顯示邏輯：計算總體進度 ---
-        // 總共需要完成的句子數: state.bossSentencesRequired
-        // 已經完成的句子數: state.bossSentencesCleared
-        // 當前句子的進度: state.bossWordIndex / state.bossData.words.length
-        
         const totalSegments = state.bossSentencesRequired;
         const clearedSegments = state.bossSentencesCleared;
         const currentSegmentProgress = state.bossWordIndex / state.bossData.words.length;
         
-        // 總完成比例 = (已完成完整句 + 當前句進度) / 總句數
         const totalProgress = (clearedSegments + currentSegmentProgress) / totalSegments;
         
-        // 血條寬度 = (1 - 總完成比例) * 100%
         const hpBarWidth = Math.max(0, (1 - totalProgress) * 100);
         document.getElementById('boss-hp-bar').style.width = hpBarWidth + '%';
         
-        // 更新階段指示器文字
         const phaseEl = document.getElementById('boss-phase-display');
         const remaining = state.bossSentencesRequired - state.bossSentencesCleared;
         phaseEl.innerText = `PHASE: ${state.bossSentencesCleared + 1} / ${state.bossSentencesRequired}`;
         
-        // 如果只剩最後一句，字體變紅變大
         if (remaining <= 1) {
             phaseEl.classList.add('text-red-500', 'flicker');
             phaseEl.innerText += " [FINISH HIM!]";
@@ -1448,30 +1352,24 @@
             sfx.reward(); 
         } else {
             state.shake = 20; 
-            // 普攻推後一點點，保持距離感
             if (state.enemies[0]) state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.05); 
         }
         createExplosion(state.enemies[0]); sfx.kill();
         
-        // 句子念完的判斷
         if (state.bossWordIndex >= state.bossData.words.length) {
             state.bossSentencesCleared++;
-            executeReward('RECOVER'); // 維持補血機制
+            executeReward('RECOVER'); 
 
-            // 推後 BOSS (獎勵時間)
             const pushBackAmt = BOSS_BEHAVIOR.pushback[state.difficultyMode] || 0.3;
             if (state.enemies[0]) state.enemies[0].z = Math.max(0.1, state.enemies[0].z - pushBackAmt);
 
             if (state.bossSentencesCleared >= state.bossSentencesRequired) {
-                // 真正擊殺
                 state.enemies[0].isDying = true; 
-                state.bossesDefeated++; // 統計用
                 winGame();
             } else {
-                // 下一個階段 (下一句)
                 setTimeout(() => {
                     loadNextBossSentence();
-                }, 500); // 稍微停頓讓玩家喘息
+                }, 500); 
             }
         } else {
             updateBossUI();
@@ -1487,10 +1385,26 @@
 
     function triggerDamage() {
         const survivalConfig = GAME_BALANCE.SURVIVAL[state.difficultyMode];
+        
+        // --- GOD MODE 實作區 ---
+        // 1. 如果是 AdaWong (ADMIN_KEY)，只播放音效和畫面震動
+        // 2. 不扣除 HP，不重置 Combo，不造成死亡
+        if (state.player.name === ADMIN_KEY) {
+            state.shake = 10; 
+            sfx.damage(); 
+            state.damageAlpha = 0.5; // 稍微紅閃一下
+            
+            // 輕微推後敵人，避免穿模太嚴重，保持測試可視性
+            if (state.bossMode && state.enemies[0]) {
+                state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.05);
+            }
+            return; // 這裡直接返回，跳過下方的扣血邏輯
+        }
+
+        // --- 一般玩家邏輯 ---
         state.hp--; state.shake = survivalConfig.damageShake; state.combo = 0; state.damageTaken++; 
         sfx.damage(); state.damageAlpha = 0.8; 
         if (state.bossMode && state.enemies[0]) {
-            // 受傷時不大幅推後 BOSS，增加難度
             state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.1); 
         }
         if (state.hp <= 0) endGame();
@@ -1507,22 +1421,17 @@
         }
         const boss = state.enemies.find(e => e.isBoss);
         
-        // --- [修改] BOSS 震動邏輯區 (讀取新參數) ---
         if (state.bossMode && boss) {
             const shakeConfig = BOSS_SHAKE_CONFIG[state.difficultyMode] || BOSS_SHAKE_CONFIG['Veteran'];
             
-            // 只有當 BOSS 距離大於設定值時才震動
             if (boss.z > shakeConfig.startZ) {
                 const proximityIntensity = (boss.z - shakeConfig.startZ) * shakeConfig.intensity;
                 
-                // 根據 axis 參數決定震動方向
                 if (shakeConfig.axis === 'XY') {
-                    // X 和 Y 軸一起震動 (暈眩感強)
                     const shakeX = (Math.random() - 0.5) * proximityIntensity;
                     const shakeY = (Math.random() - 0.5) * proximityIntensity;
                     ctx.translate(shakeX, shakeY);
                 } else {
-                    // 只有 Y 軸震動 (腳步沉重感)
                     const shakeY = (Math.random() - 0.5) * proximityIntensity;
                     ctx.translate(0, shakeY);
                 }
@@ -1583,23 +1492,20 @@
             ecgPath.setAttribute('stroke', 'red'); ecgLine.style.animationDuration = "0.5s"; 
         }
         
-        // --- 修正 UI 更新邏輯 ---
         const labelEl = document.getElementById('targeting-label');
         const wordEl = document.getElementById('current-word-ui');
 
         if (state.bossMode) {
-            // BOSS 模式：修改標題，且"不要"覆寫 current-word-ui 的內容 (因為已經由 updateBossUI 接管)
             labelEl.innerText = "BOSS SEQUENCE";
             labelEl.className = "text-[6px] text-red-500 mb-1 uppercase tracking-widest flicker";
         } else {
-            // 一般模式：正常顯示
             labelEl.innerText = "TARGETING";
             labelEl.className = "text-[6px] text-zinc-600 mb-1 uppercase tracking-widest";
             
             const target = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
             let t = "AWAITING...";
             if (target) t = target.word.toUpperCase();
-            wordEl.innerText = t; // 這裡直接覆寫文字
+            wordEl.innerText = t; 
         }
     }
 
