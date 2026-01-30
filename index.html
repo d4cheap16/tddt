@@ -31,6 +31,28 @@
             user-select: none; touch-action: manipulation;
         }
 
+        /* 自定義復古卷軸樣式 - 修改為更細緻、深沈的風格 */
+        ::-webkit-scrollbar {
+            width: 6px; /* 變細 */
+            background: #050505;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border: none;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Firefox 支援 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333 #000;
+        }
+
         .crt::before {
             content: " ";
             display: block; position: absolute;
@@ -294,11 +316,9 @@
             <p class="text-[8px] text-zinc-500 mb-2 uppercase text-left font-bold">Unit Module</p>
             <div class="grid grid-cols-3 gap-1 mb-6" id="lesson-grid"></div>
             
-            <!-- 修改：將狀態顯示改為兩層，凸顯 Unit 名稱 -->
-            <div class="bg-zinc-900 border border-zinc-800 p-2 mb-4 text-center rounded">
-                <div class="text-[6px] text-zinc-600 uppercase tracking-widest mb-1">Target Identity</div>
-                <div id="mission-target-display" class="text-sm font-bold text-green-400 uppercase tracking-wider flicker">SYSTEM READY</div>
-                <div id="mission-status-text" class="text-[6px] text-zinc-500 mt-1 uppercase">WAITING FOR INPUT...</div>
+            <!-- 修改：移除多餘標籤，只保留 Unit 名稱，並移除 flicker -->
+            <div class="bg-zinc-900 border border-zinc-800 p-4 mb-4 text-center rounded">
+                <div id="mission-target-display" class="text-sm font-bold text-green-400 uppercase tracking-wider">SYSTEM READY</div>
             </div>
             
             <div id="leaderboard-preview" class="hidden bg-zinc-900/50 p-2 rounded">
@@ -535,6 +555,14 @@
             'NoHope': 0.8     
         }
     };
+    
+    // 更新：BOSS 戰鬥配置表 (參數依照難度獨立)
+    const BOSS_BATTLE_CONFIG = {
+        'Rookie':    { criticalChance: 0.05, stunDuration: 50, pushback: 0.6, scoreMult: 2.0 },
+        'Veteran':   { criticalChance: 0.04, stunDuration: 40, pushback: 0.5, scoreMult: 2.0 },
+        'Nightmare': { criticalChance: 0.03, stunDuration: 35, pushback: 0.3, scoreMult: 2.5 },
+        'NoHope':    { criticalChance: 0.01, stunDuration: 30, pushback: 0.2, scoreMult: 3.0 }
+    };
 
     const ENEMY_SPEEDS = {
         'Rookie':   { min: 0.0008, max: 0.0012 },
@@ -752,16 +780,17 @@
 
     async function loadBookData(n) {
         selectedBook = n;
-        const statusText = document.getElementById('mission-status-text');
-        statusText.innerText = `CONNECTING ARCHIVE ${n}...`;
+        // 移除對 mission-status-text 的更新
         try {
             const res = await fetch(`book${n}.json`);
             currentBookData = await res.json();
-            statusText.innerText = `SECTOR ${n} DATA LINKED`;
+            // Status text removed
             refreshLessonGrid();
             checkMissionValid();
         } catch(e) { 
-            currentBookData = {}; statusText.innerText = `DATA ERROR - OFFLINE`; refreshLessonGrid(); checkMissionValid();
+            currentBookData = {}; 
+            // Status text removed
+            refreshLessonGrid(); checkMissionValid();
         }
     }
     window.selectBook = (n) => {
@@ -794,10 +823,12 @@
 
     window.selectLesson = (n) => {
         const data = currentBookData[`L${n}`];
+        const targetDisplay = document.getElementById('mission-target-display');
+        
         if (!data) {
-            document.getElementById('mission-target-display').innerText = "DATA MISSING";
-            document.getElementById('mission-target-display').classList.remove('text-green-400');
-            document.getElementById('mission-target-display').classList.add('text-red-500');
+            targetDisplay.innerText = "BLOCKED"; // 修改文字
+            targetDisplay.classList.remove('text-green-400');
+            targetDisplay.classList.add('text-red-500');
             document.getElementById('leaderboard-preview').classList.add('hidden');
             return;
         }
@@ -812,7 +843,6 @@
     function checkMissionValid() {
         const btn = document.getElementById('confirm-mission-btn');
         const targetDisplay = document.getElementById('mission-target-display');
-        const statusText = document.getElementById('mission-status-text');
         
         const data = currentBookData[`L${selectedLesson}`];
         
@@ -823,13 +853,11 @@
         if (data) {
             btn.disabled = false;
             targetDisplay.innerText = data.title.toUpperCase();
-            statusText.innerText = "READY TO ENGAGE";
         } else { 
             btn.disabled = true;
-            targetDisplay.innerText = "SECTOR CORRUPTED";
+            targetDisplay.innerText = "BLOCKED"; // 修改文字
             targetDisplay.classList.remove('text-green-400');
             targetDisplay.classList.add('text-red-500');
-            statusText.innerText = "INVALID TARGET";
         }
     }
     loadBookData(4);
@@ -1366,36 +1394,37 @@
 
     function hitBoss() {
         state.bossWordIndex++; 
-        
-        // 1. 累積 Combo 與分數
         state.combo++;
-        // Boss 戰分數加倍
-        let scoreGain = (GAME_BALANCE.COMBO[state.difficultyMode].baseScore * 2 + (state.combo * 20)) * state.difficulty;
+
+        // 取得當前難度的 Boss 戰參數
+        const bossParams = BOSS_BATTLE_CONFIG[state.difficultyMode] || BOSS_BATTLE_CONFIG['Veteran'];
+
+        // Boss 戰分數計算 (套用 bossParams.scoreMult)
+        let scoreGain = (GAME_BALANCE.COMBO[state.difficultyMode].baseScore * bossParams.scoreMult + (state.combo * 20)) * state.difficulty;
         state.score += scoreGain;
 
-        // 2. Combo 獎勵機制：Boss 戰中也能獲得道具
-        const comboThreshold = GAME_BALANCE.COMBO[state.difficultyMode].rewardThreshold;
-        if(state.combo > 0 && state.combo % comboThreshold === 0) {
-            triggerReward();
-        }
+        // 注意：移除了 Boss 戰中的一般 Combo 獎勵 triggerReward()
+        // 玩家必須依靠自己的技巧或 Boss 弱點擊破
 
-        // 3. Boss 弱點爆擊機制 (5% 機率)
-        // 觸發強烈擊退與定身，給予玩家喘息空間
-        if (Math.random() < 0.05) {
-            if (state.enemies[0]) state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.5); // 強力擊退
+        // Boss 弱點/爆擊機制 (依照難度機率)
+        if (Math.random() < bossParams.criticalChance) {
+            // 觸發強烈擊退與定身
+            if (state.enemies[0]) {
+                state.enemies[0].z = Math.max(0.1, state.enemies[0].z - bossParams.pushback);
+            }
             state.shake = 50;
-            state.freezeTimer = 60; // 定身 1 秒
+            state.freezeTimer = bossParams.stunDuration;
             
             // 顯示爆擊提示
             const toast = document.getElementById('reward-toast');
             toast.innerText = "BOSS STUNNED!";
             toast.classList.add('toast-active');
-            toast.style.color = '#f0f'; // 紫色
+            toast.style.color = '#f0f'; 
             toast.style.textShadow = '0 0 20px #f0f';
             setTimeout(() => toast.classList.remove('toast-active'), 1000);
-            sfx.reward(); // 播放獎勵音效
+            sfx.reward(); 
         } else {
-            // 普通受擊
+            // 普通受擊 (微量擊退)
             state.shake = 20; 
             if (state.enemies[0]) state.enemies[0].z = Math.max(0.2, state.enemies[0].z - 0.1); 
         }
@@ -1406,8 +1435,7 @@
         if (state.bossWordIndex >= state.bossData.words.length) {
             state.enemies[0].isDying = true; state.bossesDefeated++;
             
-            // 4. 階段獎勵：打完一句話必定補血
-            // 這對多階段 Boss 戰非常重要
+            // 階段獎勵：打完一句話必定補血 (保留)
             executeReward('RECOVER');
 
             setTimeout(() => {
@@ -1574,9 +1602,9 @@
         el.innerHTML = `
             <div class="grid grid-cols-[35%_65%] gap-1 text-[9px] uppercase tracking-wider font-bold text-left">
                 <div class="text-zinc-500">MISSION</div><div class="text-blue-400">Book ${selectedBook} - ${title}</div>
-                <div class="text-zinc-500">DIFFICULTY</div><div class="text-red-400">${state.difficultyMode}</div>
+                <div class="text-zinc-500">LEVEL</div><div class="text-red-400">${state.difficultyMode}</div>
                 <div class="text-zinc-500">UNIT</div><div class="text-white">${state.player.class}</div>
-                <div class="text-zinc-500">OPERATOR</div><div class="text-white">${state.player.no}. ${state.player.name}</div>
+                <div class="text-zinc-500">AGENT</div><div class="text-white">${state.player.no}. ${state.player.name}</div>
                 <div class="text-zinc-500">DATE</div><div class="text-zinc-400">${dateStr}</div>
             </div>
         `;
