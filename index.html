@@ -196,8 +196,6 @@
             background: rgba(255, 215, 0, 0.1); margin-bottom: 20px; display: none;
         }
 
-        /* 移除了 Debug Panel 相關 CSS */
-
         .ecg-container {
             width: 100%; height: 30px; background: #000; border: 1px solid #222;
             position: relative; overflow: hidden; display: flex; align-items: center; border-radius: 4px;
@@ -273,8 +271,6 @@
         </div>
     </div>
 
-    <!-- 移除了 Admin Choice Screen (因為已無 Debug 按鈕需求) -->
-
     <div id="admin-screen" class="overlay-screen hidden">
         <h2 class="text-blue-600 mb-4 uppercase">Archive Terminal</h2>
         <div class="admin-table-container">
@@ -287,15 +283,13 @@
         </div>
         <div class="grid grid-cols-2 gap-2 w-full max-w-sm mt-6">
             <button onclick="exportToCSV()" class="btn py-4 bg-blue-900 border-blue-600 text-white uppercase col-span-2">Export CSV Data</button>
-            <!-- 新增: GOD MODE 入口 -->
+            <!-- GOD MODE 入口 -->
             <button onclick="startGodMode()" class="btn py-4 bg-green-900 border-green-600 text-green-400 uppercase font-bold col-span-2 flicker">DEPLOY (GOD MODE)</button>
             
             <button onclick="handleClearData()" id="clear-data-btn" class="btn py-4 bg-red-950 border-red-700 text-red-500 uppercase">Clear All</button>
             <button onclick="location.reload()" class="btn py-4 bg-zinc-900 uppercase">Logout</button>
         </div>
     </div>
-
-    <!-- 移除了 Debug Panel HTML 結構 -->
 
     <div id="pause-screen" class="overlay-screen hidden">
         <h2 class="text-zinc-500 text-[10px] mb-8 uppercase tracking-widest">Training Mode (Paused)</h2>
@@ -404,12 +398,12 @@
         "https://d4cheap16.github.io/tddt/BG05.png"
     ];
 
-    /* BOSS 戰參數設定 (包含修正後的 NoHope 速度) */
+    /* BOSS 戰參數設定 */
     const BOSS_CONFIG_DATA = {
-        'Rookie':    { startZ: 0.15, speed: 0.0015, sentencesRequired: 2 },
-        'Veteran':   { startZ: 0.15, speed: 0.0016, sentencesRequired: 3 },
+        'Rookie':    { startZ: 0.10, speed: 0.0015, sentencesRequired: 2 },
+        'Veteran':   { startZ: 0.10, speed: 0.0016, sentencesRequired: 3 },
         'Nightmare': { startZ: 0.10, speed: 0.0019, sentencesRequired: 4 },
-        'NoHope':    { startZ: 0.10, speed: 0.0022, sentencesRequired: 5 } // 速度修正為 0.0022
+        'NoHope':    { startZ: 0.10, speed: 0.0022, sentencesRequired: 5 } 
     };
 
     /* BOSS 震動參數 */
@@ -434,10 +428,10 @@
     };
 
     const ENEMY_SPEEDS = {
-        'Rookie':   { min: 0.0008, max: 0.0012 },
-        'Veteran':  { min: 0.0010, max: 0.0015 },
-        'Nightmare':{ min: 0.0015, max: 0.0020 },
-        'NoHope':   { min: 0.0020, max: 0.0030 }
+        'Rookie':   { min: 0.0010, max: 0.0015 },
+        'Veteran':  { min: 0.0015, max: 0.0020 },
+        'Nightmare':{ min: 0.0020, max: 0.0025 },
+        'NoHope':   { min: 0.0025, max: 0.0030 }
     };
     
     const ENEMY_BEHAVIOR = { sprintZ: 0.75, sprintMultiplier: 1.4 };
@@ -460,7 +454,7 @@
             'Rookie':    { deathZ: 0.95 },
             'Veteran':   { deathZ: 0.90 },
             'Nightmare': { deathZ: 0.85 },
-            'NoHope':    { deathZ: 0.85 }
+            'NoHope':    { deathZ: 0.80 }
         }
     };
 
@@ -529,14 +523,13 @@
         sentencePool: [],
         damageAlpha: 0,
         damageTaken: 0
-        // debugMode 已移除
     };
 
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     let currentBookData = {};
     let selectedLesson = 1;
-    let selectedBook = 1;
+    let selectedBook = 1; 
     let wakeLock = null;
     let clearConfirm = false; 
 
@@ -551,7 +544,7 @@
 
     function initUI() {
         document.getElementById('book-grid').innerHTML = [1,2,3,4,5].map(i => 
-            `<button onclick="selectBook(${i})" class="btn book-btn ${i===4?'book-active':''}" id="b${i}">${['I','II','III','IV','V'][i-1]}</button>`).join('');
+            `<button onclick="selectBook(${i})" class="btn book-btn ${i===1?'book-active':''}" id="b${i}">${['I','II','III','IV','V'][i-1]}</button>`).join('');
         refreshLessonGrid();
         loadSavedProfile();
         randomizeBackground(); 
@@ -665,7 +658,7 @@
             targetDisplay.classList.add('text-red-500');
         }
     }
-    loadBookData(4);
+    loadBookData(1);
 
     window.confirmMission = () => {
         document.getElementById('mission-screen').classList.add('hidden');
@@ -680,7 +673,6 @@
     window.handleAuth = async () => {
         const nameInput = document.getElementById('input-name').value.trim();
         if(nameInput === ADMIN_KEY) {
-            // 管理員登入後，直接進入 Admin Screen 查看資料或開始無敵模式
             document.getElementById('login-screen').classList.add('hidden');
             showAdmin();
             return;
@@ -772,7 +764,6 @@
         document.body.removeChild(link);
     };
 
-    // 新增：GOD MODE 啟動函式
     window.startGodMode = () => {
         document.getElementById('admin-screen').classList.add('hidden');
         state.player = { name: ADMIN_KEY, no: "00", class: "GOD MODE" };
@@ -1119,7 +1110,6 @@
                 }
 
                 if (state.player.name === ADMIN_KEY) {
-                    // 顯示 GOD MODE 字樣
                     ctx.font = `8px monospace`; ctx.fillStyle = "#0f0"; ctx.textAlign = "center";
                     ctx.fillText(`GOD MODE: ON`, 0, -size * 1.6);
                 }
@@ -1183,7 +1173,6 @@
         state.hp = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP;
         if (!keepScore) state.score = 0; 
         state.kills = 0; 
-        // 重置累積數
         state.bossSentencesCleared = 0;
         state.combo = 0; state.freezeTimer = 0;
         state.enemies = []; state.particles = []; 
@@ -1192,7 +1181,6 @@
         document.getElementById('boss-ui').style.opacity = '0';
         document.getElementById('perfect-badge').style.display = 'none'; 
         updateUIPanel();
-        // 移除了 Debug Panel 顯示邏輯
         requestWakeLock(); handleResize(); initSpeech(); requestAnimationFrame(gameLoop);
         sfx.init();
     }
@@ -1279,7 +1267,7 @@
 
     function startBossBattle() {
         state.bossMode = true; 
-        state.bossSentencesCleared = 0; // 重置已完成句數
+        state.bossSentencesCleared = 0; 
 
         const bConfig = BOSS_CONFIG_DATA[state.difficultyMode] || BOSS_CONFIG_DATA['Veteran'];
         state.bossSentencesRequired = bConfig.sentencesRequired;
@@ -1386,19 +1374,18 @@
     function triggerDamage() {
         const survivalConfig = GAME_BALANCE.SURVIVAL[state.difficultyMode];
         
-        // --- GOD MODE 實作區 ---
-        // 1. 如果是 AdaWong (ADMIN_KEY)，只播放音效和畫面震動
-        // 2. 不扣除 HP，不重置 Combo，不造成死亡
+        // --- GOD MODE 實作區 (修正後) ---
+        // 當 BOSS 觸碰玩家時，將其大幅彈回，避免「卡在臉上」的靜止錯覺。
         if (state.player.name === ADMIN_KEY) {
             state.shake = 10; 
             sfx.damage(); 
-            state.damageAlpha = 0.5; // 稍微紅閃一下
+            state.damageAlpha = 0.5; 
             
-            // 輕微推後敵人，避免穿模太嚴重，保持測試可視性
             if (state.bossMode && state.enemies[0]) {
-                state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.05);
+                // [修改] 將 0.05 改為 0.5，大幅擊退
+                state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.5);
             }
-            return; // 這裡直接返回，跳過下方的扣血邏輯
+            return; 
         }
 
         // --- 一般玩家邏輯 ---
