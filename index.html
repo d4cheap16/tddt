@@ -446,13 +446,12 @@
         "https://d4cheap16.github.io/tddt/BG05.png"
     ];
 
-    /* --- BOSS 戰參數設定區 (速度已大幅調快) --- */
+    /* --- BOSS 戰參數設定區 (已調整起始距離與速度平衡) --- */
     const BOSS_CONFIG_DATA = {
-        // [參數調整]: speed 數值越大，BOSS 移動越快
-        'Rookie':    { startZ: 0.50, speed: 0.0020, sentencesRequired: 2 }, 
-        'Veteran':   { startZ: 0.55, speed: 0.0030, sentencesRequired: 3 },
-        'Nightmare': { startZ: 0.60, speed: 0.0040, sentencesRequired: 4 },
-        'NoHope':    { startZ: 0.65, speed: 0.0055, sentencesRequired: 6 }
+        'Rookie':    { startZ: 0.30, speed: 0.0008, sentencesRequired: 1 }, 
+        'Veteran':   { startZ: 0.25, speed: 0.0012, sentencesRequired: 2 },
+        'Nightmare': { startZ: 0.20, speed: 0.0018, sentencesRequired: 3 },
+        'NoHope':    { startZ: 0.10, speed: 0.0025, sentencesRequired: 5 }
     };
 
     const BOSS_BEHAVIOR = { 
@@ -497,7 +496,7 @@
             'Rookie':    { deathZ: 0.95, bossShakeZ: 0.5 },
             'Veteran':   { deathZ: 0.90, bossShakeZ: 0.4 },
             'Nightmare': { deathZ: 0.85, bossShakeZ: 0.3 },
-            'NoHope':    { deathZ: 0.85, bossShakeZ: 0.2 }
+            'NoHope':    { deathZ: 0.80, bossShakeZ: 0.2 }
         }
     };
 
@@ -1382,8 +1381,21 @@
             }
         });
         
-        // 血條顯示當前句子的進度
-        document.getElementById('boss-hp-bar').style.width = (100 - (state.bossWordIndex/state.bossData.words.length*100)) + '%';
+        // --- 修正血條顯示邏輯：計算總體進度 ---
+        // 總共需要完成的句子數: state.bossSentencesRequired
+        // 已經完成的句子數: state.bossSentencesCleared
+        // 當前句子的進度: state.bossWordIndex / state.bossData.words.length
+        
+        const totalSegments = state.bossSentencesRequired;
+        const clearedSegments = state.bossSentencesCleared;
+        const currentSegmentProgress = state.bossWordIndex / state.bossData.words.length;
+        
+        // 總完成比例 = (已完成完整句 + 當前句進度) / 總句數
+        const totalProgress = (clearedSegments + currentSegmentProgress) / totalSegments;
+        
+        // 血條寬度 = (1 - 總完成比例) * 100%
+        const hpBarWidth = Math.max(0, (1 - totalProgress) * 100);
+        document.getElementById('boss-hp-bar').style.width = hpBarWidth + '%';
         
         // 更新階段指示器文字
         const phaseEl = document.getElementById('boss-phase-display');
