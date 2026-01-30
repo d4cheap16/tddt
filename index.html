@@ -150,15 +150,16 @@
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
         }
 
-        /* 修改：BOSS UI 移動到下方 */
         #boss-ui {
             position: absolute; 
-            bottom: 20px; /* 從 top 改為 bottom，使其位於 Canvas 底部 */
+            /* 修改：將 BOSS UI 從 bottom: 20px 往上提，對齊 Canvas 底部 */
+            bottom: 36%; 
             left: 0; width: 100%;
             display: flex; flex-direction: column; align-items: center;
             pointer-events: none; transition: opacity 0.5s; opacity: 0;
             z-index: 150;
-            padding-bottom: 10px;
+            /* 增加底部 padding 讓它懸浮在 UI 面板上方 */
+            padding-bottom: 20px;
         }
         .boss-word-active { color: #0f0; text-shadow: 0 0 10px #0f0; transform: scale(1.05); }
 
@@ -340,7 +341,6 @@
     </div>
 
     <div id="boss-ui" class="px-5 w-full">
-        <!-- 修改：增加階段顯示，讓玩家知道還要打幾句 -->
         <div id="boss-phase-display" class="text-center text-[8px] text-red-500 font-bold mb-1 tracking-widest">THREAT LEVEL MAX</div>
         <div class="w-full bg-zinc-900 h-3 border-2 border-white mb-2 overflow-hidden rounded-full">
             <div id="boss-hp-bar" class="h-full bg-red-600 transition-all duration-300" style="width: 100%"></div>
@@ -443,10 +443,10 @@
        3. sentencesRequired: 需要念完幾句才能殺死 BOSS (累積血量制).
     */
     const BOSS_CONFIG_DATA = {
-        'Rookie':    { startZ: 0.30, speed: 0.0006, sentencesRequired: 1 },
-        'Veteran':   { startZ: 0.35, speed: 0.0009, sentencesRequired: 2 },
-        'Nightmare': { startZ: 0.40, speed: 0.0012, sentencesRequired: 3 },
-        'NoHope':    { startZ: 0.45, speed: 0.0016, sentencesRequired: 5 }
+        'Rookie':    { startZ: 0.25, speed: 0.0012, sentencesRequired: 1 },
+        'Veteran':   { startZ: 0.20, speed: 0.0018, sentencesRequired: 2 },
+        'Nightmare': { startZ: 0.15, speed: 0.0024, sentencesRequired: 3 },
+        'NoHope':    { startZ: 0.10, speed: 0.0032, sentencesRequired: 5 }
     };
 
     const BOSS_BEHAVIOR = { 
@@ -478,8 +478,8 @@
         COMBO: {
             'Rookie':    { rewardThreshold: 5, criticalChance: 0.05, baseScore: 100, comboMultiplier: 10 },
             'Veteran':   { rewardThreshold: 7, criticalChance: 0.04, baseScore: 150, comboMultiplier: 15 },
-            'Nightmare': { rewardThreshold: 9, criticalChance: 0.03, baseScore: 200, comboMultiplier: 20 },
-            'NoHope':    { rewardThreshold: 10, criticalChance: 0.01, baseScore: 300, comboMultiplier: 30 }
+            'Nightmare': { rewardThreshold: 10, criticalChance: 0.03, baseScore: 200, comboMultiplier: 20 },
+            'NoHope':    { rewardThreshold: 15, criticalChance: 0.01, baseScore: 300, comboMultiplier: 30 }
         },
         SURVIVAL: {
             'Rookie':    { maxHP: 6, damageShake: 20 },
@@ -487,7 +487,15 @@
             'Nightmare': { maxHP: 4, damageShake: 45 },
             'NoHope':    { maxHP: 3, damageShake: 60 }
         },
-        DISTANCE_THRESHOLDS: { deathZ: 0.9, bossShakeZ: 0.4 }
+        // [新增] 獨立的判定距離設定
+        // deathZ: 攻擊判定距離 (0.0~1.0)，越小代表離玩家越遠就會判定攻擊。
+        // bossShakeZ: BOSS 引發地震的距離 (0.0~1.0)，越小代表越早開始震動。
+        THRESHOLDS: {
+            'Rookie':    { deathZ: 0.95, bossShakeZ: 0.5 },
+            'Veteran':   { deathZ: 0.90, bossShakeZ: 0.4 },
+            'Nightmare': { deathZ: 0.85, bossShakeZ: 0.3 },
+            'NoHope':    { deathZ: 0.85, bossShakeZ: 0.2 }
+        }
     };
 
     const REWARD_CONFIG = {
@@ -921,7 +929,9 @@
                      this.z += s;
                 }
             }
-            return this.z >= GAME_BALANCE.DISTANCE_THRESHOLDS.deathZ;
+            // 讀取當前難度的判定參數
+            const thresholds = GAME_BALANCE.THRESHOLDS[state.difficultyMode] || GAME_BALANCE.THRESHOLDS['Veteran'];
+            return this.z >= thresholds.deathZ;
         }
         draw(ctx, w, h, isClosest) {
             const wobbleX = Math.sin(Date.now() * 0.004 + this.wobbleSeed) * 10 * this.z;
@@ -1445,8 +1455,10 @@
             state.shake *= 0.88; if(state.shake < 0.5) state.shake = 0;
         }
         const boss = state.enemies.find(e => e.isBoss);
-        if (state.bossMode && boss && boss.z > GAME_BALANCE.DISTANCE_THRESHOLDS.bossShakeZ) {
-            const proximityIntensity = (boss.z - GAME_BALANCE.DISTANCE_THRESHOLDS.bossShakeZ) * 20; 
+        const thresholds = GAME_BALANCE.THRESHOLDS[state.difficultyMode] || GAME_BALANCE.THRESHOLDS['Veteran']; // Get current thresholds
+        
+        if (state.bossMode && boss && boss.z > thresholds.bossShakeZ) {
+            const proximityIntensity = (boss.z - thresholds.bossShakeZ) * 20; 
             const shakeY = (Math.random() - 0.5) * proximityIntensity;
             ctx.translate(0, shakeY);
         }
