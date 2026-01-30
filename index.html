@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <!-- 修改路徑：VoiceoftheDEAD -> tddt -->
     <link rel="icon" href="https://d4cheap16.github.io/tddt/zombie.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,7 +9,6 @@
     <meta name="description" content="Want to Survive? Speak!">
     <meta property="og:title" content="Dead don't talk, but you do.">
     <meta property="og:description" content="用聲音在末日中生存。">
-    <!-- 修改路徑：VoiceoftheDEAD -> tddt -->
     <meta property="og:image" content="https://d4cheap16.github.io/tddt/opentag.png">
     <meta property="og:type" content="website">
 
@@ -477,6 +475,40 @@
         "https://d4cheap16.github.io/tddt/BG04.png",
         "https://d4cheap16.github.io/tddt/BG05.png"
     ];
+
+    const BOSS_QUOTAS = { 'Rookie': 1, 'Veteran': 2, 'Nightmare': 3, 'NoHope': 5 };
+
+    // 提高 Boss 基礎速度
+    const BOSS_SPEEDS = {
+        'Rookie': 0.0008,    
+        'Veteran': 0.0012,   
+        'Nightmare': 0.0018, 
+        'NoHope': 0.0025     
+    };
+
+    // 新增：一般敵人行為參數 (控制最後衝刺)
+    const ENEMY_BEHAVIOR = {
+        sprintZ: 0.75,       // 當距離 > 0.75 時開始衝刺
+        sprintMultiplier: 1.4 // 速度提升 1.5 倍
+    };
+
+    const BOSS_BEHAVIOR = {
+        sprintZ: 0.4, 
+        sprintMultiplier: 2.0, 
+        pushback: {
+            'Rookie': 0.5,    
+            'Veteran': 0.6,   
+            'Nightmare': 0.7, 
+            'NoHope': 0.8     
+        }
+    };
+
+    const ENEMY_SPEEDS = {
+        'Rookie':   { min: 0.0008, max: 0.0012 },
+        'Veteran':  { min: 0.0010, max: 0.0015 },
+        'Nightmare':{ min: 0.0015, max: 0.0020 },
+        'NoHope':   { min: 0.0020, max: 0.0030 }
+    };
     
     // --- 遊戲平衡設定表 (GAME_BALANCE) ---
     // 修改：將 COMBO 與 SURVIVAL 拆分為依照難度設定
@@ -492,8 +524,8 @@
         // Combo 與分數系統 (Per Difficulty)
         COMBO: {
             'Rookie':    { rewardThreshold: 5, criticalChance: 0.05, baseScore: 100, comboMultiplier: 10 },
-            'Veteran':   { rewardThreshold: 7, criticalChance: 0.03, baseScore: 150, comboMultiplier: 12 },
-            'Nightmare': { rewardThreshold: 10, criticalChance: 0.02, baseScore: 200, comboMultiplier: 20 },
+            'Veteran':   { rewardThreshold: 7, criticalChance: 0.04, baseScore: 150, comboMultiplier: 15 },
+            'Nightmare': { rewardThreshold: 10, criticalChance: 0.03, baseScore: 200, comboMultiplier: 20 },
             'NoHope':    { rewardThreshold: 15, criticalChance: 0.01, baseScore: 300, comboMultiplier: 30 }
         },
         
@@ -512,51 +544,6 @@
         }
     };
 
-    const BOSS_QUOTAS = { 'Rookie': 2, 'Veteran': 3, 'Nightmare': 4, 'NoHope': 5 };
-
-    // 進入 BOSS 戰所需的殺敵數 (累積殺敵達到此數值時召喚 BOSS)
-    const BOSS_TRIGGER_KILLS = {
-        'Rookie': 10,    
-        'Veteran': 15,   
-        'Nightmare': 20, 
-        'NoHope': 30     
-    };
-
-    // BOSS 基礎速度
-    const BOSS_SPEEDS = {
-        'Rookie': 0.0008,    
-        'Veteran': 0.0012,   
-        'Nightmare': 0.0018, 
-        'NoHope': 0.0020     
-    };
-
-    // Boss 行為參數 (衝刺與擊退)
-    const BOSS_BEHAVIOR = {
-        sprintZ: 0.4, 
-        sprintMultiplier: 3.0, 
-        pushback: {
-            'Rookie': 0.5,    
-            'Veteran': 0.6,   
-            'Nightmare': 0.7, 
-            'NoHope': 0.8     
-        }
-    };
-
-    // 一般敵人基礎速度範圍
-    const ENEMY_SPEEDS = {
-        'Rookie':   { min: 0.0005, max: 0.0010 },
-        'Veteran':  { min: 0.0008, max: 0.0015 },
-        'Nightmare':{ min: 0.0012, max: 0.0018 },
-        'NoHope':   { min: 0.0020, max: 0.0025 }
-    };
-    
-    // 一般敵人行為參數 (衝刺)
-    const ENEMY_BEHAVIOR = {
-        sprintZ: 0.75,       // 當距離 > 0.75 時開始衝刺
-        sprintMultiplier: 1.5 // 速度提升
-    };
-
-    // 獎勵效果設定 (文字、顏色、震動等)
     const REWARD_CONFIG = {
         'RECOVER': {
             text: "RECOVER!",
@@ -606,6 +593,14 @@
                 state.shake = 60; 
             } 
         }
+    };
+    
+    // 進入 BOSS 戰所需的殺敵數 (累積殺敵達到此數值時召喚 BOSS)
+    const BOSS_TRIGGER_KILLS = {
+        'Rookie': 10,    
+        'Veteran': 15,   
+        'Nightmare': 20, 
+        'NoHope': 30     
     };
 
     // --- 8-bit 音效系統 ---
@@ -1227,11 +1222,51 @@
     }
 
     function hitBoss() {
-        state.bossWordIndex++; state.shake = 20; createExplosion(state.enemies[0]); sfx.kill();
-        if (state.enemies[0]) state.enemies[0].z = Math.max(0.2, state.enemies[0].z - 0.1); 
+        state.bossWordIndex++; 
+        
+        // 1. 累積 Combo 與分數
+        state.combo++;
+        // Boss 戰分數加倍
+        let scoreGain = (GAME_BALANCE.COMBO[state.difficultyMode].baseScore * 2 + (state.combo * 20)) * state.difficulty;
+        state.score += scoreGain;
+
+        // 2. Combo 獎勵機制：Boss 戰中也能獲得道具
+        const comboThreshold = GAME_BALANCE.COMBO[state.difficultyMode].rewardThreshold;
+        if(state.combo > 0 && state.combo % comboThreshold === 0) {
+            triggerReward();
+        }
+
+        // 3. Boss 弱點爆擊機制 (5% 機率)
+        // 觸發強烈擊退與定身，給予玩家喘息空間
+        if (Math.random() < 0.05) {
+            if (state.enemies[0]) state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.5); // 強力擊退
+            state.shake = 50;
+            state.freezeTimer = 60; // 定身 1 秒
+            
+            // 顯示爆擊提示
+            const toast = document.getElementById('reward-toast');
+            toast.innerText = "BOSS STUNNED!";
+            toast.classList.add('toast-active');
+            toast.style.color = '#f0f'; // 紫色
+            toast.style.textShadow = '0 0 20px #f0f';
+            setTimeout(() => toast.classList.remove('toast-active'), 1000);
+            sfx.reward(); // 播放獎勵音效
+        } else {
+            // 普通受擊
+            state.shake = 20; 
+            if (state.enemies[0]) state.enemies[0].z = Math.max(0.2, state.enemies[0].z - 0.1); 
+        }
+
+        createExplosion(state.enemies[0]); 
+        sfx.kill();
+        
         if (state.bossWordIndex >= state.bossData.words.length) {
             state.enemies[0].isDying = true; state.bossesDefeated++;
             
+            // 4. 階段獎勵：打完一句話必定補血
+            // 這對多階段 Boss 戰非常重要
+            executeReward('RECOVER');
+
             setTimeout(() => {
                 const required = BOSS_QUOTAS[state.difficultyMode] || 1;
                 
@@ -1398,7 +1433,7 @@
                 <div class="text-zinc-500">MISSION</div><div class="text-blue-400">Book ${selectedBook} - ${title}</div>
                 <div class="text-zinc-500">DIFFICULTY</div><div class="text-red-400">${state.difficultyMode}</div>
                 <div class="text-zinc-500">UNIT</div><div class="text-white">${state.player.class}</div>
-                <div class="text-zinc-500">AGENT</div><div class="text-white">${state.player.no}. ${state.player.name}</div>
+                <div class="text-zinc-500">OPERATOR</div><div class="text-white">${state.player.no}. ${state.player.name}</div>
                 <div class="text-zinc-500">DATE</div><div class="text-zinc-400">${dateStr}</div>
             </div>
         `;
