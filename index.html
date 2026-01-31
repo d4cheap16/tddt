@@ -575,6 +575,7 @@
         }
     };
 
+    // ★★★ FIX: 修正數值並確保被執行 ★★★
     const REWARD_CONFIG = {
         'RECOVER': {
             text: "LET ME HELP YOU!", textColor: "#6ee7b7", borderColor: "#6ee7b7", boxShadow: "none", 
@@ -582,11 +583,12 @@
             effect: (state) => { const maxHP = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP; state.hp = Math.min(maxHP, state.hp + 1); }
         },
         'FLASH': {
-            text: "PRESENT FOR YOU!", textColor: "#67e8f9", boxShadow: "none", overlayColor: "rgba(255, 255, 255, 0.4)", overlayDuration: 1000, 
+            text: "PRESENT FOR YOU!", textColor: "#67e8f9", boxShadow: "none", overlayColor: "rgba(255, 255, 255, 0.6)", overlayDuration: 1200, 
             effect: (state) => { state.freezeTimer = 180; state.shake = 50; } 
         },
         'SHOTGUN': {
-            text: "STAY BACK!", textColor: "#fbbf24", boxShadow: "none", overlayColor: "rgba(255, 200, 50, 0.6)", overlayDuration: 300, 
+            // ★★★ FIX: 增加 overlayDuration 到 250ms (原 100ms 太快看不見) ★★★
+            text: "STAY BACK!", textColor: "#fbbf24", boxShadow: "none", overlayColor: "rgba(255, 200, 50, 0.6)", overlayDuration: 250, 
             effect: (state) => { state.enemies.forEach(e => { if (!e.isDying) e.z = Math.max(0, e.z - 0.4); }); state.shake = 60; state.freezeTimer = 60; }
         },
         'CRITICAL': {
@@ -970,7 +972,9 @@
         overlay.style.backgroundColor = conf.overlayColor;
         overlay.style.opacity = key === 'FLASH' ? "1" : "0.8"; 
         if (conf.effect) conf.effect(state);
-        setTimeout(() => { overlay.style.opacity = "0"; }, key === 'SHOTGUN' ? 100 : (key === 'FLASH' ? 1500 : 600)); 
+        // ★★★ FIX: 使用 Config 的正確時間，而非寫死的值 ★★★
+        setTimeout(() => { overlay.style.opacity = "0"; }, conf.overlayDuration);
+        
         setTimeout(() => {
             toast.classList.remove('toast-active'); toast.classList.remove('flicker');
             setTimeout(() => { toast.style.color = '#fff'; toast.style.textShadow = '0 0 10px #000'; overlay.style.backgroundColor = 'white'; }, 500);
