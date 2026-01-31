@@ -443,15 +443,17 @@
         'Rookie':    { startZ: 0.10, speed: 0.0015, sentencesRequired: 2 },
         'Veteran':   { startZ: 0.10, speed: 0.0016, sentencesRequired: 3 },
         'Nightmare': { startZ: 0.10, speed: 0.0019, sentencesRequired: 4 },
-        'NoHope':    { startZ: 0.40, speed: 0.0007, sentencesRequired: 5 } 
+        // NoHope: 巨人調整 - 起始距離近(0.4=壓迫感)，速度極慢(0.0006=巨大感)，血量厚(5句)
+        'NoHope':    { startZ: 0.40, speed: 0.0006, sentencesRequired: 5 } 
     };
 
     /* BOSS 震動參數 */
     const BOSS_SHAKE_CONFIG = {
         'Rookie':    { startZ: 0.5, intensity: 10, axis: 'Y' },
         'Veteran':   { startZ: 0.4, intensity: 20, axis: 'Y' },
-        'Nightmare': { startZ: 0.3, intensity: 70, axis: 'XY' },
-        'NoHope':    { startZ: 0.2, intensity: 100, axis: 'XY' }
+        'Nightmare': { startZ: 0.3, intensity: 40, axis: 'XY' },
+        // NoHope: 強度提升至 80，配合近距離起始，製造強烈地震感
+        'NoHope':    { startZ: 0.2, intensity: 80, axis: 'XY' }
     };
 
     const BOSS_BEHAVIOR = { 
@@ -1272,7 +1274,7 @@
 
     let lastMatchedWord = "";
     let lastMatchTime = 0; 
-    const REPEAT_COOLDOWN = 500; 
+    const REPEAT_COOLDOWN = 250; 
 
     function processCommand(text) {
         const clean = (s) => s.replace(/[.,!?]/g, "").trim().toLowerCase();
@@ -1294,21 +1296,33 @@
                 hitBoss(); 
             }
         } else {
-            // ★★★ FIX: 更嚴格的比對 ★★★
+            // ★★★ FIX: 多重擊殺與嚴格比對 ★★★
+            // 找出所有符合條件的敵人（不只是第一個）
             const matchedEnemies = state.enemies.filter(e => {
                 if (e.isDying) return false;
                 const target = clean(e.word);
-                // 檢查是否是完整單字匹配 (例如防止 'wait' 觸發 'it')
                 const regex = new RegExp(`(^|\\s)${target}($|\\s)`);
                 return regex.test(input) || input === target;
             });
 
             if (matchedEnemies.length > 0) {
-                matchedEnemies.sort((a,b) => b.z - a.z); // 優先打最近的
-                const target = matchedEnemies[0];
-                lastMatchedWord = clean(target.word);
-                lastMatchTime = now; 
-                killEnemy(state.enemies.indexOf(target));
+                // 優先處理距離近的
+                matchedEnemies.sort((a,b) => b.z - a.z);
+                
+                // 為了避免一次語音只殺一隻（當輸入是一串字時），
+                // 我們嘗試擊殺所有匹配到的不同單字。
+                // Set 用來確保同一個單字在同一次指令中只殺一隻（避免過於簡單，維持平衡）。
+                const killedWords = new Set();
+                
+                matchedEnemies.forEach(target => {
+                    const wordKey = clean(target.word);
+                    if (!killedWords.has(wordKey)) {
+                        killEnemy(state.enemies.indexOf(target));
+                        killedWords.add(wordKey);
+                        lastMatchedWord = wordKey; // 更新最後匹配單字
+                        lastMatchTime = now;
+                    }
+                });
             }
         }
     }
