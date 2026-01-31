@@ -85,6 +85,7 @@
             height: 35%; width: 100%; background: #050505;
             padding: 10px 15px; display: grid; grid-template-rows: auto 1fr auto; 
             gap: 8px; z-index: 50; box-sizing: border-box;
+            position: relative; /* 為了讓 Footer 定位參考 */
         }
 
         select, input {
@@ -206,6 +207,38 @@
             stroke-dasharray: 200; stroke-dashoffset: 200; animation: dash 2s linear infinite;
         }
         @keyframes dash { to { stroke-dashoffset: 0; } }
+
+        /* ★★★ Footer 樣式 ★★★ */
+        .game-credits {
+            position: absolute;
+            bottom: 4px;          /* 距離底部 4px */
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 200;         /* 顯示在最上層 */
+            pointer-events: none; /* 關鍵：讓點擊穿透，不影響遊戲按鈕 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;         /* 微透明 */
+        }
+
+        .game-credits img {
+            width: 24px;          /* 縮小 logo */
+            height: auto;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 0 2px #000);
+        }
+
+        .game-credits p {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 6px;       /* 縮小字體 */
+            color: #666;          /* 深灰色 */
+            margin: 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 2px #000;
+        }
     </style>
 </head>
 <body class="crt">
@@ -365,6 +398,13 @@
             <button onclick="location.reload()" class="btn py-4 uppercase">Retreat</button>
         </div>
     </div>
+
+    <!-- ★★★ Footer 已移至此處 (game-wrapper 內部) ★★★ -->
+    <div class="game-credits">
+        <img src="https://d4cheap16.github.io/tddt/Gemini.png" alt="Google Gemini Logo">
+        <p>Designed by CHENWEI with Gemini</p>
+    </div>
+
 </div>
 
 <script type="module">
@@ -1571,12 +1611,5 @@
 
     window.addEventListener('resize', handleResize);
 </script>
-    <footer class="site-footer">
-        <span>Designed by CHENWEI with</span>
-        <span>
-            Gemini
-            <img src="https://d4cheap16.github.io/tddt/Gemini.png" alt="Google Gemini Logo" class="footer-logo">
-        </span>
-    </footer>
 </body>
 </html>
