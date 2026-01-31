@@ -464,7 +464,7 @@
         'Veteran':   { startZ: 0.4, intensity: 20, axis: 'Y' },
         'Nightmare': { startZ: 0.3, intensity: 70, axis: 'XY' },
         // NoHope: 強度提升至 80，配合近距離起始，製造強烈地震感
-        'NoHope':    { startZ: 0.2, intensity: 100, axis: 'XY' }
+        'NoHope':    { startZ: 0.2, intensity: 90, axis: 'XY' }
     };
 
     const BOSS_BEHAVIOR = { 
@@ -1378,7 +1378,7 @@
         setTimeout(() => {
             warningEl.classList.add('hidden');
             initiateBossEncounter();
-        }, 2000);
+        }, 3000);
     }
 
     function initiateBossEncounter() {
