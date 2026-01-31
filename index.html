@@ -577,20 +577,20 @@
 
     const REWARD_CONFIG = {
         'RECOVER': {
-            text: "RELAX!", textColor: "#6ee7b7", borderColor: "#6ee7b7", boxShadow: "none", 
-            overlayColor: "rgba(110, 231, 183, 0.4)", overlayDuration: 600, 
+            text: "LET ME HELP YOU!", textColor: "#6ee7b7", borderColor: "#6ee7b7", boxShadow: "none", 
+            overlayColor: "rgba(110, 231, 183, 0.4)", overlayDuration: 300, 
             effect: (state) => { const maxHP = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP; state.hp = Math.min(maxHP, state.hp + 1); }
         },
         'FLASH': {
-            text: "PRESENT FOR YOU!", textColor: "#67e8f9", boxShadow: "none", overlayColor: "rgba(255, 255, 255, 0.4)", overlayDuration: 1500, 
+            text: "PRESENT FOR YOU!", textColor: "#67e8f9", boxShadow: "none", overlayColor: "rgba(255, 255, 255, 0.4)", overlayDuration: 1000, 
             effect: (state) => { state.freezeTimer = 180; state.shake = 50; } 
         },
         'SHOTGUN': {
-            text: "STAY BACK!", textColor: "#fbbf24", boxShadow: "none", overlayColor: "rgba(255, 200, 50, 0.6)", overlayDuration: 100, 
+            text: "STAY BACK!", textColor: "#fbbf24", boxShadow: "none", overlayColor: "rgba(255, 200, 50, 0.6)", overlayDuration: 300, 
             effect: (state) => { state.enemies.forEach(e => { if (!e.isDying) e.z = Math.max(0, e.z - 0.4); }); state.shake = 60; state.freezeTimer = 60; }
         },
         'CRITICAL': {
-            text: "I NEVER MISS!", textColor: "#d946ef", boxShadow: "none", overlayColor: "rgba(217, 70, 239, 0.6)", overlayDuration: 800,
+            text: "I NEVER MISS!", textColor: "#d946ef", boxShadow: "none", overlayColor: "rgba(217, 70, 239, 0.6)", overlayDuration: 700,
             effect: (state) => { const maxHP = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP; state.hp = maxHP; state.shake = 60; } 
         }
     };
