@@ -93,9 +93,13 @@
             border: 1px solid #333 !important;
             color: #0f0 !important;
             padding: 12px !important;
-            font-size: 10px !important;
+            /* FIX: iOS Zoom Issue - 手機上保持 16px 防止放大 */
+            font-size: 16px !important; 
+            transform: scale(0.8); /* 視覺上縮小以符合復古感 */
+            transform-origin: left center;
+            width: 125% !important; /* 補償 scale 縮小造成的寬度損失 */
+            
             margin: 4px 0 !important;
-            width: 100% !important;
             border-radius: 4px !important;
             font-family: 'Press Start 2P', 'Noto Sans TC', sans-serif !important;
             outline: none;
@@ -442,43 +446,13 @@
 <script>
     const ADMIN_KEY = "AdaWong";
     
-    // ★★★ FIX 1: 定義缺失的 BGS (背景圖) 陣列，避免 ReferenceError ★★★
-    // 這裡使用一些暗色系的 placeholder 圖片
+    // ★★★ FIX 1: 永久修復 BGS (ReferenceError) ★★★
+    // 這是原本導致程式崩潰的主因。即使有 JSON，沒有這些圖片變數也會掛掉。
     const BGS = [
         "https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=800&auto=format&fit=crop", // Dark hallway
         "https://images.unsplash.com/photo-1518562180175-34a163b1a9a6?q=80&w=800&auto=format&fit=crop", // Misty forest
         "https://images.unsplash.com/photo-1505506874110-6a7a69069a08?q=80&w=800&auto=format&fit=crop"  // Spooky lights
     ];
-
-    // ★★★ FIX 2: 內建模擬的書籍資料 (Mock Data) ★★★
-    // 這是因為預覽環境無法 fetch 本地 JSON 檔案。
-    // 如果你有真實的 book1.json，請將其內容貼到這裡，或者在正式上線時恢復 fetch 邏輯。
-    const embeddedBookData = {
-        "L1": {
-            "title": "Welcome to Hell",
-            "stages": {
-                "1": ["zombie", "run", "dead", "blood", "fear", "dark", "help", "pain", "kill", "fire"],
-                "2": ["Stay calm and shoot", "Don't look back", "Aim for the head"]
-            }
-        },
-        "L2": {
-            "title": "The Hospital",
-            "stages": {
-                "1": ["nurse", "needle", "bed", "sick", "virus", "ward", "pill", "cure", "doc", "wait"],
-                "2": ["The infection spreads", "Lock the doors now", "She is not sleeping"]
-            }
-        },
-        "L3": {
-            "title": "Abandoned School",
-            "stages": {
-                "1": ["book", "desk", "class", "pen", "bell", "exam", "fail", "read", "math", "art"],
-                "2": ["Class is over forever", "Teacher became a monster", "No running in halls"]
-            }
-        },
-        "L4": { "title": "Dark City", "stages": { "1": ["road", "car", "sign", "lamp"], "2": ["City is fallen"] } },
-        "L5": { "title": "Final Stand", "stages": { "1": ["gun", "ammo", "wall", "gate"], "2": ["We fight or die"] } },
-        "L6": { "title": "Bonus Stage", "stages": { "1": ["extra", "gold", "plus", "win"], "2": ["You found the secret"] } },
-    };
 
     /* BOSS 戰參數設定 */
     const BOSS_CONFIG_DATA = {
@@ -691,27 +665,27 @@
         try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
     }
 
-    // ★★★ FIX 3: 修改 loadBookData 改用本地資料 (Embedded) ★★★
-    // 原始 fetch 邏輯在沒有伺服器時會失敗
+    // ★★★ FIX 2: 恢復 Fetch 但加入快取防止 (Timestamp) ★★★
     async function loadBookData(n) {
         selectedBook = n;
         try {
-            // 原本的程式碼:
-            // const res = await fetch(`book${n}.json`);
-            // currentBookData = await res.json();
+            // 加入 timestamp 以避免 GitHub Pages 的快取問題，確保玩家讀到最新題目
+            const timestamp = new Date().getTime();
+            const res = await fetch(`book${n}.json?t=${timestamp}`);
             
-            // 修改後 (使用假資料模擬):
-            console.log(`Loading Book ${n} (Simulated)`);
+            if (!res.ok) throw new Error("File not found");
             
-            // 為了示範，不管選哪本書都載入同一組 embeddedBookData
-            // 如果你有不同書的資料，可以建立 embeddedBookData1, embeddedBookData2 等等
-            currentBookData = embeddedBookData; 
-
+            currentBookData = await res.json();
+            console.log(`Loaded Book ${n} successfully`);
+            
             refreshLessonGrid();
             checkMissionValid();
         } catch(e) { 
-            console.error("Load failed:", e);
-            currentBookData = {}; refreshLessonGrid(); checkMissionValid();
+            console.error("Load failed, file might not exist yet:", e);
+            // 讀取失敗時清空數據，避免顯示錯誤的按鈕狀態
+            currentBookData = {}; 
+            refreshLessonGrid(); 
+            checkMissionValid();
         }
     }
 
