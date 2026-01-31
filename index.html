@@ -83,6 +83,33 @@
             background: transparent;
         }
 
+        /* ★★★ NEW: 槍枝容器樣式 ★★★ */
+        #weapon-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 讓點擊穿透，不影響遊戲操作 */
+            z-index: 20; /* 顯示在 Canvas 敵人之上 */
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #weapon-img {
+            image-rendering: pixelated; /* 保持像素風格 */
+            transition: transform 0.05s ease-out; /* 極短的過渡時間，讓後座力順暢 */
+            /* 預設位置微調 */
+            transform-origin: bottom center;
+        }
+
+        /* 後座力動畫 Class */
+        .recoil-kick {
+            transform: translateY(10px) scale(1.05) !important; /* 往後(下)退並稍微變大 */
+        }
+
         .ui-panel {
             height: 35%; width: 100%; background: #050505;
             padding: 10px 15px; display: grid; grid-template-rows: auto 1fr auto; 
@@ -141,7 +168,7 @@
         .diff-rookie.active-diff { background: #063d19 !important; border-color: #0f0 !important; color: #0f0 !important; box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); }
         .diff-veteran.active-diff { background: #002244 !important; border-color: #0af !important; color: #0af !important; box-shadow: 0 0 15px rgba(0, 170, 255, 0.3); }
         .diff-nightmare.active-diff { background: #330044 !important; border-color: #f0f !important; color: #f0f !important; box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); }
-        .diff-nohope.active-diff { background: #440000 !important; border-color: #f00 !important; color: #f00 !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.5); }
+        .diff-nohope.active-diff { background: #440000 !important; border-color: #f0f !important; color: #f00 !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.5); }
         
         .book-btn { border: 1px solid #333; }
         .book-active {
@@ -383,6 +410,18 @@
 
     <div class="canvas-container" id="canvas-holder">
         <canvas id="game-canvas"></canvas>
+        <!-- ★★★ NEW: 槍枝圖層 ★★★ -->
+        <div id="weapon-layer">
+            <!-- 
+                調整說明:
+                1. width: 60% -> 控制槍的大小，數字越大槍越大
+                2. transform: translateY(5%) -> 控制槍的上下位置，正值向下移，負值向上移
+            -->
+            <img id="weapon-img" 
+                 src="https://d4cheap16.github.io/tddt/gun01.png" 
+                 alt="Weapon"
+                 style="width: 60%; transform: translateY(5%);">
+        </div>
     </div>
 
     <div class="ui-panel">
@@ -456,6 +495,13 @@
         "https://d4cheap16.github.io/tddt/BG04.png", 
         "https://d4cheap16.github.io/tddt/BG05.png"
     ];
+
+    /* ★★★ NEW: 槍枝素材設定 ★★★ */
+    const GUN_ASSETS = {
+        idle: "https://d4cheap16.github.io/tddt/gun01.png",
+        fire: "https://d4cheap16.github.io/tddt/gun02.png",
+        timer: null
+    };
 
     /* BOSS 戰參數設定 */
     const BOSS_CONFIG_DATA = {
@@ -621,9 +667,39 @@
         if (holder) holder.style.backgroundImage = `url('${randomBg}')`;
     }
     
+    // ★★★ NEW: 預載圖片功能（包含背景與槍枝） ★★★
     function preloadImages() {
-        if (!BGS) return; // 保護
-        BGS.forEach(src => { const img = new Image(); img.src = src; });
+        // 預載背景
+        if (BGS) {
+            BGS.forEach(src => { const img = new Image(); img.src = src; });
+        }
+        // 預載槍枝
+        const gun1 = new Image(); gun1.src = GUN_ASSETS.idle;
+        const gun2 = new Image(); gun2.src = GUN_ASSETS.fire;
+    }
+
+    // ★★★ NEW: 開槍效果函式 ★★★
+    function triggerGunFire() {
+        const weaponImg = document.getElementById('weapon-img');
+        if (!weaponImg) return;
+
+        // 1. 切換為開槍圖片
+        weaponImg.src = GUN_ASSETS.fire;
+        
+        // 2. 加入後座力動畫 CSS Class
+        weaponImg.classList.add('recoil-kick');
+
+        // 3. 清除之前的計時器（如果連續快速射擊）
+        if (GUN_ASSETS.timer) {
+            clearTimeout(GUN_ASSETS.timer);
+        }
+
+        // 4. 設定計時器，短暫時間後回復原狀
+        GUN_ASSETS.timer = setTimeout(() => {
+            weaponImg.src = GUN_ASSETS.idle;
+            weaponImg.classList.remove('recoil-kick');
+            GUN_ASSETS.timer = null;
+        }, 150); // 150毫秒後恢復，可依喜好調整
     }
 
     function initUI() {
@@ -1406,6 +1482,8 @@
         state.score += scoreGain;
         state.kills++; 
         if(!isAuto) {
+            // ★★★ NEW: 只有玩家主動擊殺才開槍 ★★★
+            triggerGunFire();
             state.combo++;
             if(state.combo > 0 && state.combo % comboConfig.rewardThreshold === 0) triggerReward();
             if (Math.random() < comboConfig.criticalChance && !state.bossMode) triggerCriticalWipe();
@@ -1505,6 +1583,9 @@
     }
 
     function hitBoss() {
+        // ★★★ NEW: BOSS 戰擊中也開槍 ★★★
+        triggerGunFire();
+        
         state.bossWordIndex++; 
         // ★★★ CHANGE: Boss戰不累積 COMBO ★★★
         // state.combo++; 
