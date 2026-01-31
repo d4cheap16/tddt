@@ -336,7 +336,8 @@
         <h2 class="text-zinc-500 text-[10px] mb-8 uppercase tracking-widest">Training Mode (Paused)</h2>
         <div class="bg-zinc-900 border border-zinc-700 p-8 rounded-lg w-full max-w-xs mb-8 text-center">
             <p class="text-[8px] text-zinc-600 mb-4 uppercase tracking-tighter">Target Practice</p>
-            <div id="pause-target-word" class="text-white text-[16px] font-bold mb-8 tracking-widest uppercase">---</div>
+            <!-- 修正：移除 uppercase 類別，直接顯示原始文字 -->
+            <div id="pause-target-word" class="text-white text-[16px] font-bold mb-8 tracking-widest">---</div>
             <button onclick="speakTarget()" class="btn w-full bg-blue-900 text-white mb-3 py-4 font-bold uppercase">Play Voice</button>
             <button onclick="togglePause()" class="btn w-full bg-green-950 text-white py-4 font-bold uppercase">Resume</button>
         </div>
@@ -399,7 +400,8 @@
 
         <div class="flex flex-col items-center justify-center bg-zinc-900/40 rounded-lg border border-zinc-800 p-2 relative h-full">
             <p id="targeting-label" class="text-[6px] text-zinc-600 mb-1 uppercase tracking-widest">Targeting</p>
-            <div id="current-word-ui" class="text-[12px] text-center text-white font-bold tracking-wider uppercase flex flex-wrap justify-center gap-1 w-full overflow-hidden">AWAITING SIGNAL...</div>
+            <!-- 修正：移除 uppercase 類別 -->
+            <div id="current-word-ui" class="text-[12px] text-center text-white font-bold tracking-wider flex flex-wrap justify-center gap-1 w-full overflow-hidden">AWAITING SIGNAL...</div>
         </div>
         <div class="grid grid-cols-2 gap-3 mt-1">
             <button onclick="togglePause()" class="btn py-4 font-bold uppercase">Pause</button>
@@ -453,16 +455,16 @@
         'Veteran':   { startZ: 0.10, speed: 0.0016, sentencesRequired: 3 },
         'Nightmare': { startZ: 0.10, speed: 0.0019, sentencesRequired: 4 },
         // NoHope: 巨人調整 - 起始距離近(0.4=壓迫感)，速度極慢(0.0006=巨大感)，血量厚(5句)
-        'NoHope':    { startZ: 0.40, speed: 0.0006, sentencesRequired: 5 } 
+        'NoHope':    { startZ: 0.40, speed: 0.0007, sentencesRequired: 5 } 
     };
 
     /* BOSS 震動參數 */
     const BOSS_SHAKE_CONFIG = {
         'Rookie':    { startZ: 0.5, intensity: 10, axis: 'Y' },
         'Veteran':   { startZ: 0.4, intensity: 20, axis: 'Y' },
-        'Nightmare': { startZ: 0.3, intensity: 40, axis: 'XY' },
+        'Nightmare': { startZ: 0.3, intensity: 70, axis: 'XY' },
         // NoHope: 強度提升至 80，配合近距離起始，製造強烈地震感
-        'NoHope':    { startZ: 0.2, intensity: 80, axis: 'XY' }
+        'NoHope':    { startZ: 0.2, intensity: 100, axis: 'XY' }
     };
 
     const BOSS_BEHAVIOR = { 
@@ -488,18 +490,18 @@
     const ENEMY_BEHAVIOR = { sprintZ: 0.75, sprintMultiplier: 1.4 };
 
     const GAME_BALANCE = {
-        SPAWN_RATES: { 'Rookie': 2500, 'Veteran': 2200, 'Nightmare': 1800, 'NoHope': 1500 },
+        SPAWN_RATES: { 'Rookie': 2500, 'Veteran': 2200, 'Nightmare': 2000, 'NoHope': 1800 },
         COMBO: {
-            'Rookie':    { rewardThreshold: 5, criticalChance: 0.05, baseScore: 100, comboMultiplier: 10 },
-            'Veteran':   { rewardThreshold: 7, criticalChance: 0.04, baseScore: 150, comboMultiplier: 15 },
-            'Nightmare': { rewardThreshold: 10, criticalChance: 0.03, baseScore: 200, comboMultiplier: 20 },
-            'NoHope':    { rewardThreshold: 12, criticalChance: 0.01, baseScore: 300, comboMultiplier: 30 }
+            'Rookie':    { rewardThreshold: 5, criticalChance: 0.05, baseScore: 50, comboMultiplier: 5 },
+            'Veteran':   { rewardThreshold: 7, criticalChance: 0.04, baseScore: 100, comboMultiplier: 10 },
+            'Nightmare': { rewardThreshold: 10, criticalChance: 0.03, baseScore: 150, comboMultiplier: 13 },
+            'NoHope':    { rewardThreshold: 12, criticalChance: 0.01, baseScore: 200, comboMultiplier: 15 }
         },
         SURVIVAL: {
-            'Rookie':    { maxHP: 6, damageShake: 40 },
-            'Veteran':   { maxHP: 5, damageShake: 45 },
-            'Nightmare': { maxHP: 4, damageShake: 50 },
-            'NoHope':    { maxHP: 3, damageShake: 60 }
+            'Rookie':    { maxHP: 7, damageShake: 50 },
+            'Veteran':   { maxHP: 6, damageShake: 60 },
+            'Nightmare': { maxHP: 5, damageShake: 70 },
+            'NoHope':    { maxHP: 4, damageShake: 80 }
         },
         THRESHOLDS: {
             'Rookie':    { deathZ: 0.95 },
@@ -1189,7 +1191,9 @@
             ctx.fillStyle = "#000"; 
             const eyeS = size/10; ctx.fillRect(-size/6, -size*0.75, eyeS, eyeS); ctx.fillRect(size/15, -size*0.75, eyeS, eyeS); ctx.fillRect(-size/15, -size*0.6, size/7.5, eyeS/2); 
             if (isClosest) { ctx.strokeStyle = '#f00'; ctx.lineWidth = 3; ctx.strokeRect(-size/2 - 5, -size - 5, size + 10, size + 10); }
-            ctx.font = `bold ${Math.max(8, size/7.5)}px 'Press Start 2P'`; ctx.fillStyle = isClosest ? '#fff' : '#444'; ctx.textAlign = 'center'; ctx.shadowBlur = 4; ctx.shadowColor = "#000"; ctx.fillText(this.word.toUpperCase(), 0, -size * 1.05);
+            ctx.font = `bold ${Math.max(8, size/7.5)}px 'Press Start 2P'`; ctx.fillStyle = isClosest ? '#fff' : '#444'; ctx.textAlign = 'center'; ctx.shadowBlur = 4; ctx.shadowColor = "#000"; 
+            // ★★★ FIX: Remove .toUpperCase() ★★★
+            ctx.fillText(this.word, 0, -size * 1.05);
             ctx.restore();
         }
     }
@@ -1615,7 +1619,8 @@
             // ★★★ FIX: Targeting Logic Update ★★★
             const target = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
             let t = "AWAITING...";
-            if (target) t = target.word.toUpperCase();
+            // ★★★ FIX: Remove .toUpperCase() ★★★
+            if (target) t = target.word;
             wordEl.innerText = t; 
         }
     }
@@ -1688,8 +1693,8 @@
         if (state.isPaused) { 
             ps.classList.remove('hidden');
             const target = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
-            if (state.bossMode && state.bossData) targetLabel.innerText = state.bossData.words[state.bossWordIndex].toUpperCase();
-            else if (target) targetLabel.innerText = target.word.toUpperCase();
+            if (state.bossMode && state.bossData) targetLabel.innerText = state.bossData.words[state.bossWordIndex];
+            else if (target) targetLabel.innerText = target.word;
             else targetLabel.innerText = "NO TARGET";
             if(recognition) recognition.stop(); releaseWakeLock();
         } else { ps.classList.add('hidden'); requestAnimationFrame(gameLoop); if(recognition) try{recognition.start();}catch(e){} requestWakeLock(); }
