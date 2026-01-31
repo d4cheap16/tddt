@@ -244,6 +244,15 @@
 
 <div class="game-wrapper" id="main-container">
     <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none z-[120]"></div>
+    
+    <!-- ★★★ 2. BOSS WARNING SCREEN ★★★ -->
+    <div id="warning-screen" class="overlay-screen hidden z-[160]" style="background: rgba(139, 0, 0, 0.8);">
+        <div class="border-4 border-red-500 p-6 bg-black">
+            <h1 class="text-red-500 text-4xl font-bold flicker tracking-widest mb-4">WARNING</h1>
+            <p class="text-white text-xs animate-pulse tracking-widest uppercase">MASSIVE THREAT DETECTED</p>
+        </div>
+    </div>
+
     <div id="reward-toast" class="pixel-font">REWARD LOADED</div>
 
     <div id="mission-screen" class="overlay-screen">
@@ -547,7 +556,15 @@
              this.play(523.25, 'sine', 0.1, 0.2); setTimeout(() => this.play(659.25, 'sine', 0.1, 0.2), 100); 
              setTimeout(() => this.play(783.99, 'sine', 0.2, 0.2), 200); setTimeout(() => this.play(1046.50, 'sine', 0.4, 0.2), 300); 
         },
-        boss() { this.play(80, 'triangle', 0.8, 0.2, false); }
+        boss() { this.play(80, 'triangle', 0.8, 0.2, false); },
+        // ★★★ 2. BOSS WARNING ALARM ★★★
+        alarm() {
+            this.play(800, 'square', 0.1, 0.1);
+            setTimeout(() => this.play(0, 'square', 0.1, 0), 100);
+            setTimeout(() => this.play(800, 'square', 0.1, 0.1), 200);
+            setTimeout(() => this.play(0, 'square', 0.1, 0), 300);
+            setTimeout(() => this.play(800, 'square', 0.1, 0.1), 400);
+        }
     };
 
     let state = {
@@ -1344,7 +1361,23 @@
         if (state.kills >= requiredKills && !state.bossMode) startBossBattle();
     }
 
+    // ★★★ 2. Refactored Boss Start Logic with Warning ★★★
     function startBossBattle() {
+        // Show Warning
+        const warningEl = document.getElementById('warning-screen');
+        warningEl.classList.remove('hidden');
+        
+        // Play warning sound
+        sfx.alarm();
+
+        // Wait 2 seconds then start actual battle
+        setTimeout(() => {
+            warningEl.classList.add('hidden');
+            initiateBossEncounter();
+        }, 2000);
+    }
+
+    function initiateBossEncounter() {
         state.bossMode = true; 
         state.bossSentencesCleared = 0; 
 
@@ -1369,7 +1402,8 @@
         state.bossWordIndex = 0;
         
         const container = document.getElementById('current-word-ui');
-        container.innerHTML = state.bossData.words.map((w, i) => `<span id="bw-${i}" class="boss-word-pending">${w}</span>`).join(' ');
+        // ★★★ 1. Added mx-2 margin for better readability ★★★
+        container.innerHTML = state.bossData.words.map((w, i) => `<span id="bw-${i}" class="boss-word-pending mx-2">${w}</span>`).join('');
         updateBossUI();
     }
 
@@ -1377,7 +1411,7 @@
         state.bossData.words.forEach((_, i) => {
             const el = document.getElementById(`bw-${i}`);
             if (el) {
-                el.className = i < state.bossWordIndex ? 'text-zinc-600 line-through' : (i === state.bossWordIndex ? 'boss-word-active font-bold text-green-400' : 'text-white');
+                el.className = i < state.bossWordIndex ? 'text-zinc-600 line-through mx-2' : (i === state.bossWordIndex ? 'boss-word-active font-bold text-green-400 mx-2 text-[14px]' : 'text-white mx-2');
             }
         });
         
