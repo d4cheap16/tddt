@@ -52,6 +52,8 @@
             width: 100%; max-width: 500px; height: 100dvh;
             background: #000; display: flex; flex-direction: column;
             overflow: hidden; border-left: 2px solid #222; border-right: 2px solid #222;
+            /* ★★★ NEW: 確保 transform 震動時邊緣不會糊掉 ★★★ */
+            will-change: transform;
         }
 
         .canvas-container {
@@ -497,6 +499,18 @@
 <script>
     const ADMIN_KEY = "AdaWong";
     
+    // ★★★ NEW: 受傷震動參數設定 (SHAKE CONFIG) ★★★
+    /*
+      intensity: 震動幅度 (數字越大，晃動距離越遠)
+      decay: 衰減係數 (0.0 ~ 1.0，數字越接近 1，震動持續時間越久; 越小停得越快)
+    */
+    const DAMAGE_SHAKE_CONFIG = {
+        'Rookie':    { intensity: 20, decay: 0.85 }, // 新手：輕微震動，快速恢復
+        'Veteran':   { intensity: 30, decay: 0.88 }, // 老手：標準震動
+        'Nightmare': { intensity: 45, decay: 0.90 }, // 惡夢：強烈震動
+        'NoHope':    { intensity: 60, decay: 0.92 }  // 絕望：劇烈震動，像地震一樣
+    };
+
     // ★★★ FIX: 使用您提供的 GitHub 背景圖，且在 CSS 加入 pixelated 渲染確保清晰 ★★★
     const BGS = [
         "https://d4cheap16.github.io/tddt/BG01.png", 
@@ -514,7 +528,7 @@
         flash: "https://d4cheap16.github.io/tddt/flash.png",
         shotgun: "https://d4cheap16.github.io/tddt/shotgun.png",
         // ★★★ NEW: Critical Image Placeholder ★★★
-        critical: "https://d4cheap16.github.io/tddt/minigun.png",
+        critical: "https://d4cheap16.github.io/tddt/critical.png",
         timer: null
     };
 
@@ -577,10 +591,10 @@
             'NoHope':    { rewardThreshold: 12, criticalChance: 0.01, baseScore: 200, comboMultiplier: 20 }
         },
         SURVIVAL: {
-            'Rookie':    { maxHP: 6, damageShake: 50 },
-            'Veteran':   { maxHP: 5, damageShake: 60 },
-            'Nightmare': { maxHP: 4, damageShake: 70 },
-            'NoHope':    { maxHP: 3, damageShake: 80 }
+            'Rookie':    { maxHP: 6 },
+            'Veteran':   { maxHP: 5 },
+            'Nightmare': { maxHP: 4 },
+            'NoHope':    { maxHP: 3 }
         },
         THRESHOLDS: {
             'Rookie':    { deathZ: 0.95 },
@@ -677,7 +691,8 @@
         freezeTimer: 0,
         enemies: [], particles: [],
         bgStars: [], 
-        shake: 0, bossMode: false, bossData: null, bossWordIndex: 0,
+        shake: 0, shakeDecay: 0.88, // ★★★ NEW: 新增 shakeDecay 狀態 ★★★
+        bossMode: false, bossData: null, bossWordIndex: 0,
         spawnTimer: 0, player: { name: "", no: "", class: "" },
         wordPool: [],
         sentencePool: [],
@@ -1730,10 +1745,13 @@
     function triggerDamage() {
         const survivalConfig = GAME_BALANCE.SURVIVAL[state.difficultyMode];
         const physics = BOSS_PHYSICS_CONFIG[state.difficultyMode] || BOSS_PHYSICS_CONFIG['Veteran'];
+        // ★★★ NEW: 讀取震動配置 ★★★
+        const shakeConf = DAMAGE_SHAKE_CONFIG[state.difficultyMode] || DAMAGE_SHAKE_CONFIG['Veteran'];
         
         // --- GOD MODE 實作區 ---
         if (state.player.name === ADMIN_KEY) {
-            state.shake = 10; 
+            state.shake = 10;
+            state.shakeDecay = 0.8; // 快速恢復
             sfx.damage(); 
             state.damageAlpha = 0.5; 
             
@@ -1745,7 +1763,12 @@
         }
 
         // --- 一般玩家邏輯 ---
-        state.hp--; state.shake = survivalConfig.damageShake; state.combo = 0; state.damageTaken++; 
+        state.hp--; 
+        // ★★★ NEW: 套用新的震動邏輯 ★★★
+        state.shake = shakeConf.intensity;
+        state.shakeDecay = shakeConf.decay;
+        
+        state.combo = 0; state.damageTaken++; 
         sfx.damage(); state.damageAlpha = 0.8; 
         if (state.bossMode && state.enemies[0]) {
             // ★★★ FIX: 使用 attackReset 參數控制攻擊後的彈開距離 ★★★
@@ -1760,12 +1783,23 @@
         const rect = canvas.parentElement.getBoundingClientRect();
         const w = rect.width; const h = rect.height;
         ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); 
-        if (state.shake > 0) { 
-            ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake); 
-            state.shake *= 0.88; if(state.shake < 0.5) state.shake = 0;
+
+        // ★★★ NEW: 全局畫面震動邏輯 (取代舊的 ctx.translate) ★★★
+        const container = document.getElementById('main-container');
+        if (state.shake > 0.5) { 
+            const shakeX = (Math.random() - 0.5) * state.shake;
+            const shakeY = (Math.random() - 0.5) * state.shake;
+            container.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+            
+            // 使用動態衰減值
+            state.shake *= state.shakeDecay; 
+        } else {
+            state.shake = 0;
+            container.style.transform = 'none';
         }
+
+        // BOSS 戰的鏡頭抖動 (保留 ctx.translate 以產生視覺迷幻感)
         const boss = state.enemies.find(e => e.isBoss);
-        
         if (state.bossMode && boss) {
             const shakeConfig = BOSS_SHAKE_CONFIG[state.difficultyMode] || BOSS_SHAKE_CONFIG['Veteran'];
             
