@@ -109,6 +109,16 @@
         .recoil-kick {
             transform: translateY(10px) scale(1.05) !important; /* 往後(下)退並稍微變大 */
         }
+        
+        /* ★★★ NEW: 強力後座力 (給散彈槍用) ★★★ */
+        .recoil-heavy {
+            transform: translateY(20px) scale(1.1) !important;
+        }
+
+        /* ★★★ NEW: 暴擊後座力 (給 Critical 用) - 更誇張的動作 ★★★ */
+        .recoil-critical {
+            transform: translateY(15px) scale(1.15) rotate(-5deg) !important;
+        }
 
         .ui-panel {
             height: 35%; width: 100%; background: #050505;
@@ -496,10 +506,15 @@
         "https://d4cheap16.github.io/tddt/BG05.png"
     ];
 
-    /* ★★★ NEW: 槍枝素材設定 ★★★ */
+    /* ★★★ NEW: 槍枝素材設定 (新增 flash 和 shotgun) ★★★ */
     const GUN_ASSETS = {
         idle: "https://d4cheap16.github.io/tddt/gun01.png",
         fire: "https://d4cheap16.github.io/tddt/gun02.png",
+        // 注意：請確保將您上傳的 flash.png 和 shotgun.png 放到 GitHub 的對應路徑下
+        flash: "https://d4cheap16.github.io/tddt/flash.png",
+        shotgun: "https://d4cheap16.github.io/tddt/shotgun.png",
+        // ★★★ NEW: Critical Image Placeholder ★★★
+        critical: "https://d4cheap16.github.io/tddt/minigun.png",
         timer: null
     };
 
@@ -576,24 +591,42 @@
     };
 
     // ★★★ FIX: 修正數值並確保被執行 ★★★
+    // ★★★ NEW: 在 effect 中加入 triggerSpecialAction 呼叫 ★★★
     const REWARD_CONFIG = {
         'RECOVER': {
             text: "LET ME HELP YOU!", textColor: "#6ee7b7", borderColor: "#6ee7b7", boxShadow: "none", 
             overlayColor: "rgba(110, 231, 183, 0.4)", overlayDuration: 300, 
-            effect: (state) => { const maxHP = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP; state.hp = Math.min(maxHP, state.hp + 1); }
+            effect: (state) => { 
+                const maxHP = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP; 
+                state.hp = Math.min(maxHP, state.hp + 1); 
+            }
         },
         'FLASH': {
             text: "PRESENT FOR YOU!", textColor: "#67e8f9", boxShadow: "none", overlayColor: "rgba(255, 255, 255, 0.6)", overlayDuration: 1200, 
-            effect: (state) => { state.freezeTimer = 180; state.shake = 50; } 
+            effect: (state) => { 
+                state.freezeTimer = 180; 
+                state.shake = 50;
+                triggerSpecialAction('flash'); // 觸發閃光彈圖片
+            } 
         },
         'SHOTGUN': {
             // ★★★ FIX: 增加 overlayDuration 到 250ms (原 100ms 太快看不見) ★★★
             text: "STAY BACK!", textColor: "#fbbf24", boxShadow: "none", overlayColor: "rgba(255, 200, 50, 0.6)", overlayDuration: 250, 
-            effect: (state) => { state.enemies.forEach(e => { if (!e.isDying) e.z = Math.max(0, e.z - 0.4); }); state.shake = 60; state.freezeTimer = 60; }
+            effect: (state) => { 
+                state.enemies.forEach(e => { if (!e.isDying) e.z = Math.max(0, e.z - 0.4); }); 
+                state.shake = 60; 
+                state.freezeTimer = 60;
+                triggerSpecialAction('shotgun'); // 觸發散彈槍圖片
+            }
         },
         'CRITICAL': {
             text: "I NEVER MISS!", textColor: "#d946ef", boxShadow: "none", overlayColor: "rgba(217, 70, 239, 0.6)", overlayDuration: 700,
-            effect: (state) => { const maxHP = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP; state.hp = maxHP; state.shake = 60; } 
+            effect: (state) => { 
+                const maxHP = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP; 
+                state.hp = maxHP; 
+                state.shake = 60; 
+                triggerSpecialAction('critical'); // ★★★ NEW: 觸發 Critical 圖片 ★★★
+            } 
         }
     };
     
@@ -669,15 +702,20 @@
         if (holder) holder.style.backgroundImage = `url('${randomBg}')`;
     }
     
-    // ★★★ NEW: 預載圖片功能（包含背景與槍枝） ★★★
+    // ★★★ NEW: 預載圖片功能（包含背景與槍枝 + 特殊道具） ★★★
     function preloadImages() {
         // 預載背景
         if (BGS) {
             BGS.forEach(src => { const img = new Image(); img.src = src; });
         }
-        // 預載槍枝
-        const gun1 = new Image(); gun1.src = GUN_ASSETS.idle;
-        const gun2 = new Image(); gun2.src = GUN_ASSETS.fire;
+        // 預載一般槍枝
+        new Image().src = GUN_ASSETS.idle;
+        new Image().src = GUN_ASSETS.fire;
+        // 預載特殊道具
+        new Image().src = GUN_ASSETS.flash;
+        new Image().src = GUN_ASSETS.shotgun;
+        // ★★★ NEW: 預載 Critical ★★★
+        if(GUN_ASSETS.critical) new Image().src = GUN_ASSETS.critical;
     }
 
     // ★★★ NEW: 開槍效果函式 ★★★
@@ -685,23 +723,64 @@
         const weaponImg = document.getElementById('weapon-img');
         if (!weaponImg) return;
 
-        // 1. 切換為開槍圖片
-        weaponImg.src = GUN_ASSETS.fire;
-        
-        // 2. 加入後座力動畫 CSS Class
-        weaponImg.classList.add('recoil-kick');
-
-        // 3. 清除之前的計時器（如果連續快速射擊）
+        // 1. 清除之前的計時器
         if (GUN_ASSETS.timer) {
             clearTimeout(GUN_ASSETS.timer);
+            GUN_ASSETS.timer = null;
         }
+
+        // 2. 切換為開槍圖片
+        weaponImg.src = GUN_ASSETS.fire;
+        
+        // 3. 加入後座力動畫 CSS Class
+        weaponImg.classList.remove('recoil-heavy'); // 移除可能的強力後座力
+        weaponImg.classList.remove('recoil-critical');
+        weaponImg.classList.add('recoil-kick');
 
         // 4. 設定計時器，短暫時間後回復原狀
         GUN_ASSETS.timer = setTimeout(() => {
             weaponImg.src = GUN_ASSETS.idle;
             weaponImg.classList.remove('recoil-kick');
             GUN_ASSETS.timer = null;
-        }, 150); // 150毫秒後恢復，可依喜好調整
+        }, 150); // 150毫秒後恢復
+    }
+
+    // ★★★ NEW: 特殊道具效果函式 ★★★
+    function triggerSpecialAction(type) {
+        const weaponImg = document.getElementById('weapon-img');
+        const asset = GUN_ASSETS[type];
+        if (!weaponImg || !asset) return;
+
+        // 1. 清除之前的計時器
+        if (GUN_ASSETS.timer) {
+            clearTimeout(GUN_ASSETS.timer);
+            GUN_ASSETS.timer = null;
+        }
+
+        // 2. 切換為特殊圖片
+        weaponImg.src = asset;
+        
+        // 3. 根據類型加入不同的動畫效果
+        weaponImg.classList.remove('recoil-kick');
+        weaponImg.classList.remove('recoil-heavy');
+        weaponImg.classList.remove('recoil-critical');
+        
+        if (type === 'shotgun') {
+            weaponImg.classList.add('recoil-heavy'); // 散彈槍後座力更大
+        } else if (type === 'critical') {
+            weaponImg.classList.add('recoil-critical'); // ★★★ Critical 超大後座力 ★★★
+        } else {
+            weaponImg.classList.add('recoil-kick'); // 閃光彈一般後座力
+        }
+
+        // 4. 顯示時間比普通開槍久一點，讓玩家看清楚 (600ms)
+        GUN_ASSETS.timer = setTimeout(() => {
+            weaponImg.src = GUN_ASSETS.idle;
+            weaponImg.classList.remove('recoil-kick');
+            weaponImg.classList.remove('recoil-heavy');
+            weaponImg.classList.remove('recoil-critical');
+            GUN_ASSETS.timer = null;
+        }, 600); 
     }
 
     function initUI() {
