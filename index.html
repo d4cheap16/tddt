@@ -22,7 +22,7 @@
         }
 
         body {
-            background-color: #050505; /* 背景統一全黑 */
+            background-color: #050505;
             color: #ccc;
             font-family: 'Press Start 2P', 'Noto Sans TC', sans-serif;
             margin: 0; padding: 0;
@@ -31,7 +31,6 @@
             user-select: none; touch-action: manipulation;
         }
 
-        /* 自定義復古卷軸樣式 */
         ::-webkit-scrollbar { width: 6px; background: #050505; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
@@ -51,20 +50,19 @@
         .game-wrapper {
             position: relative;
             width: 100%; 
-            max-width: 500px; /* 直立時限制寬度 */
+            max-width: 500px;
             height: 100dvh;
             background: #000; 
             display: flex; 
-            flex-direction: column; /* 上下排列 */
+            flex-direction: column;
             overflow: hidden; 
             border: 2px solid #222;
             will-change: transform;
-            transition: all 0.3s ease;
         }
 
         .canvas-container {
             width: 100%; 
-            height: 65%; /* 手機畫布高度 */
+            height: 65%;
             position: relative; 
             border-bottom: 2px solid var(--horror-red);
             overflow: hidden;
@@ -76,7 +74,7 @@
         }
 
         .ui-panel {
-            height: 35%; /* 手機 UI 高度 */
+            height: 35%;
             width: 100%; 
             background: #050505;
             padding: 10px 15px; 
@@ -88,30 +86,43 @@
             position: relative; 
         }
 
-        /* --- 電腦/平板橫向模式 (Landscape / Desktop) --- */
+        /* --- 橫向模式 (Landscape - Mobile & Desktop) --- */
+        @media (orientation: landscape) {
+            select, input {
+                transform: none !important;
+                width: 100% !important;
+                font-size: 14px !important;
+                margin: 5px 0 !important;
+            }
+            .overlay-screen .max-w-sm {
+                max-width: 480px; 
+            }
+        }
+
+        /* --- 電腦/大平板橫向模式 (Desktop/Tablet) --- */
         @media (min-width: 768px) and (orientation: landscape) {
             .game-wrapper {
-                flex-direction: row; /* 改為左右排列 */
-                max-width: none;     /* 解除寬度限制 */
-                width: auto;         /* 自動寬度 */
-                height: 90vh;        /* 視窗高度 90% */
-                border: 8px solid #333; /* 街機厚邊框 */
+                flex-direction: row;
+                max-width: none;
+                width: auto;
+                height: 90vh;
+                border: 8px solid #333;
                 border-radius: 12px;
-                box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(50, 50, 50, 0.5); /* 發光效果 */
+                box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(50, 50, 50, 0.5);
             }
 
             .canvas-container {
                 height: 100%;
                 width: auto;
-                aspect-ratio: 4 / 3; /* ★關鍵：鎖定 4:3 復古比例 */
+                aspect-ratio: 4 / 3;
                 border-bottom: none;
                 border-right: 4px solid var(--horror-red);
-                flex-shrink: 0; /* 防止被壓縮 */
+                flex-shrink: 0;
             }
 
             .ui-panel {
                 height: 100%;
-                width: 320px; /* 固定 UI 面板寬度 */
+                width: 320px;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
@@ -119,26 +130,38 @@
                 gap: 15px;
             }
 
-            /* 優化電腦版輸入框 */
-            select, input {
-                transform: none !important; /* 取消手機縮放 */
-                width: 100% !important;
-                font-size: 14px !important;
-                margin: 10px 0 !important;
+            /* 分數與血條垂直堆疊 */
+            .stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+                text-align: center;
+                padding-bottom: 20px !important;
             }
             
-            /* 優化按鈕 */
-            .btn { font-size: 10px; padding: 15px; }
+            .stats-grid > div {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
             
-            /* Banner 限制大小 */
+            .score-label-desktop {
+                text-align: center;
+            }
+
+            .btn { font-size: 10px; padding: 15px; }
             .banner-box { max-width: 100%; }
 
-            /* 修正 Boss UI 位置 */
+            /* ★★★ FIX: BOSS UI 樣式修正 ★★★ */
+            /* 因為移入 canvas-container，這裡的 positioning 相對簡單許多 */
             #boss-ui {
+                position: absolute;
                 bottom: 20px !important;
                 left: 0 !important;
-                width: 100% !important; /* 相對於 canvas-container */
-                padding: 0 20px;
+                width: 100% !important;
+                padding: 0 40px; /* 增加兩側內距以免太貼邊 */
+                z-index: 150;
             }
         }
 
@@ -161,16 +184,9 @@
 
         #weapon-layer {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; 
-            z-index: 20; 
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            overflow: hidden;
+            bottom: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 20; 
+            display: flex; align-items: flex-end; justify-content: center; overflow: hidden;
         }
 
         #weapon-img {
@@ -179,19 +195,10 @@
             transform-origin: bottom center;
         }
 
-        .recoil-kick {
-            transform: translateY(25%) scale(1.05) !important; 
-        }
-        
-        .recoil-heavy {
-            transform: translateY(20%) scale(1.1) !important;
-        }
+        .recoil-kick { transform: translateY(25%) scale(1.05) !important; }
+        .recoil-heavy { transform: translateY(20%) scale(1.1) !important; }
+        .recoil-critical { transform: translateY(15%) scale(1.15) rotate(-5deg) !important; }
 
-        .recoil-critical {
-            transform: translateY(15%) scale(1.15) rotate(-5deg) !important;
-        }
-
-        /* 手機版 Input 預設樣式 */
         select, input {
             background: #0d0d0d !important;
             border: 1px solid #333 !important;
@@ -446,12 +453,8 @@
         <p class="text-[7px] text-zinc-700">Practice your pronunciation here.</p>
     </div>
 
-    <div id="boss-ui" class="px-5 w-full">
-        <div id="boss-phase-display" class="text-center text-[8px] text-red-500 font-bold mb-1 tracking-widest">THREAT LEVEL MAX</div>
-        <div class="w-full bg-zinc-900 h-3 border-2 border-white mb-2 overflow-hidden rounded-full">
-            <div id="boss-hp-bar" class="h-full bg-red-600 transition-all duration-300" style="width: 100%"></div>
-        </div>
-    </div>
+    <!-- ★★★ FIX: BOSS UI 被移到 canvas-container 內部 ★★★ -->
+    <!-- 原本位置在 game-wrapper 直屬層，現在移除了 -->
 
     <div id="win-screen" class="overlay-screen hidden">
         <h1 class="text-green-500 text-2xl mb-4 flicker uppercase">Mission Complete</h1>
@@ -479,6 +482,15 @@
 
     <div class="canvas-container" id="canvas-holder">
         <canvas id="game-canvas"></canvas>
+        
+        <!-- ★★★ NEW: BOSS UI 移到這裡，確保它被限制在畫布範圍內 ★★★ -->
+        <div id="boss-ui" class="px-5 w-full">
+            <div id="boss-phase-display" class="text-center text-[8px] text-red-500 font-bold mb-1 tracking-widest">THREAT LEVEL MAX</div>
+            <div class="w-full bg-zinc-900 h-3 border-2 border-white mb-2 overflow-hidden rounded-full">
+                <div id="boss-hp-bar" class="h-full bg-red-600 transition-all duration-300" style="width: 100%"></div>
+            </div>
+        </div>
+
         <div id="weapon-layer">
             <img id="weapon-img" 
                  src="https://d4cheap16.github.io/tddt/gun01.png" 
@@ -488,8 +500,8 @@
     </div>
 
     <div class="ui-panel">
-        <div class="grid grid-cols-[30%_70%] gap-2 items-center border-b border-zinc-800 pb-2">
-            <div>
+        <div class="grid grid-cols-[30%_70%] gap-2 items-center border-b border-zinc-800 pb-2 stats-grid">
+            <div class="score-label-desktop">
                 <div id="score-display" class="text-[18px] text-yellow-400 pixel-font mt-1 tracking-widest font-bold" style="text-shadow: 0 0 5px orange;">00000</div>
                 <div class="text-[6px] text-zinc-600 uppercase">Score</div>
             </div>
@@ -1155,7 +1167,6 @@
             this.word = word; this.isBoss = isBoss; 
             this.z = (state.difficultyMode === 'Rookie' && !isBoss) ? 0.25 : 0;
             
-            // ★★★ 關鍵修改：動態生成寬度 ★★★
             // 使用 canvas.width * 0.75 作為生成範圍，確保敵人分散在整個寬螢幕上
             const spawnRange = canvas.width * 0.75; 
             this.x = (Math.random() - 0.5) * spawnRange; 
@@ -1587,6 +1598,9 @@
         
         state.bossMode = true; 
         state.bossSentencesCleared = 0; 
+        
+        // ★★★ FIX: BOSS 戰初始 Combo 歸零 ★★★
+        state.combo = 0;
 
         const bConfig = BOSS_CONFIG_DATA[state.difficultyMode] || BOSS_CONFIG_DATA['Veteran'];
         state.bossSentencesRequired = bConfig.sentencesRequired;
@@ -1651,6 +1665,12 @@
         
         state.bossWordIndex++; 
         
+        // ★★★ FIX: BOSS 戰 Combo 機制 ★★★
+        state.combo++; 
+        // 觸發獎勵機制
+        const comboConfig = GAME_BALANCE.COMBO[state.difficultyMode];
+        if (state.combo > 0 && state.combo % comboConfig.rewardThreshold === 0) triggerReward();
+        
         const bossParams = BOSS_BATTLE_CONFIG[state.difficultyMode] || BOSS_BATTLE_CONFIG['Veteran'];
         const physics = BOSS_PHYSICS_CONFIG[state.difficultyMode] || BOSS_PHYSICS_CONFIG['Veteran'];
 
@@ -1676,7 +1696,9 @@
         
         if (state.bossWordIndex >= state.bossData.words.length) {
             state.bossSentencesCleared++;
-            executeReward('RECOVER'); 
+            
+            // ★★★ FIX: 移除「念完一句自動補血」機制 (executeReward('RECOVER')) ★★★
+            // executeReward('RECOVER'); <--- Removed
 
             if (boss) boss.z = Math.max(0.1, boss.z - physics.phase);
 
@@ -1869,7 +1891,6 @@
     }
 
     function winGame() { 
-        if (!state.gameActive) return; // ★★★ FIX: 防止重複觸發 ★★★
         state.gameActive = false; if(wakeLock) releaseWakeLock(); 
         document.getElementById('win-score-display').innerText = Math.floor(state.score); 
         document.getElementById('win-screen').classList.remove('hidden'); 
@@ -1886,7 +1907,6 @@
     }
     
     function endGame() { 
-        if (!state.gameActive) return; // ★★★ FIX: 防止重複觸發 ★★★
         state.gameActive = false; if(wakeLock) releaseWakeLock(); 
         document.getElementById('fail-score-display').innerText = Math.floor(state.score); 
         document.getElementById('game-over-screen').classList.remove('hidden'); 
