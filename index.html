@@ -213,7 +213,7 @@
             z-index: 300;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             opacity: 0;
-            font-size: 24px;
+            font-size: 40px;
             font-weight: 700; 
             color: #fff; 
             font-family: 'Press Start 2P', cursive;
@@ -436,7 +436,7 @@
     <div id="mission-screen" class="overlay-screen">
         <div class="flex flex-col w-full max-w-sm landscape:max-w-4xl landscape:flex-row landscape:items-center landscape:justify-center landscape:gap-8 h-full landscape:h-auto">
             <!-- Left: Visuals (Banner + Title) -->
-            <div class="w-full landscape:w-1/2 flex flex-col items-center justify-center shrink-0">
+            <div class="w-full landscape:w-2/5 flex flex-col items-center justify-center shrink-0">
                 <div class="banner-box landscape:aspect-video landscape:w-full">
                     <img src="https://d4cheap16.github.io/tddt/indexbanner.png" alt="Index Banner" onerror="this.style.display='none'">
                 </div>
@@ -444,7 +444,7 @@
             </div>
             
             <!-- Right: Controls (Menu Box) -->
-            <div class="bg-black p-5 border border-zinc-800 w-full rounded-lg shadow-2xl overflow-y-auto max-h-[75%] landscape:max-h-full landscape:w-1/2">
+            <div class="bg-black p-5 border border-zinc-800 w-full rounded-lg shadow-2xl overflow-y-auto max-h-[75%] landscape:max-h-full landscape:w-3/5">
                 <p class="text-[8px] text-zinc-500 mb-2 uppercase text-left font-bold">Sector Access</p>
                 <div class="grid grid-cols-5 gap-1 mb-6" id="book-grid"></div>
                 
@@ -469,7 +469,7 @@
     <div id="login-screen" class="overlay-screen hidden">
         <div class="flex flex-col w-full max-w-sm landscape:max-w-4xl landscape:flex-row landscape:items-center landscape:justify-center landscape:gap-8 h-full landscape:h-auto">
             <!-- Left: Visuals -->
-            <div class="w-full landscape:w-1/2 flex flex-col items-center justify-center shrink-0">
+            <div class="w-full landscape:w-2/5 flex flex-col items-center justify-center shrink-0">
                 <div class="banner-box landscape:aspect-video landscape:w-full">
                     <img src="https://d4cheap16.github.io/tddt/missionbanner.png" alt="Mission Banner" onerror="this.style.display='none'">
                 </div>
@@ -477,7 +477,7 @@
             </div>
 
             <!-- Right: Controls -->
-            <div class="bg-black p-5 border border-zinc-800 w-full space-y-4 rounded-lg text-left landscape:w-1/2">
+            <div class="bg-black p-5 border border-zinc-800 w-full space-y-4 rounded-lg text-left landscape:w-3/5">
                 <p class="text-[8px] text-zinc-600 mb-1 uppercase px-1">Registration</p>
                 <div class="flex gap-2">
                     <select id="select-grade">
