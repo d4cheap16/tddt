@@ -5,7 +5,23 @@
       "LOWERCASE: Stage 1 words are lowercase.",
       "SENTENCE CASE: Stage 2 sentences start with uppercase.",
       "GRAMMAR FIXED: Added missing possessives, commas, and proper noun formatting."
-    ]
+    ],
+    "filter_logic": {
+      "strategy": "Speech-First Strategy (語音優先策略)",
+      "exclude": [
+        "單音節且易混淆字 (e.g., pen, bus, cat, one, two)",
+        "發音特徵不明顯的短字 (e.g., at, it, of, in)",
+        "同音異義字干擾強的字 (e.g., meat/meet, see/sea)",
+        "純數字 (e.g., eleven, thirty) - 因語音辨識常轉為阿拉伯數字 (11, 30) 導致字串比對失敗",
+        "包含純數字單字的片語 (e.g., one's heart, one's mind)"
+      ],
+      "include": [
+        "多音節單字 (e.g., beautiful, tomato, vacation)",
+        "發音響亮、清晰的雙音節字 (e.g., shoulder, tiger, market)",
+        "長度較長但結構簡單的字 (e.g., afternoon, basketball)",
+        "時間與頻率相關單字 (e.g., clock, future) - 替代數字以提升辨識率"
+      ]
+    }
   },
   "L1": {
     "title": "Unit 1: The Heart of a Champion",
@@ -30,9 +46,7 @@
         "admiration",
         "respect",
         "take off",
-        "have one's heart set on",
         "speed up",
-        "rise to one's feet",
         "carry through"
       ],
       "2": [
@@ -155,7 +169,6 @@
         "from then on",
         "all the more",
         "fly into a rage",
-        "for one thing",
         "be filled with",
         "slip away"
       ],
@@ -341,7 +354,6 @@
         "ceremony",
         "fit in",
         "around the corner",
-        "sick to one's stomach",
         "make peace",
         "make fun of",
         "at least",
@@ -407,8 +419,7 @@
         "as well as",
         "for free",
         "at present",
-        "give a try",
-        "broaden one's horizons"
+        "give a try"
       ],
       "2": [
         "Jenny's father is eager to make money and is seeking new ways.",
@@ -525,7 +536,6 @@
         "take on",
         "later on",
         "in the beginning",
-        "too to",
         "play a role in",
         "think up"
       ],
