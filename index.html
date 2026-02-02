@@ -8,7 +8,7 @@
     <title>Dead Don't Talk</title>
     <meta name="description" content="Want to Survive? Speak!">
     <meta property="og:title" content="Dead don't talk, but you do.">
-    <meta property="og:description" content="Speak, or you become one of them...">
+    <meta property="og:description" content="Speak, or become one of them...">
     <meta property="og:image" content="https://d4cheap16.github.io/tddt/opentag.png">
     <meta property="og:type" content="website">
 
@@ -46,11 +46,12 @@
             pointer-events: none; opacity: 0.2;
         }
 
-        /* --- 手機版預設 (Portrait Mobile) --- */
+        /* --- 基礎樣式區 (Base Styles) --- */
+
         .game-wrapper {
             position: relative;
             width: 100%; 
-            max-width: 500px;
+            max-width: 500px; /* 手機版預設寬度 */
             height: 100dvh;
             background: #000; 
             display: flex; 
@@ -73,6 +74,40 @@
             image-rendering: pixelated; 
         }
 
+        .canvas-container::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #game-canvas { 
+            position: relative;
+            z-index: 10;
+            image-rendering: pixelated; 
+            width: 100%; height: 100%; 
+            background: transparent;
+        }
+
+        #weapon-layer {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 20; 
+            display: flex; align-items: flex-end; justify-content: center; overflow: hidden;
+        }
+
+        #weapon-img {
+            image-rendering: pixelated; 
+            transition: transform 0.05s ease-out; 
+            transform-origin: bottom center;
+        }
+
+        .recoil-kick { transform: translateY(25%) scale(1.05) !important; }
+        .recoil-heavy { transform: translateY(20%) scale(1.1) !important; }
+        .recoil-critical { transform: translateY(15%) scale(1.15) rotate(-5deg) !important; }
+
         .ui-panel {
             height: 35%;
             width: 100%; 
@@ -86,8 +121,184 @@
             position: relative; 
         }
 
-        /* --- 橫向模式 (Landscape - Mobile & Desktop) --- */
+        /* 輸入框基礎樣式 (針對手機優化) */
+        select, input {
+            background: #0d0d0d !important;
+            border: 1px solid #333 !important;
+            color: #0f0 !important;
+            padding: 12px !important;
+            font-size: 16px !important; 
+            transform: scale(0.8); 
+            transform-origin: left center;
+            width: 125% !important; 
+            margin: 4px 0 !important;
+            border-radius: 4px !important;
+            font-family: 'Press Start 2P', 'Noto Sans TC', sans-serif !important;
+            outline: none;
+            box-sizing: border-box;
+        }
+        select:focus, input:focus { border-color: #0f0 !important; }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .btn {
+            background: #111; border: 1px solid #444; color: #ccc;
+            padding: 10px; cursor: pointer; font-size: 9px;
+            font-family: 'Press Start 2P', cursive;
+            transition: 0.1s; border-radius: 6px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .btn:active { background: #555; color: #fff; transform: scale(0.95); }
+
+        .btn-empty { color: #444 !important; border-style: dashed !important; cursor: not-allowed; background: #050505 !important; }
+
+        /* Banner & Overlay */
+        .overlay-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 200; text-align: center; padding: 20px;
+        }
+
+        .banner-box {
+            width: 100%; max-width: 400px; aspect-ratio: 1480 / 450;
+            background: #000; margin-bottom: 15px; border: 1px solid #333;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .banner-box img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+
+        /* Difficulty Buttons */
+        .diff-rookie.active-diff { background: #063d19 !important; border-color: #0f0 !important; color: #0f0 !important; box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); }
+        .diff-veteran.active-diff { background: #002244 !important; border-color: #0af !important; color: #0af !important; box-shadow: 0 0 15px rgba(0, 170, 255, 0.3); }
+        .diff-nightmare.active-diff { background: #330044 !important; border-color: #f0f !important; color: #f0f !important; box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); }
+        .diff-nohope.active-diff { background: #440000 !important; border-color: #f0f !important; color: #f00 !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.5); }
+        
+        .book-btn { border: 1px solid #333; }
+        .book-active {
+            background-color: #d4d4d8 !important; color: #000 !important;
+            border-color: #fff !important; font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .lesson-btn { border: 1px solid #333; }
+        .lesson-active {
+            background-color: #16a34a !important; color: #000 !important;
+            border-color: #4ade80 !important; font-weight: bold;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+        }
+
+        /* Boss UI 基礎樣式 */
+        #boss-ui {
+            position: absolute; 
+            bottom: 35%; 
+            left: 0; width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            pointer-events: none; transition: opacity 0.5s; opacity: 0;
+            z-index: 150;
+            padding-bottom: 2px;
+        }
+        .boss-word-active { color: #0f0; text-shadow: 0 0 10px #0f0; transform: scale(1.05); display: inline-block;}
+
+        #reward-toast {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            width: auto;
+            white-space: nowrap;
+            text-align: center;
+            pointer-events: none; 
+            z-index: 300;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            font-size: 40px;
+            font-weight: 700; 
+            color: #fff; 
+            font-family: 'Press Start 2P', cursive;
+            line-height: 1.5;
+            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+        
+        .toast-active { 
+            opacity: 1; 
+            transform: translate(-50%, -50%) scale(1.2) !important; 
+        }
+
+        .admin-table-container {
+            width: 100%; max-height: 250px; overflow-y: auto; font-size: 9px;
+            border: 1px solid #333; margin-top: 10px; background: #050505;
+        }
+        .admin-table-container th { padding: 8px; font-size: 8px; color: #666; text-transform: uppercase; }
+        .admin-table-container td { padding: 6px 8px; border-bottom: 1px solid #111; vertical-align: top; }
+
+        #leaderboard-preview { width: 100%; margin-top: 10px; border-top: 1px solid #222; padding-top: 10px; }
+
+        @keyframes flicker { 
+            0% { opacity: 1; } 25% { opacity: 0.8; } 50% { opacity: 1; } 75% { opacity: 0.6; } 100% { opacity: 1; }
+        }
+        .flicker { animation: flicker 0.15s infinite; }
+        
+        @keyframes shine { 
+            0% { transform: scale(1); text-shadow: 0 0 10px gold; } 
+            50% { transform: scale(1.1); text-shadow: 0 0 30px yellow, 0 0 50px orange; } 
+            100% { transform: scale(1); text-shadow: 0 0 10px gold; } 
+        }
+        .perfect-badge {
+            color: #FFD700; animation: shine 1.5s infinite ease-in-out;
+            border: 2px solid #FFD700; padding: 10px; border-radius: 8px;
+            background: rgba(255, 215, 0, 0.1); margin-bottom: 20px; display: none;
+        }
+
+        .ecg-container {
+            width: 100%; height: 30px; background: #000; border: 1px solid #222;
+            position: relative; overflow: hidden; display: flex; align-items: center; border-radius: 4px;
+        }
+        .ecg-svg { width: 100%; height: 100%; }
+        .ecg-line {
+            fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+            stroke-dasharray: 200; stroke-dashoffset: 200; animation: dash 2s linear infinite;
+        }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
+
+        .game-credits {
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 200;
+            pointer-events: none; 
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            transition: opacity 0.3s; 
+        }
+        .game-credits p {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 7px;
+            color: #ffffff;
+            margin: 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 2px #000;
+        }
+        .game-credits img {
+            width: 20px;
+            height: auto;
+            gap: 6px;
+            filter: drop-shadow(0 0 2px #000);
+        }
+
+        /* =========================================
+           ★★★ 媒體查詢 (Media Queries) - 請保持在最下方 ★★★
+           ========================================= */
+
+        /* --- 橫向模式通則 (Mobile & Desktop) --- */
         @media (orientation: landscape) {
+            /* 修正輸入框寬度：移除手機版的縮放 Hack，回歸 100% 寬度 */
             select, input {
                 transform: none !important;
                 width: 100% !important;
@@ -149,8 +360,6 @@
                 text-align: center;
             }
 
-            /* ★★★ FIX 1 & 2: 生命跡象 UI 優化 ★★★ */
-            /* 將左右並排改為垂直排列，並放大字體 */
             .vital-info-container {
                 flex-direction: column !important; /* 改為垂直 */
                 align-items: center !important;
@@ -167,11 +376,19 @@
                 margin-top: 4px;
             }
 
-            /* ★★★ FIX 3: 放大目標單字 ★★★ */
+            /* ★★★ FIX 3: 調整目標單字樣式 (防止長字溢出) ★★★ */
             #current-word-ui {
-                font-size: 32px !important; /* 超大字體 */
-                line-height: 1.2;
+                font-size: 24px !important; /* 固定字體大小，避免太大 */
+                line-height: 1.4;
                 margin-top: 10px;
+                
+                /* 換行邏輯： */
+                white-space: normal !important;        /* 允許換行 */
+                overflow-wrap: break-word !important;  /* 長單字太長時可切斷 */
+                word-break: keep-all !important;       /* 盡量保持單字完整，不要隨意切斷 */
+                
+                width: 100%;
+                max-width: 100%;
             }
 
             .btn { font-size: 10px; padding: 15px; }
@@ -185,211 +402,6 @@
                 padding: 0 40px;
                 z-index: 150;
             }
-        }
-
-        .canvas-container::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.65);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        #game-canvas { 
-            position: relative;
-            z-index: 10;
-            image-rendering: pixelated; 
-            width: 100%; height: 100%; 
-            background: transparent;
-        }
-
-        #weapon-layer {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 20; 
-            display: flex; align-items: flex-end; justify-content: center; overflow: hidden;
-        }
-
-        #weapon-img {
-            image-rendering: pixelated; 
-            transition: transform 0.05s ease-out; 
-            transform-origin: bottom center;
-        }
-
-        .recoil-kick { transform: translateY(25%) scale(1.05) !important; }
-        .recoil-heavy { transform: translateY(20%) scale(1.1) !important; }
-        .recoil-critical { transform: translateY(15%) scale(1.15) rotate(-5deg) !important; }
-
-        select, input {
-            background: #0d0d0d !important;
-            border: 1px solid #333 !important;
-            color: #0f0 !important;
-            padding: 12px !important;
-            font-size: 16px !important; 
-            transform: scale(0.8); 
-            transform-origin: left center;
-            width: 125% !important; 
-            margin: 4px 0 !important;
-            border-radius: 4px !important;
-            font-family: 'Press Start 2P', 'Noto Sans TC', sans-serif !important;
-            outline: none;
-            box-sizing: border-box;
-        }
-        select:focus, input:focus { border-color: #0f0 !important; }
-
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        .btn {
-            background: #111; border: 1px solid #444; color: #ccc;
-            padding: 10px; cursor: pointer; font-size: 9px;
-            font-family: 'Press Start 2P', cursive;
-            transition: 0.1s; border-radius: 6px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .btn:active { background: #555; color: #fff; transform: scale(0.95); }
-
-        .btn-empty { color: #444 !important; border-style: dashed !important; cursor: not-allowed; background: #050505 !important; }
-
-        .overlay-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.95); display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
-            z-index: 200; text-align: center; padding: 20px;
-        }
-
-        .banner-box {
-            width: 100%; max-width: 400px; aspect-ratio: 1480 / 450;
-            background: #000; margin-bottom: 15px; border: 1px solid #333;
-            overflow: hidden; display: flex; align-items: center; justify-content: center;
-        }
-        .banner-box img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
-
-        .diff-rookie.active-diff { background: #063d19 !important; border-color: #0f0 !important; color: #0f0 !important; box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); }
-        .diff-veteran.active-diff { background: #002244 !important; border-color: #0af !important; color: #0af !important; box-shadow: 0 0 15px rgba(0, 170, 255, 0.3); }
-        .diff-nightmare.active-diff { background: #330044 !important; border-color: #f0f !important; color: #f0f !important; box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); }
-        .diff-nohope.active-diff { background: #440000 !important; border-color: #f0f !important; color: #f00 !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.5); }
-        
-        .book-btn { border: 1px solid #333; }
-        .book-active {
-            background-color: #d4d4d8 !important; color: #000 !important;
-            border-color: #fff !important; font-weight: bold;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-
-        .lesson-btn { border: 1px solid #333; }
-        .lesson-active {
-            background-color: #16a34a !important; color: #000 !important;
-            border-color: #4ade80 !important; font-weight: bold;
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
-        }
-
-        #boss-ui {
-            position: absolute; 
-            bottom: 35%; 
-            left: 0; width: 100%;
-            display: flex; flex-direction: column; align-items: center;
-            pointer-events: none; transition: opacity 0.5s; opacity: 0;
-            z-index: 150;
-            padding-bottom: 2px;
-        }
-        .boss-word-active { color: #0f0; text-shadow: 0 0 10px #0f0; transform: scale(1.05); display: inline-block;}
-
-        #reward-toast {
-            position: absolute;
-            top: 50%; /* 垂直置中 */
-            left: 50%; /* 水平置中 */
-            transform: translate(-50%, -50%) scale(0.5); /* 初始狀態：置中且縮小 */
-            
-            width: auto;
-            white-space: nowrap; /* 確保不換行 */
-            text-align: center;
-            pointer-events: none; 
-            z-index: 300; /* 層級最高 */
-            
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 彈跳效果 */
-            opacity: 0;
-            
-            font-size: 40px; /* 字體加大 */
-            font-weight: 700; 
-            color: #fff; 
-            font-family: 'Press Start 2P', cursive;
-            line-height: 1.5;
-            
-            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-        }
-        
-        .toast-active { 
-            opacity: 1; 
-            transform: translate(-50%, -50%) scale(1.2) !important; 
-        }
-
-        .admin-table-container {
-            width: 100%; max-height: 250px; overflow-y: auto; font-size: 9px;
-            border: 1px solid #333; margin-top: 10px; background: #050505;
-        }
-        .admin-table-container th { padding: 8px; font-size: 8px; color: #666; text-transform: uppercase; }
-        .admin-table-container td { padding: 6px 8px; border-bottom: 1px solid #111; vertical-align: top; }
-
-        #leaderboard-preview { width: 100%; margin-top: 10px; border-top: 1px solid #222; padding-top: 10px; }
-
-        @keyframes flicker { 
-            0% { opacity: 1; } 25% { opacity: 0.8; } 50% { opacity: 1; } 75% { opacity: 0.6; } 100% { opacity: 1; }
-        }
-        .flicker { animation: flicker 0.15s infinite; }
-        
-        @keyframes shine { 
-            0% { transform: scale(1); text-shadow: 0 0 10px gold; } 
-            50% { transform: scale(1.1); text-shadow: 0 0 30px yellow, 0 0 50px orange; } 
-            100% { transform: scale(1); text-shadow: 0 0 10px gold; } 
-        }
-        .perfect-badge {
-            color: #FFD700; animation: shine 1.5s infinite ease-in-out;
-            border: 2px solid #FFD700; padding: 10px; border-radius: 8px;
-            background: rgba(255, 215, 0, 0.1); margin-bottom: 20px; display: none;
-        }
-
-        .ecg-container {
-            width: 100%; height: 30px; background: #000; border: 1px solid #222;
-            position: relative; overflow: hidden; display: flex; align-items: center; border-radius: 4px;
-        }
-        .ecg-svg { width: 100%; height: 100%; }
-        .ecg-line {
-            fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
-            stroke-dasharray: 200; stroke-dashoffset: 200; animation: dash 2s linear infinite;
-        }
-        @keyframes dash { to { stroke-dashoffset: 0; } }
-
-        .game-credits {
-            position: absolute;
-            bottom: 4px;          
-            left: 0;
-            width: 100%;
-            text-align: center;
-            z-index: 200;         
-            pointer-events: none; 
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.7;         
-            transition: opacity 0.3s; 
-        }
-        .game-credits p {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 7px;       
-            color: #ffffff;          
-            margin: 0;
-            text-transform: uppercase;
-            text-shadow: 0 0 2px #000;
-        }
-        .game-credits img {
-            width: 20px;          
-            height: auto;
-            gap: 6px;
-            filter: drop-shadow(0 0 2px #000);
         }
     </style>
 </head>
@@ -548,7 +560,6 @@
                         <path id="ecg-path" class="ecg-line" d="M0,10 L10,10 L15,0 L20,20 L25,10 L100,10" stroke="lime" />
                     </svg>
                 </div>
-                <!-- ★★★ FIX: 增加 class vital-info-container 以便 CSS 操作 ★★★ -->
                 <div class="flex justify-between mt-1 vital-info-container">
                     <div id="status-label" class="pixel-font text-green-500 text-[8px] font-bold">VITAL: STABLE</div>
                     <div id="combo-display" class="pixel-font text-yellow-500 text-[8px] opacity-0 font-bold">0 COMBO</div>
@@ -557,8 +568,6 @@
         </div>
 
         <div class="flex flex-col items-center justify-center bg-zinc-900/40 rounded-lg border border-zinc-800 p-2 relative h-full">
-            <!-- ★★★ FIX 4: 移除 TARGETING 字樣 ★★★ -->
-            <!-- <p id="targeting-label" ...>Targeting</p> 被刪除了 -->
             <div id="current-word-ui" class="text-[12px] text-center text-white font-bold tracking-wider flex flex-wrap justify-center gap-1 w-full overflow-hidden">AWAITING SIGNAL...</div>
         </div>
         <div class="grid grid-cols-2 gap-3 mt-1">
@@ -683,16 +692,16 @@
             'NoHope':    { rewardThreshold: 12, criticalChance: 0.01, baseScore: 200, comboMultiplier: 20 }
         },
         BOSS_COMBO: {
-            'Rookie':    { rewardThreshold: 10, shotgunPush: 0.20, flashDuration: 90 },
-            'Veteran':   { rewardThreshold: 11, shotgunPush: 0.15, flashDuration: 84 },
-            'Nightmare': { rewardThreshold: 12, shotgunPush: 0.10, flashDuration: 72 },
-            'NoHope':    { rewardThreshold: 15, shotgunPush: 0.02, flashDuration: 60 }
+            'Rookie':    { rewardThreshold: 10, shotgunPush: 0.20, flashDuration: 300 },
+            'Veteran':   { rewardThreshold: 15, shotgunPush: 0.15, flashDuration: 180 },
+            'Nightmare': { rewardThreshold: 20, shotgunPush: 0.10, flashDuration: 120 },
+            'NoHope':    { rewardThreshold: 30, shotgunPush: 0.005, flashDuration: 60 }
         },
         SURVIVAL: {
             'Rookie':    { maxHP: 6 },
             'Veteran':   { maxHP: 5 },
-            'Nightmare': { maxHP: 5 },
-            'NoHope':    { maxHP: 4 }
+            'Nightmare': { maxHP: 4 },
+            'NoHope':    { maxHP: 3 }
         },
         THRESHOLDS: {
             'Rookie':    { deathZ: 0.85 },
@@ -1937,7 +1946,7 @@
     }
 
     function winGame() { 
-        if (!state.gameActive) return; // ★★★ FIX: 防止重複觸發 ★★★
+        if (!state.gameActive) return; 
         state.gameActive = false; if(wakeLock) releaseWakeLock(); 
         document.getElementById('win-score-display').innerText = Math.floor(state.score); 
         document.getElementById('win-screen').classList.remove('hidden'); 
@@ -1954,7 +1963,7 @@
     }
     
     function endGame() { 
-        if (!state.gameActive) return; // ★★★ FIX: 防止重複觸發 ★★★
+        if (!state.gameActive) return; 
         state.gameActive = false; if(wakeLock) releaseWakeLock(); 
         document.getElementById('fail-score-display').innerText = Math.floor(state.score); 
         document.getElementById('game-over-screen').classList.remove('hidden'); 
