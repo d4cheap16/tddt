@@ -291,6 +291,26 @@
             gap: 6px;
             filter: drop-shadow(0 0 2px #000);
         }
+        
+        /* ★★★ FIX 3: 調整目標單字樣式 (防止長字溢出) ★★★ */
+        /* 修改字體為 Noto Sans TC 以節省空間並提高可讀性 */
+        #current-word-ui {
+            font-family: 'Noto Sans TC', sans-serif !important;
+            font-weight: 700; /* 使用粗體增加辨識度 */
+            letter-spacing: 0.5px; /* 稍微增加字距 */
+            
+            font-size: 26px !important; /* 稍微調整大小 */
+            line-height: 1.3;
+            margin-top: 10px;
+            
+            /* 換行邏輯： */
+            white-space: normal !important;        /* 允許換行 */
+            overflow-wrap: break-word !important;  /* 長單字太長時可切斷 */
+            word-break: keep-all !important;       /* 盡量保持單字完整 */
+            
+            width: 100%;
+            max-width: 100%;
+        }
 
         /* =========================================
            ★★★ 媒體查詢 (Media Queries) - 請保持在最下方 ★★★
@@ -376,19 +396,9 @@
                 margin-top: 4px;
             }
 
-            /* ★★★ FIX 3: 調整目標單字樣式 (防止長字溢出) ★★★ */
+            /* Desktop override specifically handled above, but ensuring consistency */
             #current-word-ui {
-                font-size: 24px !important; /* 固定字體大小，避免太大 */
-                line-height: 1.4;
-                margin-top: 10px;
-                
-                /* 換行邏輯： */
-                white-space: normal !important;        /* 允許換行 */
-                overflow-wrap: break-word !important;  /* 長單字太長時可切斷 */
-                word-break: keep-all !important;       /* 盡量保持單字完整，不要隨意切斷 */
-                
-                width: 100%;
-                max-width: 100%;
+                font-size: 28px !important; /* 在大螢幕上可以稍微再大一點 */
             }
 
             .btn { font-size: 10px; padding: 15px; }
@@ -1396,7 +1406,7 @@
 
                 } else {
                     const scale = 3.2; 
-                    const size = Math.min(w * 0.65, (20 + Math.pow(this.z, 2) * 320) * scale);
+                    const size = Math.min(w * 0.55, (15 + Math.pow(this.z, 2) * 280));
                     const PALETTE = { skin: "#6d6459", shadow: "#3e3630", dirt: "#1f1c18", pants: "#2b2825", blood: "#660000", dried: "#2a0505", scar: "#3e2723" };
                     const breathe = Math.sin(Date.now()*0.0015)*0.05;
 
