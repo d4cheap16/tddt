@@ -52,7 +52,6 @@
             width: 100%; max-width: 500px; height: 100dvh;
             background: #000; display: flex; flex-direction: column;
             overflow: hidden; border-left: 2px solid #222; border-right: 2px solid #222;
-            /* ★★★ NEW: 確保 transform 震動時邊緣不會糊掉 ★★★ */
             will-change: transform;
         }
 
@@ -64,7 +63,6 @@
             background-size: cover;
             background-position: center;
             transition: background-image 0.5s ease-in-out;
-            /* ★★★ OPTIMIZATION: 確保背景圖保持像素風格，不會模糊 ★★★ */
             image-rendering: pixelated; 
         }
 
@@ -85,15 +83,14 @@
             background: transparent;
         }
 
-        /* ★★★ NEW: 槍枝容器樣式 ★★★ */
         #weapon-layer {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* 讓點擊穿透，不影響遊戲操作 */
-            z-index: 20; /* 顯示在 Canvas 敵人之上 */
+            pointer-events: none; 
+            z-index: 20; 
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -101,23 +98,19 @@
         }
 
         #weapon-img {
-            image-rendering: pixelated; /* 保持像素風格 */
-            transition: transform 0.05s ease-out; /* 極短的過渡時間，讓後座力順暢 */
-            /* 預設位置微調 */
+            image-rendering: pixelated; 
+            transition: transform 0.05s ease-out; 
             transform-origin: bottom center;
         }
 
-        /* 後座力動畫 Class */
         .recoil-kick {
-            transform: translateY(25%) scale(1.05) !important; /* 往後(下)退並稍微變大 */
+            transform: translateY(25%) scale(1.05) !important; 
         }
         
-        /* ★★★ NEW: 強力後座力 (給散彈槍用) ★★★ */
         .recoil-heavy {
             transform: translateY(20%) scale(1.1) !important;
         }
 
-        /* ★★★ NEW: 暴擊後座力 (給 Critical 用) - 更誇張的動作 ★★★ */
         .recoil-critical {
             transform: translateY(15%) scale(1.15) rotate(-5deg) !important;
         }
@@ -126,7 +119,7 @@
             height: 35%; width: 100%; background: #050505;
             padding: 10px 15px; display: grid; grid-template-rows: auto 1fr auto; 
             gap: 8px; z-index: 50; box-sizing: border-box;
-            position: relative; /* 為了讓 Footer 定位參考 */
+            position: relative; 
         }
 
         select, input {
@@ -134,11 +127,10 @@
             border: 1px solid #333 !important;
             color: #0f0 !important;
             padding: 12px !important;
-            /* FIX: iOS Zoom Issue - 手機上保持 16px 防止放大 */
             font-size: 16px !important; 
-            transform: scale(0.8); /* 視覺上縮小以符合復古感 */
+            transform: scale(0.8); 
             transform-origin: left center;
-            width: 125% !important; /* 補償 scale 縮小造成的寬度損失 */
+            width: 125% !important; 
             
             margin: 4px 0 !important;
             border-radius: 4px !important;
@@ -253,32 +245,31 @@
         }
         @keyframes dash { to { stroke-dashoffset: 0; } }
 
-        /* ★★★ Footer 樣式 ★★★ */
         .game-credits {
             position: absolute;
-            bottom: 4px;          /* 距離底部 4px */
+            bottom: 4px;          
             left: 0;
             width: 100%;
             text-align: center;
-            z-index: 200;         /* 顯示在最上層 */
-            pointer-events: none; /* 關鍵：讓點擊穿透，不影響遊戲按鈕 */
+            z-index: 200;         
+            pointer-events: none; 
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            opacity: 0.7;         /* 微透明 */
-            transition: opacity 0.3s; /* 增加淡入淡出效果 */
+            opacity: 0.7;         
+            transition: opacity 0.3s; 
         }
         .game-credits p {
             font-family: 'Press Start 2P', cursive;
-            font-size: 7px;       /* 縮小字體 */
-            color: #ffffff;          /* 白色 */
+            font-size: 7px;       
+            color: #ffffff;          
             margin: 0;
             text-transform: uppercase;
             text-shadow: 0 0 2px #000;
         }
         .game-credits img {
-            width: 20px;          /* 縮小 logo */
+            width: 20px;          
             height: auto;
             gap: 6px;
             filter: drop-shadow(0 0 2px #000);
@@ -290,7 +281,6 @@
 <div class="game-wrapper" id="main-container">
     <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none z-[120]"></div>
     
-    <!-- ★★★ 2. BOSS WARNING SCREEN ★★★ -->
     <div id="warning-screen" class="overlay-screen hidden z-[160]" style="background: rgba(139, 0, 0, 0.8);">
         <div class="border-4 border-red-500 p-6 bg-black">
             <h1 class="text-red-500 text-4xl font-bold flicker tracking-widest mb-4">WARNING</h1>
@@ -369,7 +359,6 @@
         </div>
         <div class="grid grid-cols-2 gap-2 w-full max-w-sm mt-6">
             <button onclick="exportToCSV()" class="btn py-4 bg-blue-900 border-blue-600 text-white uppercase col-span-2">Export CSV Data</button>
-            <!-- GOD MODE 入口 -->
             <button onclick="startGodMode()" class="btn py-4 bg-green-900 border-green-600 text-green-400 uppercase font-bold col-span-2">GOD MODE</button>
             
             <button onclick="handleClearData()" id="clear-data-btn" class="btn py-4 bg-red-950 border-red-700 text-red-500 uppercase">Clear All</button>
@@ -381,7 +370,6 @@
         <h2 class="text-zinc-500 text-[10px] mb-8 uppercase tracking-widest">Training Mode (Paused)</h2>
         <div class="bg-zinc-900 border border-zinc-700 p-8 rounded-lg w-full max-w-xs mb-8 text-center">
             <p class="text-[8px] text-zinc-600 mb-4 uppercase tracking-tighter">Target Practice</p>
-            <!-- 修正：移除 uppercase 類別，直接顯示原始文字 -->
             <div id="pause-target-word" class="text-white text-[16px] font-bold mb-8 tracking-widest">---</div>
             <button onclick="speakTarget()" class="btn w-full bg-blue-900 text-white mb-3 py-4 font-bold uppercase">Play Voice</button>
             <button onclick="togglePause()" class="btn w-full bg-green-950 text-white py-4 font-bold uppercase">Resume</button>
@@ -422,13 +410,7 @@
 
     <div class="canvas-container" id="canvas-holder">
         <canvas id="game-canvas"></canvas>
-        <!-- ★★★ NEW: 槍枝圖層 ★★★ -->
         <div id="weapon-layer">
-            <!-- 
-                調整說明:
-                1. width: 60% -> 控制槍的大小，數字越大槍越大
-                2. transform: translateY(5%) -> 控制槍的上下位置，正值向下移，負值向上移
-            -->
             <img id="weapon-img" 
                  src="https://d4cheap16.github.io/tddt/gun01.png" 
                  alt="Weapon"
@@ -457,7 +439,6 @@
 
         <div class="flex flex-col items-center justify-center bg-zinc-900/40 rounded-lg border border-zinc-800 p-2 relative h-full">
             <p id="targeting-label" class="text-[6px] text-zinc-600 mb-1 uppercase tracking-widest">Targeting</p>
-            <!-- 修正：移除 uppercase 類別 -->
             <div id="current-word-ui" class="text-[12px] text-center text-white font-bold tracking-wider flex flex-wrap justify-center gap-1 w-full overflow-hidden">AWAITING SIGNAL...</div>
         </div>
         <div class="grid grid-cols-2 gap-3 mt-1">
@@ -466,8 +447,6 @@
         </div>
     </div>
 
-    <!-- ★★★ Footer ★★★ -->
-    <!-- 增加 ID 以便程式碼控制 -->
     <div id="game-footer" class="game-credits">
         <p>Designed by CHENWEI with Gemini</p>
         <img src="https://d4cheap16.github.io/tddt/Gemini.png" alt="Google Gemini Logo">
@@ -497,21 +476,26 @@
 </script>
 
 <script>
-    const ADMIN_KEY = "AdaWong";
+    const ADMIN_KEY = atob("QWRhV29uZw==");";
     
-    // ★★★ NEW: 受傷震動參數設定 (SHAKE CONFIG) ★★★
-    /*
-      intensity: 震動幅度 (數字越大，晃動距離越遠)
-      decay: 衰減係數 (0.0 ~ 1.0，數字越接近 1，震動持續時間越久; 越小停得越快)
-    */
+    // ★★★ NEW: XSS 防護輔助函式 ★★★
+    function escapeHtml(text) {
+        if (!text) return text;
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     const DAMAGE_SHAKE_CONFIG = {
-        'Rookie':    { intensity: 20, decay: 0.85 }, // 新手：輕微震動，快速恢復
-        'Veteran':   { intensity: 30, decay: 0.88 }, // 老手：標準震動
-        'Nightmare': { intensity: 45, decay: 0.90 }, // 惡夢：強烈震動
-        'NoHope':    { intensity: 60, decay: 0.92 }  // 絕望：劇烈震動，像地震一樣
+        'Rookie':    { intensity: 20, decay: 0.85 }, 
+        'Veteran':   { intensity: 30, decay: 0.88 }, 
+        'Nightmare': { intensity: 45, decay: 0.90 }, 
+        'NoHope':    { intensity: 60, decay: 0.92 }  
     };
 
-    // ★★★ FIX: 使用您提供的 GitHub 背景圖，且在 CSS 加入 pixelated 渲染確保清晰 ★★★
     const BGS = [
         "https://d4cheap16.github.io/tddt/BG01.png", 
         "https://d4cheap16.github.io/tddt/BG02.png", 
@@ -520,19 +504,15 @@
         "https://d4cheap16.github.io/tddt/BG05.png"
     ];
 
-    /* ★★★ NEW: 槍枝素材設定 (新增 flash 和 shotgun) ★★★ */
     const GUN_ASSETS = {
         idle: "https://d4cheap16.github.io/tddt/gun01.png",
         fire: "https://d4cheap16.github.io/tddt/gun02.png",
-        // 注意：請確保將您上傳的 flash.png 和 shotgun.png 放到 GitHub 的對應路徑下
         flash: "https://d4cheap16.github.io/tddt/flash.png",
         shotgun: "https://d4cheap16.github.io/tddt/shotgun.png",
-        // ★★★ NEW: Critical Image Placeholder ★★★
         critical: "https://d4cheap16.github.io/tddt/minigun.png",
         timer: null
     };
 
-    /* BOSS 戰參數設定 */
     const BOSS_CONFIG_DATA = {
         'Rookie':    { startZ: 0.10, speed: 0.0015, sentencesRequired: 2 },
         'Veteran':   { startZ: 0.10, speed: 0.0016, sentencesRequired: 3 },
@@ -540,19 +520,13 @@
         'NoHope':    { startZ: 0.40, speed: 0.0006, sentencesRequired: 5 } 
     };
 
-    /* ★★★ NEW: BOSS 物理與擊退參數獨立設定 ★★★ */
     const BOSS_PHYSICS_CONFIG = {
         'Rookie':    { hit: 0.05,  crit: 0.15, phase: 0.40, attackReset: 0.30 },
         'Veteran':   { hit: 0.04,  crit: 0.12, phase: 0.35, attackReset: 0.25 },
         'Nightmare': { hit: 0.03,  crit: 0.10, phase: 0.30, attackReset: 0.20 },
-        // NoHope (巨人): 
-        // hit: 0.002 (幾乎打不動)
-        // phase: 0.1 (轉階段也只退一點點)
-        // attackReset: 0.04 (攻擊後幾乎不退，因為速度慢，這樣才能維持連續攻擊感)
         'NoHope':    { hit: 0.002, crit: 0.05, phase: 0.10, attackReset: 0.04 } 
     };
 
-    /* BOSS 震動參數 */
     const BOSS_SHAKE_CONFIG = {
         'Rookie':    { startZ: 0.5, intensity: 10, axis: 'Y' },
         'Veteran':   { startZ: 0.4, intensity: 20, axis: 'Y' },
@@ -570,7 +544,6 @@
         'Veteran':   { criticalChance: 0.04, stunDuration: 40,  scoreMult: 2.0 },
         'Nightmare': { criticalChance: 0.03, stunDuration: 35,  scoreMult: 2.5 },
         'NoHope':    { criticalChance: 0.01, stunDuration: 30,  scoreMult: 3.0 }
-        // 移除舊的 pushback 設定
     };
 
     const ENEMY_SPEEDS = {
@@ -604,8 +577,6 @@
         }
     };
 
-    // ★★★ FIX: 修正數值並確保被執行 ★★★
-    // ★★★ NEW: 在 effect 中加入 triggerSpecialAction 呼叫 ★★★
     const REWARD_CONFIG = {
         'RECOVER': {
             text: "LET ME HELP YOU!", textColor: "#6ee7b7", borderColor: "#6ee7b7", boxShadow: "none", 
@@ -620,17 +591,16 @@
             effect: (state) => { 
                 state.freezeTimer = 180; 
                 state.shake = 50;
-                triggerSpecialAction('flash'); // 觸發閃光彈圖片
+                triggerSpecialAction('flash'); 
             } 
         },
         'SHOTGUN': {
-            // ★★★ FIX: 增加 overlayDuration 到 250ms (原 100ms 太快看不見) ★★★
             text: "STAY BACK!", textColor: "#fbbf24", boxShadow: "none", overlayColor: "rgba(255, 200, 50, 0.6)", overlayDuration: 250, 
             effect: (state) => { 
                 state.enemies.forEach(e => { if (!e.isDying) e.z = Math.max(0, e.z - 0.4); }); 
                 state.shake = 60; 
                 state.freezeTimer = 60;
-                triggerSpecialAction('shotgun'); // 觸發散彈槍圖片
+                triggerSpecialAction('shotgun'); 
             }
         },
         'CRITICAL': {
@@ -639,7 +609,7 @@
                 const maxHP = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP; 
                 state.hp = maxHP; 
                 state.shake = 60; 
-                triggerSpecialAction('critical'); // ★★★ NEW: 觸發 Critical 圖片 ★★★
+                triggerSpecialAction('critical'); 
             } 
         }
     };
@@ -672,7 +642,6 @@
              setTimeout(() => this.play(783.99, 'sine', 0.2, 0.2), 200); setTimeout(() => this.play(1046.50, 'sine', 0.4, 0.2), 300); 
         },
         boss() { this.play(80, 'triangle', 0.8, 0.2, false); },
-        // ★★★ 2. BOSS WARNING ALARM ★★★
         alarm() {
             this.play(800, 'square', 0.1, 0.1);
             setTimeout(() => this.play(0, 'square', 0.1, 0), 100);
@@ -691,14 +660,13 @@
         freezeTimer: 0,
         enemies: [], particles: [],
         bgStars: [], 
-        shake: 0, shakeDecay: 0.88, // ★★★ NEW: 新增 shakeDecay 狀態 ★★★
+        shake: 0, shakeDecay: 0.88, 
         bossMode: false, bossData: null, bossWordIndex: 0,
         spawnTimer: 0, player: { name: "", no: "", class: "" },
         wordPool: [],
         sentencePool: [],
         damageAlpha: 0,
         damageTaken: 0,
-        // ★★★ FIX: BOSS 啟動鎖 ★★★
         isBossStarting: false 
     };
 
@@ -711,84 +679,69 @@
     let clearConfirm = false; 
 
     function randomizeBackground() {
-        if (!BGS || BGS.length === 0) return; // 保護
+        if (!BGS || BGS.length === 0) return; 
         const randomBg = BGS[Math.floor(Math.random() * BGS.length)];
         const holder = document.getElementById('canvas-holder');
         if (holder) holder.style.backgroundImage = `url('${randomBg}')`;
     }
     
-    // ★★★ NEW: 預載圖片功能（包含背景與槍枝 + 特殊道具） ★★★
     function preloadImages() {
-        // 預載背景
         if (BGS) {
             BGS.forEach(src => { const img = new Image(); img.src = src; });
         }
-        // 預載一般槍枝
         new Image().src = GUN_ASSETS.idle;
         new Image().src = GUN_ASSETS.fire;
-        // 預載特殊道具
         new Image().src = GUN_ASSETS.flash;
         new Image().src = GUN_ASSETS.shotgun;
-        // ★★★ NEW: 預載 Critical ★★★
         if(GUN_ASSETS.critical) new Image().src = GUN_ASSETS.critical;
     }
 
-    // ★★★ NEW: 開槍效果函式 ★★★
     function triggerGunFire() {
         const weaponImg = document.getElementById('weapon-img');
         if (!weaponImg) return;
 
-        // 1. 清除之前的計時器
         if (GUN_ASSETS.timer) {
             clearTimeout(GUN_ASSETS.timer);
             GUN_ASSETS.timer = null;
         }
 
-        // 2. 切換為開槍圖片
         weaponImg.src = GUN_ASSETS.fire;
         
-        // 3. 加入後座力動畫 CSS Class
-        weaponImg.classList.remove('recoil-heavy'); // 移除可能的強力後座力
+        weaponImg.classList.remove('recoil-heavy'); 
         weaponImg.classList.remove('recoil-critical');
         weaponImg.classList.add('recoil-kick');
 
-        // 4. 設定計時器，短暫時間後回復原狀
         GUN_ASSETS.timer = setTimeout(() => {
             weaponImg.src = GUN_ASSETS.idle;
             weaponImg.classList.remove('recoil-kick');
             GUN_ASSETS.timer = null;
-        }, 150); // 150毫秒後恢復
+        }, 150); 
     }
 
-    // ★★★ NEW: 特殊道具效果函式 ★★★
     function triggerSpecialAction(type) {
         const weaponImg = document.getElementById('weapon-img');
         const asset = GUN_ASSETS[type];
         if (!weaponImg || !asset) return;
 
-        // 1. 清除之前的計時器
         if (GUN_ASSETS.timer) {
             clearTimeout(GUN_ASSETS.timer);
             GUN_ASSETS.timer = null;
         }
 
-        // 2. 切換為特殊圖片
         weaponImg.src = asset;
         
-        // 3. 根據類型加入不同的動畫效果
         weaponImg.classList.remove('recoil-kick');
         weaponImg.classList.remove('recoil-heavy');
         weaponImg.classList.remove('recoil-critical');
         
         if (type === 'shotgun') {
-            weaponImg.classList.add('recoil-heavy'); // 散彈槍後座力更大
+            weaponImg.classList.add('recoil-heavy'); 
         } else if (type === 'critical') {
-            weaponImg.classList.add('recoil-critical'); // ★★★ Critical 超大後座力 ★★★
+            weaponImg.classList.add('recoil-critical'); 
         } else {
-            weaponImg.classList.add('recoil-kick'); // 閃光彈一般後座力
+            weaponImg.classList.add('recoil-kick'); 
         }
 
-        // 4. 顯示時間比普通開槍久一點，讓玩家看清楚 (600ms)
         GUN_ASSETS.timer = setTimeout(() => {
             weaponImg.src = GUN_ASSETS.idle;
             weaponImg.classList.remove('recoil-kick');
@@ -802,7 +755,6 @@
         document.getElementById('book-grid').innerHTML = [1,2,3,4,5].map(i => 
             `<button onclick="selectBook(${i})" class="btn book-btn ${i===1?'book-active':''}" id="b${i}">${['I','II','III','IV','V'][i-1]}</button>`).join('');
         
-        // 確保先載入一次資料
         loadBookData(1);
         
         loadSavedProfile();
@@ -841,11 +793,9 @@
         try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
     }
 
-    // ★★★ FIX 2: 恢復 Fetch 但加入快取防止 (Timestamp) ★★★
     async function loadBookData(n) {
         selectedBook = n;
         try {
-            // 加入 timestamp 以避免 GitHub Pages 的快取問題，確保玩家讀到最新題目
             const timestamp = new Date().getTime();
             const res = await fetch(`book${n}.json?t=${timestamp}`);
             
@@ -858,7 +808,6 @@
             checkMissionValid();
         } catch(e) { 
             console.error("Load failed, file might not exist yet:", e);
-            // 讀取失敗時清空數據，避免顯示錯誤的按鈕狀態
             currentBookData = {}; 
             refreshLessonGrid(); 
             checkMissionValid();
@@ -888,7 +837,7 @@
             records.sort((a, b) => b.score - a.score);
             const top3 = records.slice(0, 3);
             if(top3.length === 0) list.innerHTML = "NO RECORDS IN THIS SECTOR";
-            else list.innerHTML = top3.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${r.name}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
+            else list.innerHTML = top3.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${escapeHtml(r.name)}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
         } catch (e) { list.innerHTML = "UNABLE TO LOAD RECORDS"; }
     }
 
@@ -936,7 +885,6 @@
         }
     }
 
-    // 啟動 UI 初始化
     initUI();
 
     window.confirmMission = () => {
@@ -991,17 +939,24 @@
             body.innerHTML = res.map(d => {
                 let timeStr = "";
                 let dateStr = "N/A";
-                if (d.timestamp && d.timestamp.seconds) {
+                // ★★★ FIX: timestamp 安全檢查 ★★★
+                if (d.timestamp?.seconds) {
                     const date = new Date(d.timestamp.seconds * 1000);
                     dateStr = `${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getDate().toString().padStart(2,'0')}`;
                     timeStr = `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
                 }
                 const missionStr = `B${d.book || '?'}-L${d.lesson || '?'}`;
+                
+                // ★★★ FIX: XSS 防護，對所有輸出欄位進行 escapeHtml 處理 ★★★
+                const safeName = escapeHtml(d.name);
+                const safeClass = escapeHtml(d.class);
+                const safeNo = escapeHtml(d.no);
+                
                 return `
                 <tr>
                     <td class="align-top">
-                        <div class="text-blue-400 font-bold leading-tight">${d.class}<span class="text-white ml-1">${d.no}</span></div>
-                        <div class="text-zinc-500 text-[8px] truncate max-w-[80px]">${d.name}</div>
+                        <div class="text-blue-400 font-bold leading-tight">${safeClass}<span class="text-white ml-1">${safeNo}</span></div>
+                        <div class="text-zinc-500 text-[8px] truncate max-w-[80px]">${safeName}</div>
                     </td>
                     <td class="align-top text-center text-zinc-300 font-bold tracking-tighter pt-2">${missionStr}</td>
                     <td class="align-top">
@@ -1025,7 +980,7 @@
         const headers = ["Class", "No", "Name", "Score", "Difficulty", "Book", "Lesson", "Date", "Time"];
         const rows = cachedAdminData.map(d => {
             let dateStr = "", timeStr = "";
-            if (d.timestamp && d.timestamp.seconds) {
+            if (d.timestamp?.seconds) {
                 const date = new Date(d.timestamp.seconds * 1000);
                 dateStr = `${date.getFullYear()}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getDate().toString().padStart(2,'0')}`;
                 timeStr = `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
@@ -1066,7 +1021,6 @@
         overlay.style.backgroundColor = conf.overlayColor;
         overlay.style.opacity = key === 'FLASH' ? "1" : "0.8"; 
         if (conf.effect) conf.effect(state);
-        // ★★★ FIX: 使用 Config 的正確時間，而非寫死的值 ★★★
         setTimeout(() => { overlay.style.opacity = "0"; }, conf.overlayDuration);
         
         setTimeout(() => {
@@ -1188,16 +1142,13 @@
                 ctx.globalAlpha = this.opacity;
 
                 if (state.difficultyMode === 'Rookie') {
-                    // --- ROOKIE: SUBJECT 57 ---
                     const scale = 2.2; 
                     const size = Math.min(w * 0.65, (20 + Math.pow(this.z, 2) * 320) * scale);
-                    // 額外動畫計算
                     const twitch = (Math.random() - 0.5) * size * 0.02;
-                    ctx.translate(twitch, 0); // 抽搐
+                    ctx.translate(twitch, 0); 
 
                     const PALETTE = { skin: "#b0c4de", shadow: "#6c7a89", gown: "#4a6fa5", gShadow: "#2c3e50", strap: "#dcdcdc", sShadow: "#999", metal: "#555" };
                     
-                    // 飄帶函式
                     const drawStrap = (x, y, len, wid, offset) => {
                         const segs=5, segLen=len/segs; let cX=x, cY=y;
                         ctx.fillStyle = PALETTE.strap;
@@ -1210,130 +1161,103 @@
                         }
                     };
 
-                    // 剪影
                     drawRect(-size*0.5, -size*1.1, size, size*2.2, "#05080a");
-                    // 腿
                     drawRect(-size*0.3, size*0.6, size*0.25, size*0.9, PALETTE.gShadow);
                     drawRect(size*0.05, size*0.6, size*0.25, size*0.9, PALETTE.gShadow);
-                    // 飄帶 (背後)
                     drawStrap(-size*0.4, size*0.2, size*1.2, size*0.08, 0);
                     drawStrap(size*0.4, size*0.2, size*1.2, size*0.08, 2);
-                    // 軀幹
                     drawRect(-size*0.4, -size*0.8, size*0.8, size*1.4, PALETTE.gown);
                     ctx.fillStyle=PALETTE.sShadow; ctx.fillRect(-size*0.4, -size*0.3, size*0.8, size*0.15); ctx.fillRect(-size*0.4, 0, size*0.8, size*0.15);
-                    // 手臂 (過長袖)
                     ctx.save(); ctx.translate(-size*0.45, -size*0.7); ctx.rotate(0.1+Math.sin(Date.now()*0.003)*0.1);
                     drawRect(-size*0.1, 0, size*0.2, size*1.2, PALETTE.gown); drawStrap(0, size*1.1, size*0.6, size*0.08, 1);
                     ctx.restore();
                     ctx.save(); ctx.translate(size*0.45, -size*0.7); ctx.rotate(-0.1+Math.sin(Date.now()*0.004)*0.1);
                     drawRect(-size*0.1, 0, size*0.2, size*1.2, PALETTE.gown); drawStrap(0, size*1.1, size*0.6, size*0.08, 3);
                     ctx.restore();
-                    // 頭 (口枷)
                     ctx.save(); ctx.translate(0, -size*0.9); ctx.rotate(Math.sin(Date.now()*0.02)*0.05);
                     const hW=size*0.35, hH=size*0.45;
-                    drawRect(-hW/2, -hH*0.9, hW, hH, "#dcdcdc"); // 繃帶
+                    drawRect(-hW/2, -hH*0.9, hW, hH, "#dcdcdc"); 
                     ctx.fillStyle="#0ff"; ctx.shadowBlur=5; ctx.shadowColor="#0ff";
-                    if(Math.random()>0.1) ctx.fillRect(-hW*0.32, -hH*0.53, size*0.04, size*0.04); // 眼
+                    if(Math.random()>0.1) ctx.fillRect(-hW*0.32, -hH*0.53, size*0.04, size*0.04); 
                     ctx.shadowBlur=0;
-                    ctx.fillStyle=PALETTE.metal; ctx.fillRect(-hW*0.55, -hH*0.3, hW*1.1, hH*0.35); // 面罩
+                    ctx.fillStyle=PALETTE.metal; ctx.fillRect(-hW*0.55, -hH*0.3, hW*1.1, hH*0.35); 
                     ctx.restore();
 
                 } else if (state.difficultyMode === 'Veteran') {
-                    // --- VETERAN: BUTCHER ---
                     const scale = 2.3; 
                     const size = Math.min(w * 0.65, (20 + Math.pow(this.z, 2) * 320) * scale);
                     const PALETTE = { skin: "#757a75", shirt: "#262626", apron: "#3f3f3f", pants: "#000", blood: "#8a0b0b", blade: "#888", rust: "#5d4037" };
 
-                    // 剪影
                     drawRect(-size*0.7, -size*1.3, size*1.4, size*2.5, "#0a0a0a");
-                    // 腿
                     drawRect(-size*0.35, size*0.5, size*0.3, size*0.85, PALETTE.pants);
                     drawRect(size*0.05, size*0.5, size*0.3, size*0.85, PALETTE.pants);
-                    // 軀幹 & 圍裙
                     drawRect(-size*0.4, -size*0.8, size*0.8, size*1.4, PALETTE.shirt);
                     const aW=size*0.7, aH=size*1.0;
                     drawRect(-aW/2, -size*0.3, aW, aH, PALETTE.apron);
                     drawRot(-aW/2, -size*0.2, aW, aH, 20, PALETTE.blood, "#3a0000", size);
-                    // 頭 (歪)
                     ctx.save(); ctx.translate(0, -size*0.85); ctx.rotate(Math.PI/9);
                     const hW=size*0.38, hH=size*0.5;
                     drawRect(-hW/2, -hH, hW, hH, PALETTE.skin);
-                    ctx.fillStyle="#111"; ctx.fillRect(-hW*0.35, -hH*0.6, hW*0.3, hH*0.18); // 左眼窩
-                    ctx.fillStyle="#f00"; ctx.fillRect(hW*0.18, -hH*0.54, size*0.02, size*0.02); // 右紅眼
+                    ctx.fillStyle="#111"; ctx.fillRect(-hW*0.35, -hH*0.6, hW*0.3, hH*0.18); 
+                    ctx.fillStyle="#f00"; ctx.fillRect(hW*0.18, -hH*0.54, size*0.02, size*0.02); 
                     ctx.restore();
-                    // 手臂 & 菜刀
                     const armW=size*0.24, armL=size*0.9;
-                    // 左手
                     ctx.save(); ctx.translate(-size*0.5, -size*0.7); ctx.rotate(0.1+Math.sin(Date.now()*0.002)*0.05);
                     drawRect(-armW/2, 0, armW, armL, PALETTE.shirt); drawRect(-armW/2, armL*0.85, armW, size*0.3, PALETTE.skin);
                     ctx.restore();
-                    // 右手 (舉刀)
                     ctx.save(); ctx.translate(size*0.48, -size*0.7); 
                     const aRot = -0.8 + Math.sin(Date.now()*0.003)*0.1; ctx.rotate(aRot);
                     drawRect(-armW/2, 0, armW, armL, PALETTE.shirt); drawRect(-armW/2, armL*0.85, armW, size*0.3, PALETTE.skin);
-                    // 刀 (直立修正)
                     ctx.translate(0, armL*1.1); ctx.rotate(-aRot - 0.2); 
-                    drawRect(-size*0.04, -size*0.17, size*0.08, size*0.35, "#3e2723"); // 柄
-                    ctx.fillStyle=PALETTE.blade; ctx.fillRect(-size*0.04, -size*0.17-size*0.55, size*0.45, size*0.55); // 刃
-                    ctx.fillStyle=PALETTE.rust; ctx.fillRect(size*0.1, -size*0.4, size*0.1, size*0.1); // 鏽
-                    ctx.fillStyle=PALETTE.blood; ctx.fillRect(-size*0.04+size*0.37, -size*0.5, size*0.05, size*0.3); // 血刃
+                    drawRect(-size*0.04, -size*0.17, size*0.08, size*0.35, "#3e2723"); 
+                    ctx.fillStyle=PALETTE.blade; ctx.fillRect(-size*0.04, -size*0.17-size*0.55, size*0.45, size*0.55); 
+                    ctx.fillStyle=PALETTE.rust; ctx.fillRect(size*0.1, -size*0.4, size*0.1, size*0.1); 
+                    ctx.fillStyle=PALETTE.blood; ctx.fillRect(-size*0.04+size*0.37, -size*0.5, size*0.05, size*0.3); 
                     ctx.restore();
 
                 } else if (state.difficultyMode === 'Nightmare') {
-                    // --- NIGHTMARE: CHAINSAW MAN ---
                     const scale = 2.4; 
                     const size = Math.min(w * 0.65, (20 + Math.pow(this.z, 2) * 320) * scale);
                     const PALETTE = { shirt: "#d7ccc8", pants: "#3e2723", mask: "#5d4037", saw: "#f57c00", blood: "#aa0000" };
 
-                    // 剪影
                     drawRect(-size*0.8, -size*1.3, size*1.6, size*2.6, "#0c0500");
-                    // 腿
                     drawRect(-size*0.38, size*0.5, size*0.32, size*0.85, PALETTE.pants);
                     drawRect(size*0.06, size*0.5, size*0.32, size*0.85, PALETTE.pants);
-                    // 軀幹
                     drawRect(-size*0.45, -size*0.8, size*0.9, size*1.4, PALETTE.shirt);
-                    // 吊帶
                     ctx.fillStyle="#2e2e2e"; ctx.fillRect(size*0.2, -size*0.8, size*0.12, size*1.4);
-                    // 血汙
                     drawRot(-size*0.45, -size*0.8, size*0.9, size*1.2, 30, PALETTE.blood, "#2a0000", size);
-                    // 頭 (麻布袋 + 右歪)
                     ctx.save(); ctx.translate(0, -size*0.9); ctx.rotate(Math.PI/8);
                     const hW=size*0.45, hH=size*0.6;
-                    drawRect(-hW/2, -hH*0.85, hW, hH, PALETTE.mask); // Mask
-                    ctx.fillStyle="#000"; ctx.fillRect(-hW*0.35, -hH*0.45, size*0.12, size*0.12); ctx.fillRect(hW*0.15, -hH*0.45, size*0.14, size*0.12); // Eyes
+                    drawRect(-hW/2, -hH*0.85, hW, hH, PALETTE.mask); 
+                    ctx.fillStyle="#000"; ctx.fillRect(-hW*0.35, -hH*0.45, size*0.12, size*0.12); ctx.fillRect(hW*0.15, -hH*0.45, size*0.14, size*0.12); 
                     ctx.restore();
-                    // 手臂 (握電鋸)
                     const armW=size*0.25;
-                    ctx.save(); ctx.translate(size*0.4, -size*0.7); ctx.rotate(0.5); // 右
+                    ctx.save(); ctx.translate(size*0.4, -size*0.7); ctx.rotate(0.5); 
                     drawRect(-armW/2, 0, armW, size*0.8, PALETTE.shirt); drawRect(-armW/2, size*0.8, armW, size*0.25, "#a18e72");
                     ctx.restore();
-                    ctx.save(); ctx.translate(-size*0.4, -size*0.7); ctx.rotate(-0.5); // 左
+                    ctx.save(); ctx.translate(-size*0.4, -size*0.7); ctx.rotate(-0.5); 
                     drawRect(-armW/2, 0, armW, size*0.8, PALETTE.shirt); drawRect(-armW/2, size*0.8, armW, size*0.25, "#a18e72");
                     ctx.restore();
-                    // 電鋸 (胸前 + 左傾 + 震動)
                     ctx.save();
                     const vX = vibrate(0.08, size); const vY = vibrate(0.08, size);
                     ctx.translate(vX, -size*0.1+vY); ctx.rotate(-Math.PI/6);
                     const sW=size*0.8, sH=size*0.5;
-                    drawRect(-sW*0.6, -sH/2, sW, sH, PALETTE.saw); // 機身
+                    drawRect(-sW*0.6, -sH/2, sW, sH, PALETTE.saw); 
                     drawRot(-sW*0.6, -sH/2, sW, sH, 15, PALETTE.blood, "#2a0000", size);
-                    ctx.translate(sW*0.35, 0); ctx.rotate(0.05); // 導板
+                    ctx.translate(sW*0.35, 0); ctx.rotate(0.05); 
                     const bL=size*1.6, bH=size*0.3;
                     drawRect(0, -bH/2, bL, bH, "#546e7a");
-                    drawRot(bL*0.5, -bH/2, bL*0.5, bH, 20, "#ff0000", "#aa0000", size); // 鋸條血
-                    // 鋸齒
+                    drawRot(bL*0.5, -bH/2, bL*0.5, bH, 20, "#ff0000", "#aa0000", size); 
                     ctx.fillStyle="#cfd8dc"; const off = (Date.now()/15)%(size*0.2);
                     for(let i=0; i<bL; i+=size*0.15) { ctx.fillRect(i-off, -bH/2-size*0.06, size*0.1, size*0.06); ctx.fillRect(i+off, bH/2, size*0.1, size*0.06); }
                     ctx.restore();
 
                 } else {
-                    // --- NO HOPE: THE GIANT (V3) ---
                     const scale = 3.2; 
                     const size = Math.min(w * 0.65, (20 + Math.pow(this.z, 2) * 320) * scale);
                     const PALETTE = { skin: "#6d6459", shadow: "#3e3630", dirt: "#1f1c18", pants: "#2b2825", blood: "#660000", dried: "#2a0505", scar: "#3e2723" };
                     const breathe = Math.sin(Date.now()*0.0015)*0.05;
 
-                    // 固定雜訊繪製 (Deterministic)
                     const drawStatic = (x, y, w, h, den, seedOffset, type) => {
                         for(let i=0; i<den; i++) {
                             const r = Math.sin(this.wobbleSeed + i * 132.1 + seedOffset) * 10000; const rv = r - Math.floor(r);
@@ -1346,42 +1270,35 @@
                         }
                     };
 
-                    // 剪影
                     drawRect(-size*1.0, -size*1.2, size*2.0, size*2.5, "#050403");
-                    // 腿 (髒)
                     const lW=size*0.4, lH=size*0.7;
                     drawRect(-size*0.45, size*0.6, lW, lH, PALETTE.skin); drawStatic(-size*0.45, size*0.6, lW, lH, 20, 100, 'dirt');
                     drawRect(-size*0.45, size*0.8, lW, lH*0.6, PALETTE.pants);
                     drawRect(size*0.05, size*0.6, lW, lH, PALETTE.skin); drawStatic(size*0.05, size*0.6, lW, lH, 20, 200, 'dirt');
                     drawRect(size*0.05, size*0.8, lW, lH*0.6, PALETTE.pants);
-                    ctx.fillStyle=PALETTE.pants; ctx.fillRect(-size*0.25, size*0.5, size*0.5, size*0.5); // 襠
-                    // 軀幹
+                    ctx.fillStyle=PALETTE.pants; ctx.fillRect(-size*0.25, size*0.5, size*0.5, size*0.5); 
                     const bW = size*0.9+breathe*size*0.1;
-                    drawRect(-bW/2, -size*0.2, bW, size*0.9, PALETTE.shadow); // 腹
+                    drawRect(-bW/2, -size*0.2, bW, size*0.9, PALETTE.shadow); 
                     drawStatic(-bW/2, -size*0.2, bW, size*0.5, 15, 300, 'blood');
                     const cW = size*1.2+breathe*size*0.05;
-                    drawRect(-cW/2, -size*0.8, cW, size*0.8, PALETTE.skin); // 胸
+                    drawRect(-cW/2, -size*0.8, cW, size*0.8, PALETTE.skin); 
                     drawStatic(-cW/2, -size*0.8, cW, size*0.8, 40, 400, 'dirt');
                     drawStatic(-cW/2, -size*0.8, cW, size*0.6, 10, 500, 'scar');
                     drawStatic(-cW/4, -size*0.7, cW/2, size*0.4, 20, 600, 'blood');
-                    // 斜方肌
                     ctx.fillStyle=PALETTE.skin; ctx.beginPath();
                     const tH = -size*1.1+breathe*size*0.05;
                     ctx.moveTo(-size*0.9, -size*0.5); ctx.lineTo(-size*0.3, tH); ctx.lineTo(size*0.3, tH); ctx.lineTo(size*0.9, -size*0.5); ctx.fill();
-                    // 頭 (小)
                     const hW=size*0.25, hH=size*0.3, hY=tH+size*0.15;
                     drawRect(-hW/2, hY, hW, hH, PALETTE.shadow);
-                    ctx.fillStyle="#1a0505"; ctx.fillRect(-hW*0.3, hY+hH*0.5, hW*0.6, hH*0.35); // 嘴
-                    ctx.fillStyle="#ffeb3b"; ctx.fillRect(-hW*0.2, hY+hH*0.25, size*0.02, size*0.02); ctx.fillRect(hW*0.15, hY+hH*0.25, size*0.02, size*0.02); // 眼
-                    // 手臂 (長)
+                    ctx.fillStyle="#1a0505"; ctx.fillRect(-hW*0.3, hY+hH*0.5, hW*0.6, hH*0.35); 
+                    ctx.fillStyle="#ffeb3b"; ctx.fillRect(-hW*0.2, hY+hH*0.25, size*0.02, size*0.02); ctx.fillRect(hW*0.15, hY+hH*0.25, size*0.02, size*0.02); 
                     const aW=size*0.35;
                     ctx.save(); ctx.translate(-size*0.8, -size*0.5); ctx.rotate(0.15+Math.sin(Date.now()*0.001)*0.05);
                     drawRect(-aW/2, 0, aW, size*1.3, PALETTE.skin); drawStatic(-aW/2, 0, aW, size*1.3, 20, 700, 'dirt'); drawStatic(-aW/2, 0, aW, size*1.0, 5, 750, 'scar');
-                    ctx.fillStyle="#455a64"; ctx.fillRect(-aW*0.6, size*1.1, aW*1.2, size*0.15); // 鏈
-                    ctx.fillStyle=PALETTE.shadow; ctx.fillRect(-aW*0.6, size*1.3, aW*1.2, size*0.45); // 拳
+                    ctx.fillStyle="#455a64"; ctx.fillRect(-aW*0.6, size*1.1, aW*1.2, size*0.15); 
+                    ctx.fillStyle=PALETTE.shadow; ctx.fillRect(-aW*0.6, size*1.3, aW*1.2, size*0.45); 
                     drawStatic(-aW*0.6, size*1.3, aW*1.2, size*0.45, 15, 800, 'blood');
                     ctx.restore();
-                    // 右手
                     ctx.save(); ctx.translate(size*0.8, -size*0.5); ctx.rotate(-0.15-Math.sin(Date.now()*0.001)*0.05);
                     drawRect(-aW/2, 0, aW, size*1.3, PALETTE.skin); drawStatic(-aW/2, 0, aW, size*1.3, 20, 900, 'dirt');
                     ctx.fillStyle="#455a64"; ctx.fillRect(-aW*0.6, size*1.1, aW*1.2, size*0.15);
@@ -1395,10 +1312,9 @@
                     ctx.fillText(`GOD MODE: ON`, 0, -size * 1.6);
                 }
                 ctx.restore();
-                return; // BOSS 繪製結束
+                return; 
             }
 
-            // --- 普通敵人繪製 ---
             const size = Math.min(w * 0.55, (15 + Math.pow(this.z, 2) * 280));
             ctx.save(); ctx.globalAlpha = this.opacity; ctx.translate(screenX, screenY);
             ctx.fillStyle = `hsl(${this.clothesHue}, 40%, 35%)`;
@@ -1412,7 +1328,6 @@
             const eyeS = size/10; ctx.fillRect(-size/6, -size*0.75, eyeS, eyeS); ctx.fillRect(size/15, -size*0.75, eyeS, eyeS); ctx.fillRect(-size/15, -size*0.6, size/7.5, eyeS/2); 
             if (isClosest) { ctx.strokeStyle = '#f00'; ctx.lineWidth = 3; ctx.strokeRect(-size/2 - 5, -size - 5, size + 10, size + 10); }
             ctx.font = `bold ${Math.max(8, size/7.5)}px 'Press Start 2P'`; ctx.fillStyle = isClosest ? '#fff' : '#444'; ctx.textAlign = 'center'; ctx.shadowBlur = 4; ctx.shadowColor = "#000"; 
-            // ★★★ FIX: Remove .toUpperCase() ★★★
             ctx.fillText(this.word, 0, -size * 1.05);
             ctx.restore();
         }
@@ -1463,7 +1378,6 @@
         state.damageAlpha = 0; state.damageTaken = 0; 
         document.getElementById('boss-ui').style.opacity = '0';
         document.getElementById('perfect-badge').style.display = 'none';
-        // ★★★ FIX: 隱藏 Footer 避免干擾 ★★★ 
         document.getElementById('game-footer').classList.add('hidden');
         updateUIPanel();
         requestWakeLock(); handleResize(); initSpeech(); requestAnimationFrame(gameLoop);
@@ -1501,12 +1415,11 @@
             else if(interimTranscript.length > 2) processCommand(interimTranscript);
         };
 
-        // ★★★ FIX: 防止無限遞迴導致崩潰，加入延遲 ★★★
         recognition.onend = () => { 
             if(state.gameActive && !state.isPaused) {
                 setTimeout(() => {
                     try { recognition.start(); } catch(e){} 
-                }, 300); // 300ms 冷卻
+                }, 300); 
             }
         };
         
@@ -1529,18 +1442,13 @@
 
         if (state.bossMode && state.bossData && state.bossData.words) {
             const target = clean(state.bossData.words[state.bossWordIndex]);
-            // ★★★ FIX: 更嚴格的比對，避免 "wait" 觸發 "it" ★★★
             const regex = new RegExp(`(^|\\s)${target}($|\\s)`);
-            if (regex.test(input) || input.includes(target)) { // 保持一點彈性
-                // ★★★ CHANGE: 使用 input (玩家語音) 作為比對基準，防止同一句話重複觸發 ★★★
-                // 舊邏輯: lastMatchedWord = target; (導致語音變 Final 時因 target 不變而再次觸發)
+            if (regex.test(input) || input.includes(target)) { 
                 lastMatchedWord = input; 
                 lastMatchTime = now; 
                 hitBoss(); 
             }
         } else {
-            // ★★★ FIX: 多重擊殺與嚴格比對 ★★★
-            // 找出所有符合條件的敵人（不只是第一個）
             const matchedEnemies = state.enemies.filter(e => {
                 if (e.isDying) return false;
                 const target = clean(e.word);
@@ -1549,12 +1457,8 @@
             });
 
             if (matchedEnemies.length > 0) {
-                // 優先處理距離近的
                 matchedEnemies.sort((a,b) => b.z - a.z);
                 
-                // 為了避免一次語音只殺一隻（當輸入是一串字時），
-                // 我們嘗試擊殺所有匹配到的不同單字。
-                // Set 用來確保同一個單字在同一次指令中只殺一隻（避免過於簡單，維持平衡）。
                 const killedWords = new Set();
                 
                 matchedEnemies.forEach(target => {
@@ -1562,7 +1466,6 @@
                     if (!killedWords.has(wordKey)) {
                         killEnemy(state.enemies.indexOf(target));
                         killedWords.add(wordKey);
-                        // ★★★ CHANGE: 使用 input 作為比對基準 ★★★
                         lastMatchedWord = input; 
                         lastMatchTime = now;
                     }
@@ -1580,7 +1483,6 @@
         state.score += scoreGain;
         state.kills++; 
         if(!isAuto) {
-            // ★★★ NEW: 只有玩家主動擊殺才開槍 ★★★
             triggerGunFire();
             state.combo++;
             if(state.combo > 0 && state.combo % comboConfig.rewardThreshold === 0) triggerReward();
@@ -1590,31 +1492,24 @@
         if (state.kills >= requiredKills && !state.bossMode) startBossBattle();
     }
 
-    // ★★★ 2. Refactored Boss Start Logic with Warning ★★★
     function startBossBattle() {
-        // ★★★ FIX: 防止重複觸發 BOSS 戰 ★★★
         if (state.isBossStarting) return;
         state.isBossStarting = true;
 
-        // ★★★ FIX: 清空敵人，讓玩家專心準備 ★★★
         state.enemies = [];
 
-        // Show Warning
         const warningEl = document.getElementById('warning-screen');
         warningEl.classList.remove('hidden');
         
-        // Play warning sound
         sfx.alarm();
 
-        // Wait 2 seconds then start actual battle
         setTimeout(() => {
             warningEl.classList.add('hidden');
             initiateBossEncounter();
-        }, 2500); // <--- 修改這裡: 2000 = 2秒, 3000 = 3秒, 1500 = 1.5秒
+        }, 2500); 
     }
 
     function initiateBossEncounter() {
-        // ★★★ FIX: 重置觸發鎖 ★★★
         state.isBossStarting = false;
         
         state.bossMode = true; 
@@ -1629,7 +1524,6 @@
         
         state.freezeTimer = 0;
 
-        // ★★★ FIX: 確保題庫是新的 ★★★
         state.wordPool = []; 
         state.sentencePool = [];
 
@@ -1645,7 +1539,6 @@
         state.bossWordIndex = 0;
         
         const container = document.getElementById('current-word-ui');
-        // ★★★ 1. Added mx-2 margin for better readability ★★★
         container.innerHTML = state.bossData.words.map((w, i) => `<span id="bw-${i}" class="boss-word-pending mx-2">${w}</span>`).join('');
         updateBossUI();
     }
@@ -1681,15 +1574,11 @@
     }
 
     function hitBoss() {
-        // ★★★ NEW: BOSS 戰擊中也開槍 ★★★
         triggerGunFire();
         
         state.bossWordIndex++; 
-        // ★★★ CHANGE: Boss戰不累積 COMBO ★★★
-        // state.combo++; 
         
         const bossParams = BOSS_BATTLE_CONFIG[state.difficultyMode] || BOSS_BATTLE_CONFIG['Veteran'];
-        // ★★★ FIX: 引入物理參數 ★★★
         const physics = BOSS_PHYSICS_CONFIG[state.difficultyMode] || BOSS_PHYSICS_CONFIG['Veteran'];
 
         let scoreGain = (GAME_BALANCE.COMBO[state.difficultyMode].baseScore * bossParams.scoreMult + (state.combo * 20)) * state.difficulty;
@@ -1698,7 +1587,6 @@
         const boss = state.enemies[0];
 
         if (Math.random() < bossParams.criticalChance) {
-            // Critical Hit: 使用 physics.crit
             if (boss) boss.z = Math.max(0.05, boss.z - physics.crit);
             state.shake = 50; state.freezeTimer = bossParams.stunDuration;
             const toast = document.getElementById('reward-toast');
@@ -1708,7 +1596,6 @@
             sfx.reward(); 
         } else {
             state.shake = 20; 
-            // Normal Hit: 使用 physics.hit (不再是寫死的 0.05)
             if (boss) boss.z = Math.max(0.1, boss.z - physics.hit); 
         }
         if (boss) createExplosion(boss); 
@@ -1718,7 +1605,6 @@
             state.bossSentencesCleared++;
             executeReward('RECOVER'); 
 
-            // Phase Change: 使用 physics.phase
             if (boss) boss.z = Math.max(0.1, boss.z - physics.phase);
 
             if (state.bossSentencesCleared >= state.bossSentencesRequired) {
@@ -1735,7 +1621,7 @@
     }
 
     function createExplosion(en) {
-        if(!en) return; // Safety
+        if(!en) return; 
         const rect = canvas.parentElement.getBoundingClientRect();
         const x = rect.width/2 + (en.x * en.z);
         const y = rect.height/2 + (en.y * en.z) + (en.z * rect.height * 0.45);
@@ -1743,36 +1629,28 @@
     }
 
     function triggerDamage() {
-        const survivalConfig = GAME_BALANCE.SURVIVAL[state.difficultyMode];
-        const physics = BOSS_PHYSICS_CONFIG[state.difficultyMode] || BOSS_PHYSICS_CONFIG['Veteran'];
-        // ★★★ NEW: 讀取震動配置 ★★★
         const shakeConf = DAMAGE_SHAKE_CONFIG[state.difficultyMode] || DAMAGE_SHAKE_CONFIG['Veteran'];
+        const physics = BOSS_PHYSICS_CONFIG[state.difficultyMode] || BOSS_PHYSICS_CONFIG['Veteran'];
         
-        // --- GOD MODE 實作區 ---
         if (state.player.name === ADMIN_KEY) {
             state.shake = 10;
-            state.shakeDecay = 0.8; // 快速恢復
+            state.shakeDecay = 0.8; 
             sfx.damage(); 
             state.damageAlpha = 0.5; 
             
             if (state.bossMode && state.enemies[0]) {
-                // GOD MODE 下還是退多一點，避免太吵
                 state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.5);
             }
             return; 
         }
 
-        // --- 一般玩家邏輯 ---
         state.hp--; 
-        // ★★★ NEW: 套用新的震動邏輯 ★★★
         state.shake = shakeConf.intensity;
         state.shakeDecay = shakeConf.decay;
         
         state.combo = 0; state.damageTaken++; 
         sfx.damage(); state.damageAlpha = 0.8; 
         if (state.bossMode && state.enemies[0]) {
-            // ★★★ FIX: 使用 attackReset 參數控制攻擊後的彈開距離 ★★★
-            // 距離越短，BOSS 再次攻擊的速度越快
             state.enemies[0].z = Math.max(0.1, state.enemies[0].z - physics.attackReset); 
         }
         if (state.hp <= 0) endGame();
@@ -1784,21 +1662,18 @@
         const w = rect.width; const h = rect.height;
         ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); 
 
-        // ★★★ NEW: 全局畫面震動邏輯 (取代舊的 ctx.translate) ★★★
         const container = document.getElementById('main-container');
         if (state.shake > 0.5) { 
             const shakeX = (Math.random() - 0.5) * state.shake;
             const shakeY = (Math.random() - 0.5) * state.shake;
             container.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
             
-            // 使用動態衰減值
             state.shake *= state.shakeDecay; 
         } else {
             state.shake = 0;
             container.style.transform = 'none';
         }
 
-        // BOSS 戰的鏡頭抖動 (保留 ctx.translate 以產生視覺迷幻感)
         const boss = state.enemies.find(e => e.isBoss);
         if (state.bossMode && boss) {
             const shakeConfig = BOSS_SHAKE_CONFIG[state.difficultyMode] || BOSS_SHAKE_CONFIG['Veteran'];
@@ -1826,16 +1701,12 @@
         });
         
         const spawnRate = GAME_BALANCE.SPAWN_RATES[state.difficultyMode] || 2200;
-        // ★★★ FIX: Prevent spawning during boss warning ★★★
         if (!state.bossMode && !state.isBossStarting && state.freezeTimer <= 0 && Date.now() - state.spawnTimer > spawnRate) {
             state.enemies.push(new Enemy(getNextWord())); state.spawnTimer = Date.now();
         }
 
         const closest = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
         
-        // ★★★ FIX: 視覺渲染順序修正 (Painter's Algorithm: 先畫遠的，再畫近的) ★★★
-        // b.z (大, 近) - a.z (小, 遠) => 由大到小排序 (近...遠)
-        // 迴圈由後往前 (i--) => 遠...近 => 正確！
         state.enemies.sort((a,b) => b.z - a.z);
 
         for (let i = state.enemies.length - 1; i >= 0; i--) {
@@ -1887,18 +1758,14 @@
             labelEl.innerText = "TARGETING";
             labelEl.className = "text-[6px] text-zinc-600 mb-1 uppercase tracking-widest";
             
-            // ★★★ FIX: Targeting Logic Update ★★★
             const target = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
             let t = "AWAITING...";
-            // ★★★ FIX: Remove .toUpperCase() ★★★
             if (target) t = target.word;
             wordEl.innerText = t; 
         }
     }
 
     async function syncData() {
-        // ★★★ FIX: Admin Score Check ★★★
-        // 如果目前玩家是 ADMIN_KEY，則直接停止上傳資料，不寫入 Firestore。
         if (state.player.name === ADMIN_KEY) return;
 
         try {
@@ -1929,10 +1796,10 @@
     }
 
     function winGame() { 
+        if (!state.gameActive) return; // ★★★ FIX: 防止重複觸發 ★★★
         state.gameActive = false; if(wakeLock) releaseWakeLock(); 
         document.getElementById('win-score-display').innerText = Math.floor(state.score); 
         document.getElementById('win-screen').classList.remove('hidden'); 
-        // ★★★ FIX: 重新顯示 Footer ★★★
         document.getElementById('game-footer').classList.remove('hidden');
         updateResultDetails('win-details');
         if (state.damageTaken === 0) { document.getElementById('perfect-badge').style.display = 'block'; sfx.perfect(); }
@@ -1946,10 +1813,10 @@
     }
     
     function endGame() { 
+        if (!state.gameActive) return; // ★★★ FIX: 防止重複觸發 ★★★
         state.gameActive = false; if(wakeLock) releaseWakeLock(); 
         document.getElementById('fail-score-display').innerText = Math.floor(state.score); 
         document.getElementById('game-over-screen').classList.remove('hidden'); 
-        // ★★★ FIX: 重新顯示 Footer ★★★
         document.getElementById('game-footer').classList.remove('hidden');
         updateResultDetails('fail-details');
         syncData(); 
