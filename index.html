@@ -149,6 +149,31 @@
                 text-align: center;
             }
 
+            /* ★★★ FIX 1 & 2: 生命跡象 UI 優化 ★★★ */
+            /* 將左右並排改為垂直排列，並放大字體 */
+            .vital-info-container {
+                flex-direction: column !important; /* 改為垂直 */
+                align-items: center !important;
+                gap: 8px !important; /* 增加間距 */
+                margin-top: 10px !important;
+            }
+
+            #status-label {
+                font-size: 14px !important; /* 放大生命狀態文字 */
+            }
+
+            #combo-display {
+                font-size: 14px !important; /* 放大 Combo 文字 */
+                margin-top: 4px;
+            }
+
+            /* ★★★ FIX 3: 放大目標單字 ★★★ */
+            #current-word-ui {
+                font-size: 32px !important; /* 超大字體 */
+                line-height: 1.2;
+                margin-top: 10px;
+            }
+
             .btn { font-size: 10px; padding: 15px; }
             .banner-box { max-width: 100%; }
 
@@ -272,7 +297,6 @@
         }
         .boss-word-active { color: #0f0; text-shadow: 0 0 10px #0f0; transform: scale(1.05); display: inline-block;}
 
-        /* ★★★ FIX: 新的 REWARD TOAST 樣式 (置中 + 放大) ★★★ */
         #reward-toast {
             position: absolute;
             top: 50%; /* 垂直置中 */
@@ -294,13 +318,12 @@
             font-family: 'Press Start 2P', cursive;
             line-height: 1.5;
             
-            /* 強力描邊，確保在任何背景都清晰 */
             text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
         
         .toast-active { 
             opacity: 1; 
-            transform: translate(-50%, -50%) scale(1.5) !important; /* 啟動時：置中且放大 1.5 倍 */
+            transform: translate(-50%, -50%) scale(1.2) !important; 
         }
 
         .admin-table-container {
@@ -382,8 +405,6 @@
         </div>
     </div>
 
-    <!-- ★★★ NEW POSITION: 移除這裡的 reward-toast，移到 canvas-container 內 ★★★ -->
-
     <div id="mission-screen" class="overlay-screen">
         <div class="banner-box">
             <img src="https://d4cheap16.github.io/tddt/indexbanner.png" alt="Index Banner" onerror="this.style.display='none'">
@@ -434,7 +455,6 @@
                 <button onclick="setDifficulty(1.5, 'Nightmare')" class="btn diff-btn diff-nightmare" id="diff-nightmare">Nightmare</button>
                 <button onclick="setDifficulty(2.5, 'NoHope')" class="btn diff-btn diff-nohope text-red-600" id="diff-nohope">NO HOPE</button>
             </div>
-            <!-- 按鈕配色修改 -->
             <div class="flex gap-2 mt-4">
                 <button onclick="backToMission()" class="btn w-1/3 text-[8px] uppercase bg-zinc-900 border-zinc-700 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300">Back</button>
                 <button id="start-btn" onclick="handleAuth()" class="btn w-2/3 py-5 bg-green-950 border-green-700 text-green-500 hover:bg-green-900 hover:text-green-400 uppercase font-bold tracking-wider">Initiate</button>
@@ -499,7 +519,6 @@
     <div class="canvas-container" id="canvas-holder">
         <canvas id="game-canvas"></canvas>
         
-        <!-- ★★★ NEW POSITION: 獎勵文字移到這裡，確保它被限制在畫布範圍內 ★★★ -->
         <div id="reward-toast" class="pixel-font">REWARD LOADED</div>
 
         <div id="boss-ui" class="px-5 w-full">
@@ -529,7 +548,8 @@
                         <path id="ecg-path" class="ecg-line" d="M0,10 L10,10 L15,0 L20,20 L25,10 L100,10" stroke="lime" />
                     </svg>
                 </div>
-                <div class="flex justify-between mt-1">
+                <!-- ★★★ FIX: 增加 class vital-info-container 以便 CSS 操作 ★★★ -->
+                <div class="flex justify-between mt-1 vital-info-container">
                     <div id="status-label" class="pixel-font text-green-500 text-[8px] font-bold">VITAL: STABLE</div>
                     <div id="combo-display" class="pixel-font text-yellow-500 text-[8px] opacity-0 font-bold">0 COMBO</div>
                 </div>
@@ -537,10 +557,10 @@
         </div>
 
         <div class="flex flex-col items-center justify-center bg-zinc-900/40 rounded-lg border border-zinc-800 p-2 relative h-full">
-            <p id="targeting-label" class="text-[6px] text-zinc-600 mb-1 uppercase tracking-widest">Targeting</p>
+            <!-- ★★★ FIX 4: 移除 TARGETING 字樣 ★★★ -->
+            <!-- <p id="targeting-label" ...>Targeting</p> 被刪除了 -->
             <div id="current-word-ui" class="text-[12px] text-center text-white font-bold tracking-wider flex flex-wrap justify-center gap-1 w-full overflow-hidden">AWAITING SIGNAL...</div>
         </div>
-        <!-- 按鈕配色修改 -->
         <div class="grid grid-cols-2 gap-3 mt-1">
             <button onclick="togglePause()" class="btn py-4 font-bold uppercase bg-blue-950 border-blue-800 text-blue-400 hover:bg-blue-900 hover:text-blue-300">Pause</button>
             <button onclick="location.reload()" class="btn py-4 uppercase bg-zinc-800 border-zinc-500 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-white">Retreat</button>
@@ -662,6 +682,12 @@
             'Nightmare': { rewardThreshold: 10, criticalChance: 0.03, baseScore: 150, comboMultiplier: 15 },
             'NoHope':    { rewardThreshold: 12, criticalChance: 0.01, baseScore: 200, comboMultiplier: 20 }
         },
+        BOSS_COMBO: {
+            'Rookie':    { rewardThreshold: 10, shotgunPush: 0.20, flashDuration: 100 },
+            'Veteran':   { rewardThreshold: 15, shotgunPush: 0.15, flashDuration: 80 },
+            'Nightmare': { rewardThreshold: 20, shotgunPush: 0.10, flashDuration: 60 },
+            'NoHope':    { rewardThreshold: 30, shotgunPush: 0.02, flashDuration: 30 }
+        },
         SURVIVAL: {
             'Rookie':    { maxHP: 6 },
             'Veteran':   { maxHP: 5 },
@@ -688,7 +714,13 @@
         'FLASH': {
             text: "PRESENT FOR YOU!", textColor: "#67e8f9", boxShadow: "none", overlayColor: "rgba(255, 255, 255, 0.6)", overlayDuration: 1200, 
             effect: (state) => { 
-                state.freezeTimer = 180; 
+                let duration = 180;
+                if (state.bossMode) {
+                    const bossComboConfig = GAME_BALANCE.BOSS_COMBO[state.difficultyMode] || GAME_BALANCE.BOSS_COMBO['Veteran'];
+                    duration = bossComboConfig.flashDuration;
+                }
+                
+                state.freezeTimer = duration; 
                 state.shake = 50;
                 triggerSpecialAction('flash'); 
             } 
@@ -696,7 +728,16 @@
         'SHOTGUN': {
             text: "STAY BACK!", textColor: "#fbbf24", boxShadow: "none", overlayColor: "rgba(255, 200, 50, 0.6)", overlayDuration: 250, 
             effect: (state) => { 
-                state.enemies.forEach(e => { if (!e.isDying) e.z = Math.max(0, e.z - 0.4); }); 
+                state.enemies.forEach(e => { 
+                    if (!e.isDying) {
+                        let pushDist = 0.4;
+                        if (e.isBoss) {
+                            const bossComboConfig = GAME_BALANCE.BOSS_COMBO[state.difficultyMode] || GAME_BALANCE.BOSS_COMBO['Veteran'];
+                            pushDist = bossComboConfig.shotgunPush;
+                        }
+                        e.z = Math.max(0, e.z - pushDist); 
+                    }
+                }); 
                 state.shake = 60; 
                 state.freezeTimer = 60;
                 triggerSpecialAction('shotgun'); 
@@ -936,7 +977,7 @@
             records.sort((a, b) => b.score - a.score);
             const top3 = records.slice(0, 3);
             if(top3.length === 0) list.innerHTML = "NO RECORDS IN THIS SECTOR";
-            else list.innerHTML = top3.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${escapeHtml(r.name)}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
+            else list.innerHTML = top3.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${r.name}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
         } catch (e) { list.innerHTML = "UNABLE TO LOAD RECORDS"; }
     }
 
@@ -1044,16 +1085,11 @@
                     timeStr = `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
                 }
                 const missionStr = `B${d.book || '?'}-L${d.lesson || '?'}`;
-                
-                const safeName = escapeHtml(d.name);
-                const safeClass = escapeHtml(d.class);
-                const safeNo = escapeHtml(d.no);
-                
                 return `
                 <tr>
                     <td class="align-top">
-                        <div class="text-blue-400 font-bold leading-tight">${safeClass}<span class="text-white ml-1">${safeNo}</span></div>
-                        <div class="text-zinc-500 text-[8px] truncate max-w-[80px]">${safeName}</div>
+                        <div class="text-blue-400 font-bold leading-tight">${d.class}<span class="text-white ml-1">${d.no}</span></div>
+                        <div class="text-zinc-500 text-[8px] truncate max-w-[80px]">${d.name}</div>
                     </td>
                     <td class="align-top text-center text-zinc-300 font-bold tracking-tighter pt-2">${missionStr}</td>
                     <td class="align-top">
@@ -1678,7 +1714,8 @@
         state.bossWordIndex++; 
         
         state.combo++; 
-        const comboConfig = GAME_BALANCE.COMBO[state.difficultyMode];
+        
+        const comboConfig = GAME_BALANCE.BOSS_COMBO[state.difficultyMode] || GAME_BALANCE.BOSS_COMBO['Veteran'];
         if (state.combo > 0 && state.combo % comboConfig.rewardThreshold === 0) triggerReward();
         
         const bossParams = BOSS_BATTLE_CONFIG[state.difficultyMode] || BOSS_BATTLE_CONFIG['Veteran'];
@@ -1854,11 +1891,13 @@
         const wordEl = document.getElementById('current-word-ui');
 
         if (state.bossMode) {
-            labelEl.innerText = "BOSS SEQUENCE";
-            labelEl.className = "text-[6px] text-red-500 mb-1 uppercase tracking-widest flicker";
+            // labelEl removed
+            // labelEl.innerText = "BOSS SEQUENCE";
+            // labelEl.className = "text-[6px] text-red-500 mb-1 uppercase tracking-widest flicker";
         } else {
-            labelEl.innerText = "TARGETING";
-            labelEl.className = "text-[6px] text-zinc-600 mb-1 uppercase tracking-widest";
+            // labelEl removed
+            // labelEl.innerText = "TARGETING";
+            // labelEl.className = "text-[6px] text-zinc-600 mb-1 uppercase tracking-widest";
             
             const target = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
             let t = "AWAITING...";
@@ -1950,5 +1989,3 @@
 </script>
 </body>
 </html>
-
-}
