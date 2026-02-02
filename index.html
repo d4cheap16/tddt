@@ -189,10 +189,13 @@
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
         }
 
-        /* Boss UI 基礎樣式 */
+        /* Boss UI 基礎樣式 - 手機版改到上方 */
         #boss-ui {
             position: absolute; 
-            bottom: 35%; 
+            /* ★★★ FIX: 手機版改為靠上方顯示，避免遮擋中央戰鬥 ★★★ */
+            top: 15px; 
+            bottom: auto;
+            
             left: 0; width: 100%;
             display: flex; flex-direction: column; align-items: center;
             pointer-events: none; transition: opacity 0.5s; opacity: 0;
@@ -426,7 +429,10 @@
 
             #boss-ui {
                 position: absolute;
+                /* ★★★ FIX: 橫向/電腦模式恢復到底部 ★★★ */
+                top: auto !important; 
                 bottom: 20px !important;
+                
                 left: 0 !important;
                 width: 100% !important;
                 padding: 0 40px;
