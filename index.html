@@ -526,22 +526,40 @@
         </div>
     </div>
 
+    <!-- Admin Screen (Updated) -->
     <div id="admin-screen" class="overlay-screen hidden">
-        <h2 class="text-blue-600 mb-4 uppercase">Archive Terminal</h2>
-        <div class="admin-table-container">
+        <h2 class="text-blue-600 mb-2 uppercase">Archive Terminal</h2>
+        
+        <!-- Filter Controls -->
+        <div class="w-full max-w-sm grid grid-cols-2 gap-2 mb-2">
+             <select id="admin-select-grade">
+                <option value="G10">高一 (G10)</option><option value="G11">高二 (G11)</option><option value="G12">高三 (G12)</option>
+            </select>
+            <select id="admin-select-class">
+                <option value="知足">知足</option><option value="感恩">感恩</option><option value="善解">善解</option><option value="包容">包容</option>
+                <option value="大愛">大愛</option><option value="外校">外校</option>
+            </select>
+            <button onclick="fetchClassRecords()" class="btn py-2 bg-blue-900 border-blue-500 text-white uppercase col-span-2 text-[8px]">SEARCH CLASS DATA</button>
+        </div>
+
+        <div class="admin-table-container h-[200px]">
             <table class="w-full text-left">
                 <thead class="bg-zinc-900 sticky top-0">
                     <tr><th>USER</th><th class="text-center">MSN</th><th>RESULT</th><th class="text-right">TIME</th></tr>
                 </thead>
-                <tbody id="records-body" class="text-zinc-300"></tbody>
+                <tbody id="records-body" class="text-zinc-300">
+                    <tr><td colspan='5' class='p-4 text-center text-zinc-600'>SELECT CLASS TO LOAD DATA</td></tr>
+                </tbody>
             </table>
         </div>
-        <div class="grid grid-cols-2 gap-2 w-full max-w-sm mt-6">
-            <button onclick="exportToCSV()" class="btn py-4 bg-blue-900 border-blue-600 text-white uppercase col-span-2">Export CSV Data</button>
-            <button onclick="startGodMode()" class="btn py-4 bg-green-900 border-green-600 text-green-400 uppercase font-bold col-span-2">GOD MODE</button>
-            
-            <button onclick="handleClearData()" id="clear-data-btn" class="btn py-4 bg-red-950 border-red-700 text-red-500 uppercase">Clear All</button>
-            <button onclick="location.reload()" class="btn py-4 bg-zinc-900 uppercase">Logout</button>
+        
+        <div class="grid grid-cols-2 gap-2 w-full max-w-sm mt-4">
+            <!-- Custom HP Test -->
+            <input type="number" id="admin-custom-hp" placeholder="TEST HP (e.g. 100)" class="col-span-1 text-[10px]">
+            <button onclick="adminStartGame()" class="btn py-2 bg-green-900 border-green-600 text-green-400 uppercase font-bold col-span-1 text-[9px]">TEST MISSION</button>
+
+            <button onclick="exportToCSV()" class="btn py-3 bg-blue-900 border-blue-600 text-white uppercase col-span-2">Export Class CSV</button>
+            <button onclick="location.reload()" class="btn py-3 bg-zinc-900 uppercase col-span-2">Logout</button>
         </div>
     </div>
 
@@ -638,7 +656,6 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    // ★★★ FIX: 加入 query, where, orderBy, limit 引用 ★★★
     import { getFirestore, doc, setDoc, getDocs, collection, serverTimestamp, deleteDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -653,14 +670,14 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    // ★★★ FIX: 將 query 相關函式暴露到 window.fbase ★★★
+    // Added query, where, orderBy, limit to window.fbase for optimization
     window.fbase = { db, setDoc, doc, collection, getDocs, serverTimestamp, deleteDoc, query, where, orderBy, limit, appId: 'voice-reborn-101' };
     signInAnonymously(auth);
 </script>
 
 <script>
     const ADMIN_KEY = atob("QWRhV29uZw==");
-    let rankCache = {}; // ★★★ 新增快取物件 ★★★
+    let rankCache = {}; 
     
     function escapeHtml(text) {
         if (!text) return text;
@@ -871,7 +888,8 @@
         sentencePool: [],
         damageAlpha: 0,
         damageTaken: 0,
-        isBossStarting: false 
+        isBossStarting: false,
+        customHP: null // NEW: For admin testing
     };
 
     const canvas = document.getElementById('game-canvas');
@@ -1027,7 +1045,7 @@
     // ★★★ FIX: 使用 Query 查詢，大幅節省讀取次數 ★★★
     function renderRankList(container, records) {
          if(records.length === 0) container.innerHTML = "NO RECORDS IN THIS SECTOR";
-         else container.innerHTML = records.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${r.name}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
+         else container.innerHTML = records.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${escapeHtml(r.name)}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
     }
 
     async function fetchLessonRankings(lessonId) {
@@ -1156,25 +1174,48 @@
 
     let cachedAdminData = [];
 
-    async function showAdmin() {
+    // ★★★ NEW: Only show UI, do NOT fetch data yet
+    function showAdmin() {
         document.getElementById('admin-screen').classList.remove('hidden');
         const body = document.getElementById('records-body');
-        body.innerHTML = "<tr><td colspan='5' class='p-4 text-center'>FETCHING ARCHIVE...</td></tr>";
+        body.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-zinc-500'>PLEASE SELECT A CLASS TO SEARCH</td></tr>";
+    }
+
+    // ★★★ NEW: Fetch only specific class data to save reads
+    window.fetchClassRecords = async () => {
+        const body = document.getElementById('records-body');
+        const grade = document.getElementById('admin-select-grade').value;
+        const cls = document.getElementById('admin-select-class').value;
+        const targetClass = grade + cls;
+
+        body.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-blue-400'>FETCHING DATA FOR: " + targetClass + "...</td></tr>";
         
         try {
-            const { db, appId, collection, getDocs } = window.fbase;
-            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
+            const { db, appId, collection, getDocs, query, where } = window.fbase;
+            const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+            
+            // Query: class == targetClass (Requires index? Often not for simple equality)
+            const q = query(scoresRef, where('class', '==', targetClass));
+            const snap = await getDocs(q);
+            
             let res = []; 
             snap.forEach(d => {
                 const data = d.data();
                 if (data.name !== ADMIN_KEY) res.push(data);
             });
+
+            // Sort in memory to avoid compound index requirement errors
             res.sort((a, b) => {
                 const timeA = a.timestamp ? a.timestamp.seconds : 0;
                 const timeB = b.timestamp ? b.timestamp.seconds : 0;
                 return timeB - timeA;
             });
             cachedAdminData = res; 
+
+            if(res.length === 0) {
+                 body.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-yellow-500'>NO RECORDS FOUND</td></tr>";
+                 return;
+            }
 
             body.innerHTML = res.map(d => {
                 let timeStr = "";
@@ -1204,12 +1245,22 @@
             }).join('');
         } catch(e) { 
             console.error(e);
-            body.innerHTML = "SYSTEM ERROR"; 
+            body.innerHTML = `<tr><td colspan='5' class='p-4 text-center text-red-500'>ERROR: ${e.message}</td></tr>`; 
         }
-    }
+    };
+    
+    // ★★★ NEW: Start game from Admin with Custom HP
+    window.adminStartGame = () => {
+        document.getElementById('admin-screen').classList.add('hidden');
+        const customHpVal = parseInt(document.getElementById('admin-custom-hp').value);
+        state.customHP = isNaN(customHpVal) ? null : customHpVal;
+        state.player = { name: ADMIN_KEY, no: "00", class: "ADMIN" }; 
+        startGame();
+    };
     
     window.exportToCSV = () => {
-        if (!cachedAdminData || cachedAdminData.length === 0) { alert("No data to export"); return; }
+        if (!cachedAdminData || cachedAdminData.length === 0) { alert("No data loaded. Please search for a class first."); return; }
+        
         const headers = ["Class", "No", "Name", "Score", "Difficulty", "Book", "Lesson", "Date", "Time"];
         const rows = cachedAdminData.map(d => {
             let dateStr = "", timeStr = "";
@@ -1223,18 +1274,19 @@
         });
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(",") + "\n" + rows.join("\n");
         const encodedUri = encodeURI(csvContent);
+        
+        // Use class name in filename if available
+        let filename = `tddt_report_${Date.now()}.csv`;
+        if (cachedAdminData.length > 0) {
+             filename = `tddt_report_${cachedAdminData[0].class}_${Date.now()}.csv`;
+        }
+
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `dead_dont_talk_report_${Date.now()}.csv`);
+        link.setAttribute("download", filename);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    };
-
-    window.startGodMode = () => {
-        document.getElementById('admin-screen').classList.add('hidden');
-        state.player = { name: ADMIN_KEY, no: "00", class: "GOD MODE" };
-        startGame();
     };
 
     function executeReward(key) {
@@ -1541,10 +1593,6 @@
                     ctx.restore();
                 }
 
-                if (state.player.name === ADMIN_KEY) {
-                    ctx.font = `8px monospace`; ctx.fillStyle = "#0f0"; ctx.textAlign = "center";
-                    ctx.fillText(`GOD MODE: ON`, 0, -size * 1.6);
-                }
                 ctx.restore();
                 return; 
             }
@@ -1602,7 +1650,14 @@
     function startGame(keepScore = false) {
         randomizeBackground(); 
         state.gameActive = true; 
-        state.hp = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP;
+        
+        // ★★★ FIX: Allow Custom HP for Admin Testing
+        if (state.customHP) {
+             state.hp = state.customHP;
+        } else {
+             state.hp = GAME_BALANCE.SURVIVAL[state.difficultyMode].maxHP;
+        }
+
         if (!keepScore) state.score = 0; 
         state.kills = 0; 
         state.bossSentencesCleared = 0;
@@ -1880,18 +1935,8 @@
         const shakeConf = DAMAGE_SHAKE_CONFIG[state.difficultyMode] || DAMAGE_SHAKE_CONFIG['Veteran'];
         const physics = BOSS_PHYSICS_CONFIG[state.difficultyMode] || BOSS_PHYSICS_CONFIG['Veteran'];
         
-        if (state.player.name === ADMIN_KEY) {
-            state.shake = 10;
-            state.shakeDecay = 0.8; 
-            sfx.damage(); 
-            state.damageAlpha = 0.5; 
-            
-            if (state.bossMode && state.enemies[0]) {
-                state.enemies[0].z = Math.max(0.1, state.enemies[0].z - 0.5);
-            }
-            return; 
-        }
-
+        // ★★★ REMOVED GOD MODE PHYSICS GLITCH HERE ★★★
+        
         state.hp--; 
         state.shake = shakeConf.intensity;
         state.shakeDecay = shakeConf.decay;
