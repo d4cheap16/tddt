@@ -638,7 +638,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDocs, collection, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    // ★★★ FIX: 加入 query, where, orderBy, limit 引用 ★★★
+    import { getFirestore, doc, setDoc, getDocs, collection, serverTimestamp, deleteDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBF4B2Y8-e4Ifp2_9uWjKGyLItKq0QAgnE",
@@ -652,12 +653,14 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    window.fbase = { db, setDoc, doc, collection, getDocs, serverTimestamp, deleteDoc, appId: 'voice-reborn-101' };
+    // ★★★ FIX: 將 query 相關函式暴露到 window.fbase ★★★
+    window.fbase = { db, setDoc, doc, collection, getDocs, serverTimestamp, deleteDoc, query, where, orderBy, limit, appId: 'voice-reborn-101' };
     signInAnonymously(auth);
 </script>
 
 <script>
     const ADMIN_KEY = atob("QWRhV29uZw==");
+    let rankCache = {}; // ★★★ 新增快取物件 ★★★
     
     function escapeHtml(text) {
         if (!text) return text;
@@ -1021,25 +1024,61 @@
         loadBookData(n);
     };
 
+    // ★★★ FIX: 使用 Query 查詢，大幅節省讀取次數 ★★★
+    function renderRankList(container, records) {
+         if(records.length === 0) container.innerHTML = "NO RECORDS IN THIS SECTOR";
+         else container.innerHTML = records.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${r.name}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
+    }
+
     async function fetchLessonRankings(lessonId) {
+        const cacheKey = `b${selectedBook}_l${lessonId}`;
         const preview = document.getElementById('leaderboard-preview');
         const list = document.getElementById('top-records-list');
+        
+        // 1. 快取檢查
+        if (rankCache[cacheKey]) {
+            renderRankList(list, rankCache[cacheKey]);
+            preview.classList.remove('hidden');
+            return;
+        }
+
         list.innerHTML = "SEARCHING RECORDS...";
         preview.classList.remove('hidden');
 
         try {
-            const { db, appId, collection, getDocs } = window.fbase;
-            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
+            // 從 window.fbase 解構出需要的工具
+            const { db, appId, collection, getDocs, query, where, orderBy, limit } = window.fbase;
+            
+            // 2. 伺服器端過濾查詢
+            const q = query(
+                collection(db, 'artifacts', appId, 'public', 'data', 'scores'),
+                where("book", "==", selectedBook),
+                where("lesson", "==", lessonId),
+                orderBy("score", "desc"), 
+                limit(5) // 取前5名，預留一些被Admin過濾掉的空間
+            );
+
+            const snap = await getDocs(q);
             let records = [];
             snap.forEach(d => {
                 const data = d.data();
-                if(data.book == selectedBook && data.lesson == lessonId && data.name !== ADMIN_KEY) records.push(data);
+                if(data.name !== ADMIN_KEY) records.push(data);
             });
-            records.sort((a, b) => b.score - a.score);
-            const top3 = records.slice(0, 3);
-            if(top3.length === 0) list.innerHTML = "NO RECORDS IN THIS SECTOR";
-            else list.innerHTML = top3.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${r.name}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
-        } catch (e) { list.innerHTML = "UNABLE TO LOAD RECORDS"; }
+            
+            // 取前3名
+            records = records.slice(0, 3);
+            
+            // 3. 寫入快取
+            rankCache[cacheKey] = records;
+
+            renderRankList(list, records);
+        } catch (e) { 
+            console.error(e); 
+            if (e.message && e.message.includes("requires an index")) {
+                console.log("%c 請點擊 Console 中的連結以建立 Firebase 索引", "color: red; font-size: 16px; font-weight: bold;");
+            }
+            list.innerHTML = "UNABLE TO LOAD RECORDS"; 
+        }
     }
 
     window.selectLesson = (n) => {
