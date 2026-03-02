@@ -461,7 +461,10 @@
                 <div class="banner-box landscape:aspect-video landscape:w-full">
                     <img src="https://d4cheap16.github.io/tddt/indexbanner.png" alt="Index Banner" onerror="this.style.display='none'">
                 </div>
-                <h1 class="text-md mb-6 landscape:mb-0 landscape:mt-4 text-red-600 tracking-tighter flicker uppercase">Dead Don't Talk</h1>
+                <h1 class="text-md mb-2 landscape:mb-0 landscape:mt-4 text-red-600 tracking-tighter flicker uppercase">Dead Don't Talk</h1>
+                <button onclick="showHowToPlay()" class="btn mb-4 landscape:mt-3 w-8 h-8 p-0 flex items-center justify-center text-yellow-500 bg-yellow-950/60 border-yellow-600 hover:bg-yellow-900 shadow-[0_0_10px_rgba(202,138,4,0.3)]" title="How to play">
+                    <span class="text-[12px] animate-pulse">?</span>
+                </button>
             </div>
             
             <!-- Right: Controls (Menu Box) -->
@@ -524,6 +527,42 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- ★ 修改：獨立的 How To Play 彈出視窗 (取代原本的 Briefing Screen) -->
+    <div id="how-to-play-screen" class="overlay-screen hidden z-[250]">
+        <div class="w-full max-w-sm text-left border-l-4 border-yellow-600 pl-4 mb-8">
+            <h1 class="text-yellow-500 text-lg font-bold tracking-widest mb-2 uppercase">Survival Guide</h1>
+            <p class="text-[8px] text-zinc-400 uppercase tracking-widest">How to survive the outbreak</p>
+        </div>
+
+        <div class="bg-black p-5 border border-zinc-800 w-full max-w-sm rounded-lg text-left mb-6 space-y-4">
+            <div class="flex items-start gap-3">
+                <span class="text-yellow-500 text-[10px] mt-1">[!]</span>
+                <div>
+                    <p class="text-[10px] text-white font-bold mb-1">MIC REQUIRED</p>
+                    <p class="text-[8px] text-zinc-400 font-sans tracking-wide leading-relaxed">請務必允許瀏覽器存取您的麥克風。沒有通訊設備，您無法存活。</p>
+                </div>
+            </div>
+            
+            <div class="flex items-start gap-3">
+                <span class="text-green-500 text-[10px] mt-1">[!]</span>
+                <div>
+                    <p class="text-[10px] text-white font-bold mb-1">SPEAK TO SHOOT</p>
+                    <p class="text-[8px] text-zinc-400 font-sans tracking-wide leading-relaxed">清晰唸出目標身上的單字，系統將自動鎖定並開火。</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+                <span class="text-red-500 text-[10px] mt-1">[!]</span>
+                <div>
+                    <p class="text-[10px] text-white font-bold mb-1">BOSS ENCOUNTER</p>
+                    <p class="text-[8px] text-zinc-400 font-sans tracking-wide leading-relaxed">遭遇高威脅目標時，需依序唸出畫面上方的完整句型才能造成傷害。</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="hideHowToPlay()" class="btn py-5 bg-zinc-900 border-zinc-700 text-zinc-400 uppercase font-bold tracking-wider hover:bg-zinc-700 hover:text-white w-full max-w-sm">CLOSE</button>
     </div>
 
     <!-- Admin Screen (Updated) -->
@@ -670,9 +709,12 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    // Added query, where, orderBy, limit to window.fbase for optimization
     window.fbase = { db, setDoc, doc, collection, getDocs, serverTimestamp, deleteDoc, query, where, orderBy, limit, appId: 'voice-reborn-101' };
-    signInAnonymously(auth);
+    
+    // 捕捉登入錯誤，以防止因為預覽環境網域未受 Firebase 允許而跳出全域錯誤
+    signInAnonymously(auth).catch(err => {
+        console.warn("Firebase 登入被拒絕。可能是此網域未加至 Firebase 控制台的白名單。系統將暫時關閉線上存檔功能。", err);
+    });
 </script>
 
 <script>
@@ -889,7 +931,7 @@
         damageAlpha: 0,
         damageTaken: 0,
         isBossStarting: false,
-        customHP: null // NEW: For admin testing
+        customHP: null
     };
 
     const canvas = document.getElementById('game-canvas');
@@ -1019,7 +1061,8 @@
         selectedBook = n;
         try {
             const timestamp = new Date().getTime();
-            const res = await fetch(`book${n}.json?t=${timestamp}`);
+            // 已加上您的 GitHub URL，確保 fetch 在預覽環境也不會因為相對路徑解析錯誤而失敗
+            const res = await fetch(`https://d4cheap16.github.io/tddt/book${n}.json?t=${timestamp}`);
             
             if (!res.ok) throw new Error("File not found");
             
@@ -1042,7 +1085,6 @@
         loadBookData(n);
     };
 
-    // ★★★ FIX: 使用 Query 查詢，大幅節省讀取次數 ★★★
     function renderRankList(container, records) {
          if(records.length === 0) container.innerHTML = "NO RECORDS IN THIS SECTOR";
          else container.innerHTML = records.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${escapeHtml(r.name)}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
@@ -1064,7 +1106,6 @@
         preview.classList.remove('hidden');
 
         try {
-            // 從 window.fbase 解構出需要的工具
             const { db, appId, collection, getDocs, query, where, orderBy, limit } = window.fbase;
             
             // 2. 伺服器端過濾查詢
@@ -1073,7 +1114,7 @@
                 where("book", "==", selectedBook),
                 where("lesson", "==", lessonId),
                 orderBy("score", "desc"), 
-                limit(5) // 取前5名，預留一些被Admin過濾掉的空間
+                limit(5)
             );
 
             const snap = await getDocs(q);
@@ -1169,19 +1210,28 @@
         localStorage.setItem('vofd_profile', JSON.stringify({ grade, className, no, name: nameInput }));
         state.player = { name: nameInput, no, class: grade + className };
         document.getElementById('login-screen').classList.add('hidden');
+        
+        // 恢復成直接開始遊戲
         startGame();
+    };
+
+    // ★ 新增：控制說明視窗的開啟與關閉
+    window.showHowToPlay = () => {
+        document.getElementById('how-to-play-screen').classList.remove('hidden');
+    };
+
+    window.hideHowToPlay = () => {
+        document.getElementById('how-to-play-screen').classList.add('hidden');
     };
 
     let cachedAdminData = [];
 
-    // ★★★ NEW: Only show UI, do NOT fetch data yet
     function showAdmin() {
         document.getElementById('admin-screen').classList.remove('hidden');
         const body = document.getElementById('records-body');
         body.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-zinc-500'>PLEASE SELECT A CLASS TO SEARCH</td></tr>";
     }
 
-    // ★★★ NEW: Fetch only specific class data to save reads
     window.fetchClassRecords = async () => {
         const body = document.getElementById('records-body');
         const grade = document.getElementById('admin-select-grade').value;
@@ -1194,7 +1244,6 @@
             const { db, appId, collection, getDocs, query, where } = window.fbase;
             const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
             
-            // Query: class == targetClass (Requires index? Often not for simple equality)
             const q = query(scoresRef, where('class', '==', targetClass));
             const snap = await getDocs(q);
             
@@ -1204,7 +1253,6 @@
                 if (data.name !== ADMIN_KEY) res.push(data);
             });
 
-            // Sort in memory to avoid compound index requirement errors
             res.sort((a, b) => {
                 const timeA = a.timestamp ? a.timestamp.seconds : 0;
                 const timeB = b.timestamp ? b.timestamp.seconds : 0;
@@ -1249,7 +1297,6 @@
         }
     };
     
-    // ★★★ NEW: Start game from Admin with Custom HP
     window.adminStartGame = () => {
         document.getElementById('admin-screen').classList.add('hidden');
         const customHpVal = parseInt(document.getElementById('admin-custom-hp').value);
@@ -1275,7 +1322,6 @@
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(",") + "\n" + rows.join("\n");
         const encodedUri = encodeURI(csvContent);
         
-        // Use class name in filename if available
         let filename = `tddt_report_${Date.now()}.csv`;
         if (cachedAdminData.length > 0) {
              filename = `tddt_report_${cachedAdminData[0].class}_${Date.now()}.csv`;
@@ -1651,7 +1697,6 @@
         randomizeBackground(); 
         state.gameActive = true; 
         
-        // ★★★ FIX: Allow Custom HP for Admin Testing
         if (state.customHP) {
              state.hp = state.customHP;
         } else {
@@ -1669,7 +1714,6 @@
         document.getElementById('perfect-badge').style.display = 'none';
         document.getElementById('game-footer').classList.add('hidden');
         
-        // ★★★ FIX: 重置對齊方式 ★★★
         document.getElementById('current-word-ui').classList.remove('boss-mode-layout');
         
         updateUIPanel();
@@ -1826,7 +1870,6 @@
         
         document.getElementById('boss-ui').style.opacity = '1';
         
-        // ★★★ FIX: 切換為 BOSS 對齊模式 ★★★
         document.getElementById('current-word-ui').classList.add('boss-mode-layout');
         
         sfx.boss();
@@ -1934,8 +1977,6 @@
     function triggerDamage() {
         const shakeConf = DAMAGE_SHAKE_CONFIG[state.difficultyMode] || DAMAGE_SHAKE_CONFIG['Veteran'];
         const physics = BOSS_PHYSICS_CONFIG[state.difficultyMode] || BOSS_PHYSICS_CONFIG['Veteran'];
-        
-        // ★★★ REMOVED GOD MODE PHYSICS GLITCH HERE ★★★
         
         state.hp--; 
         state.shake = shakeConf.intensity;
@@ -2045,25 +2086,17 @@
         const wordEl = document.getElementById('current-word-ui');
 
         if (state.bossMode) {
-            // labelEl removed
-            // labelEl.innerText = "BOSS SEQUENCE";
-            // labelEl.className = "text-[6px] text-red-500 mb-1 uppercase tracking-widest flicker";
-        } else {
-            // labelEl removed
-            // labelEl.innerText = "TARGETING";
-            // labelEl.className = "text-[6px] text-zinc-600 mb-1 uppercase tracking-widest";
             
+        } else {
             const target = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
             
             if (target) {
                 if (target.zh) {
-                    // Display English + Chinese
                     wordEl.innerHTML = `
                         <div class="w-full">${target.word}</div>
                         <div class="w-full text-[#4ade80] text-[12px] font-normal mt-1 tracking-wider" style="font-family: 'Noto Sans TC', sans-serif;">${target.zh}</div>
                     `;
                 } else {
-                    // Display English only
                     wordEl.innerText = target.word;
                 }
             } else {
