@@ -169,17 +169,95 @@
     }
   },
   "L4": {
-    "title": "",
+    "title": "Unit 4: The Sugar Feast and More: Welcome to Eid al-Fitr",
     "stages": {
-      "1": [],
-      "2": []
+      "1": [
+        {"id": 1, "en": "annual", "zh": "年度的"},
+        {"id": 2, "en": "remind", "zh": "使想起 / 提醒"},
+        {"id": 3, "en": "dependence", "zh": "依賴 / 依靠"},
+        {"id": 4, "en": "celebrate", "zh": "慶祝"},
+        {"id": 5, "en": "accomplishment", "zh": "完成 / 成就"},
+        {"id": 6, "en": "duty", "zh": "責任 / 義務"},
+        {"id": 7, "en": "strength", "zh": "力量 / 堅強 / 力氣"},
+        {"id": 8, "en": "traditional", "zh": "傳統的"},
+        {"id": 9, "en": "feature", "zh": "以……為主要特色 / 重點 / 特色 / 特徵"},
+        {"id": 10, "en": "recent", "zh": "最近的"},
+        {"id": 11, "en": "community", "zh": "社區 / 群體"},
+        {"id": 12, "en": "local", "zh": "當地的 / 本地的 / 當地居民 / 本地人"},
+        {"id": 13, "en": "government", "zh": "政府"},
+        {"id": 14, "en": "various", "zh": "各式各樣的"},
+        {"id": 15, "en": "serve", "zh": "供應餐點"},
+        {"id": 16, "en": "besides", "zh": "除此之外 / 而且 / 除了……之外還"},
+        {"id": 17, "en": "culture", "zh": "文化"},
+        {"id": 18, "en": "tourism", "zh": "觀光業 / 旅遊業"},
+        {"id": 19, "en": "express", "zh": "表達"},
+        {"id": 20, "en": "grateful", "zh": "感激的"}
+      ],
+      "2": [
+        "The company holds its annual meeting in December every year.",
+        "Please remind me to call my mother when we get home.",
+        "The country is trying to reduce its dependence on foreign oil.",
+        "We will celebrate his birthday with a large chocolate cake.",
+        "Finishing the marathon was a major accomplishment for her.",
+        "It is the duty of a police officer to protect the people.",
+        "He goes to the gym every day to build his physical strength.",
+        "They served a traditional dinner with turkey and sweet potatoes.",
+        "The new car has a special safety feature to protect drivers.",
+        "In recent years, many people have started working from home.",
+        "The local community worked together to clean up the public park.",
+        "We prefer to buy fresh fruit from the local farmers in our town.",
+        "The government decided to build a new hospital in the city.",
+        "She enjoys reading various types of books during her free time.",
+        "The restaurant will serve breakfast starting at seven in the morning.",
+        "I have no other family besides my parents and my younger sister.",
+        "Learning a new language helps you understand a different culture.",
+        "The beautiful beaches have made tourism the main business on the island.",
+        "He sent a beautiful card to express his thanks for the gift.",
+        "I am very grateful for all the help you gave me today."
+      ]
     }
   },
   "L5": {
-    "title": "",
+    "title": "Unit 5: Creative Traffic Signals Around the World",
     "stages": {
-      "1": [],
-      "2": []
+      "1": [
+        {"id": 1, "en": "creative", "zh": "有創意的 / 有創造力的"},
+        {"id": 2, "en": "signal", "zh": "號誌燈 / 信號 / 發信號 / 示意"},
+        {"id": 3, "en": "pressured", "zh": "感到壓力的"},
+        {"id": 4, "en": "figure", "zh": "人物形象 / 人物 / 數字 / 數據"},
+        {"id": 5, "en": "manage", "zh": "調節 / 控制 / 成功解決"},
+        {"id": 6, "en": "reflect", "zh": "顯示 / 反映 / 映出"},
+        {"id": 7, "en": "design", "zh": "設計"},
+        {"id": 8, "en": "symbol", "zh": "象徵"},
+        {"id": 9, "en": "introduce", "zh": "介紹 / 使認識 / 引見"},
+        {"id": 10, "en": "amusement", "zh": "樂趣 / 娛樂"},
+        {"id": 11, "en": "character", "zh": "人物"},
+        {"id": 12, "en": "exhibition", "zh": "展覽會"},
+        {"id": 13, "en": "communicate", "zh": "交流 / 溝通"},
+        {"id": 14, "en": "support", "zh": "支持"},
+        {"id": 15, "en": "stage", "zh": "階段"},
+        {"id": 16, "en": "increase", "zh": "增加"},
+        {"id": 17, "en": "deliver", "zh": "傳達 / 遞送 / 投遞"}
+      ],
+      "2": [
+        "She found a creative way to solve the difficult math problem.",
+        "The police officer gave a signal for the cars to stop.",
+        "He felt pressured to finish the work before the deadline.",
+        "I saw a dark figure standing at the end of the street.",
+        "The new boss knows how to manage a large team of workers.",
+        "The calm water of the lake will reflect the beautiful mountains.",
+        "They will design a new website for the local clothing store.",
+        "The white dove is a common symbol of peace and love.",
+        "Let me introduce my best friend to you at the party.",
+        "The children watched the magic show with great amusement.",
+        "My favorite character in the story is the brave little dog.",
+        "We went to the art museum to see the new painting exhibition.",
+        "People can communicate with each other easily through the internet.",
+        "Good friends will always support you when you are feeling sad.",
+        "The project is currently in its final stage of development.",
+        "The store will increase the price of milk starting next week.",
+        "The mailman will deliver the package to your house tomorrow morning."
+      ]
     }
   },
   "L6": {
