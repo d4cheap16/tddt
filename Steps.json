@@ -33,7 +33,7 @@
       }
     }
   },
- "pipeline_stages": [
+  "pipeline_stages": [
     {
       "stage_id": "STAGE_00_CONTENT_EXTRACTION",
       "stage_name": "Title & Core Vocabulary Extraction",
@@ -56,3 +56,4 @@
       "ai_execution_directives": "Construct and output the COMPLETE JSON structure for the entire book. You MUST include the top-level '_notes' object. You MUST include ALL previously generated lessons with their full data. You MUST include the newly generated lesson data. You MUST include empty placeholder nodes (e.g., {\"title\": \"\", \"stages\": {\"1\": [], \"2\": []}}) for all remaining, ungenerated lessons (up to the final lesson of the book). Ensure all leaf objects and arrays are outputted in a single-line (minified) compact format to maintain data transmission efficiency. (Note: The 'id' key from Stage 1 may be retained in the final output as it does not interfere with reading logic)."
     }
   ]
+}
