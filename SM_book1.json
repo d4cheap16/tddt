@@ -12,6 +12,7 @@
       "strategy": "Speech-First Strategy",
       "exclude": [
         "Derivative words or word families (e.g., if 'memorize' is the core word, exclude 'memory'). Only keep numbered core 'Words for Production'.",
+        "Idioms and Phrases (e.g., 'in fact', 'look forward to'). STRICTLY ONLY keep single vocabulary items from 'Words for Production'.",
         "Easily confused monosyllabic words (e.g., pen, bus, cat, one, two).",
         "Short words lacking distinct phonetic features (e.g., at, it, of, in).",
         "Words with strong homophone interference (e.g., meat/meet, see/sea).",
@@ -76,10 +77,48 @@
     }
   },
   "L2": {
-    "title": "",
+    "title": "Unit 2: I See You, Taiwan",
     "stages": {
-      "1": [],
-      "2": []
+      "1": [
+        {"en": "greet", "zh": "呈現於……之前 / 問候 / 打招呼"},
+        {"en": "single", "zh": "單一的"},
+        {"en": "mood", "zh": "氣氛 / 氛圍 / 心情 / 情緒"},
+        {"en": "view", "zh": "景色 / 風景 / 看法 / 觀點"},
+        {"en": "match", "zh": "相配 / 相稱"},
+        {"en": "energy", "zh": "活力 / 能量"},
+        {"en": "diversity", "zh": "多樣化"},
+        {"en": "journey", "zh": "旅行 / 行程 / 經歷 / 路程"},
+        {"en": "shade", "zh": "色調 / 深淺不同的顏色"},
+        {"en": "shadow", "zh": "影子 / 尾隨"},
+        {"en": "classic", "zh": "經典的 / 典型的"},
+        {"en": "painting", "zh": "繪畫作品 / 圖畫"},
+        {"en": "motion", "zh": "移動 / 運動"},
+        {"en": "cheering", "zh": "加油用的 / 令人振奮的 / 使人高興的"},
+        {"en": "wooden", "zh": "木製的"},
+        {"en": "forest", "zh": "森林"},
+        {"en": "lantern", "zh": "燈籠 / 提燈"},
+        {"en": "impression", "zh": "印象"}
+      ],
+      "2": [
+        "The delicious smell of freshly baked bread greeted us when we walked into the bakery.",
+        "Phoebe has not answered his calls or replied to a single text message from him.",
+        "The sad movie changed the mood in the room, and everyone became quiet.",
+        "During their trip, Jack and Eileen had a beautiful view of the sea from their hotel room.",
+        "Karen matched her red shoes with a red bag, and everyone noticed her bright style.",
+        "The dance team was full of energy, and even the people in the back row could feel it.",
+        "The president of the university invited foreign students to share stories to encourage cultural diversity.",
+        "The couple went on a journey to a foreign country during their vacation to relieve stress.",
+        "The painter used a shade of green to show the trees after the rain.",
+        "In a cinema, anyone who stands and blocks the projector would cast a shadow on the screen.",
+        "My father still reads a classic novel from his school days every summer.",
+        "On the classroom wall hung a Chinese painting of mountains and a small river.",
+        "Keep your seat belt on when the bus is in motion so you do not get badly injured.",
+        "The students hit their cheering sticks loudly when the final point was scored.",
+        "The old shop had a wooden door that opened with a long and low sound.",
+        "A mountain forest stood behind the village, and people could hear birds there every morning.",
+        "On the festival night, each child carried a paper lantern down the street.",
+        "The company's well-designed website leaves a good impression on its own customers."
+      ]
     }
   },
   "L3": {
