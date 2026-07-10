@@ -51,7 +51,7 @@
         .game-wrapper {
             position: relative;
             width: 100%; 
-            max-width: 500px; /* 手機版預設寬度 */
+            max-width: 500px;
             height: 100dvh;
             background: #000; 
             display: flex; 
@@ -121,7 +121,6 @@
             position: relative; 
         }
 
-        /* 輸入框基礎樣式 (針對手機優化) */
         select, input {
             background: #0d0d0d !important;
             border: 1px solid #333 !important;
@@ -154,7 +153,6 @@
 
         .btn-empty { color: #444 !important; border-style: dashed !important; cursor: not-allowed; background: #050505 !important; }
 
-        /* Banner & Overlay */
         .overlay-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.95); display: flex;
@@ -169,7 +167,6 @@
         }
         .banner-box img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
 
-        /* Difficulty Buttons */
         .diff-rookie.active-diff { background: #063d19 !important; border-color: #0f0 !important; color: #0f0 !important; box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); }
         .diff-veteran.active-diff { background: #002244 !important; border-color: #0af !important; color: #0af !important; box-shadow: 0 0 15px rgba(0, 170, 255, 0.3); }
         .diff-nightmare.active-diff { background: #330044 !important; border-color: #f0f !important; color: #f0f !important; box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); }
@@ -189,13 +186,10 @@
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
         }
 
-        /* Boss UI 基礎樣式 - 手機版改到上方 */
         #boss-ui {
             position: absolute; 
-            /* ★★★ FIX: 手機版改為靠上方顯示，避免遮擋中央戰鬥 ★★★ */
             top: 15px; 
             bottom: auto;
-            
             left: 0; width: 100%;
             display: flex; flex-direction: column; align-items: center;
             pointer-events: none; transition: opacity 0.5s; opacity: 0;
@@ -295,65 +289,42 @@
             filter: drop-shadow(0 0 2px #000);
         }
         
-        /* ★★★ FIX 3: 調整目標單字樣式 (防止長字溢出) ★★★ */
-        /* 修改字體為 Noto Sans TC 以節省空間並提高可讀性 */
         #current-word-ui {
             font-family: 'Noto Sans TC', sans-serif !important;
-            font-weight: 700; /* 使用粗體增加辨識度 */
-            letter-spacing: 0.5px; /* 稍微增加字距 */
-            
-            font-size: 26px !important; /* 稍微調整大小 */
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            font-size: 26px !important;
             line-height: 1.3;
             margin-top: 10px;
-            
             display: flex !important;
             flex-wrap: wrap !important;
-            
-            /* ★★★ 修改這裡：預設為一般戰鬥，使用置中對齊 ★★★ */
             justify-content: center !important; 
             text-align: center !important; 
-            
-            white-space: normal !important;        /* 允許換行 */
-            overflow-wrap: break-word !important;  /* 長單字太長時可切斷 */
-            word-break: keep-all !important;       /* 盡量保持單字完整 */
-            
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            word-break: keep-all !important;
             width: 100%;
             max-width: 100%;
         }
 
-        /* ★★★ 新增：BOSS 戰專用樣式 (靠左對齊) ★★★ */
         #current-word-ui.boss-mode-layout {
-            justify-content: flex-start !important; /* 靠左開始 */
-            text-align: left !important;            /* 文字靠左 */
+            justify-content: flex-start !important;
+            text-align: left !important;
         }
 
-        /* ★★★ UNIT NAME FONT SIZE - 單位名稱字體大小控制 ★★★ */
-        #mission-target-display {
-            font-size: 12px; /* 調整首頁選單中的標題大小 (原為 text-sm: 14px) */
-        }
-        #selected-mission-title {
-            font-size: 11px; /* 調整登入畫面中的標題大小 (原為 text-[11px]: 11px) */
-        }
+        #mission-target-display { font-size: 12px; }
+        #selected-mission-title { font-size: 11px; }
 
-        /* =========================================
-           ★★★ 媒體查詢 (Media Queries) - 請保持在最下方 ★★★
-           ========================================= */
-
-        /* --- 橫向模式通則 (Mobile & Desktop) --- */
         @media (orientation: landscape) {
-            /* 修正輸入框寬度：移除手機版的縮放 Hack，回歸 100% 寬度 */
             select, input {
                 transform: none !important;
                 width: 100% !important;
                 font-size: 14px !important;
                 margin: 5px 0 !important;
             }
-            .overlay-screen .max-w-sm {
-                max-width: 480px; 
-            }
+            .overlay-screen .max-w-sm { max-width: 480px; }
         }
 
-        /* --- 電腦/大平板橫向模式 (Desktop/Tablet) --- */
         @media (min-width: 768px) and (orientation: landscape) {
             .game-wrapper {
                 flex-direction: row;
@@ -399,40 +370,25 @@
                 justify-content: center;
             }
             
-            .score-label-desktop {
-                text-align: center;
-            }
+            .score-label-desktop { text-align: center; }
 
             .vital-info-container {
-                flex-direction: column !important; /* 改為垂直 */
+                flex-direction: column !important;
                 align-items: center !important;
-                gap: 8px !important; /* 增加間距 */
+                gap: 8px !important;
                 margin-top: 10px !important;
             }
 
-            #status-label {
-                font-size: 14px !important; /* 放大生命狀態文字 */
-            }
-
-            #combo-display {
-                font-size: 14px !important; /* 放大 Combo 文字 */
-                margin-top: 4px;
-            }
-
-            /* Desktop override specifically handled above, but ensuring consistency */
-            #current-word-ui {
-                font-size: 28px !important; /* 在大螢幕上可以稍微再大一點 */
-            }
-
+            #status-label { font-size: 14px !important; }
+            #combo-display { font-size: 14px !important; margin-top: 4px; }
+            #current-word-ui { font-size: 28px !important; }
             .btn { font-size: 10px; padding: 15px; }
             .banner-box { max-width: 100%; }
 
             #boss-ui {
                 position: absolute;
-                /* ★★★ FIX: 橫向/電腦模式恢復到底部 ★★★ */
                 top: auto !important; 
                 bottom: 20px !important;
-                
                 left: 0 !important;
                 width: 100% !important;
                 padding: 0 40px;
@@ -699,16 +655,24 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    // Added query, where, orderBy, limit to window.fbase for optimization
     window.fbase = { db, setDoc, doc, collection, getDocs, serverTimestamp, deleteDoc, query, where, orderBy, limit, appId: 'voice-reborn-101' };
     
-    // ★★★ FIX: Catch Firebase auth errors to prevent crashes in restricted environments
     signInAnonymously(auth).catch(err => {
         console.warn("Firebase 登入受限，可能是預覽環境未授權。線上功能暫時關閉。", err);
     });
 </script>
 
 <script>
+    // === 教材路徑統一設定區 ===
+    // 當您完成新版教材時，只需在這裡將對應的檔名改為 "SM_bookX.json" 即可
+    const BOOK_FILES = {
+        1: "SM_book1.json", // 第一冊：已更新為語音優先版
+        2: "book2.json",    // 第二冊：舊版
+        3: "book3.json",    // 第三冊：舊版
+        4: "book4.json",    // 第四冊：舊版
+        5: "book5.json"     // 第五冊：舊版
+    };
+
     const ADMIN_KEY = atob("QWRhV29uZw==");
     let rankCache = {}; 
     
@@ -922,7 +886,7 @@
         damageAlpha: 0,
         damageTaken: 0,
         isBossStarting: false,
-        customHP: null // NEW: For admin testing
+        customHP: null
     };
 
     const canvas = document.getElementById('game-canvas');
@@ -1050,15 +1014,18 @@
 
     async function loadBookData(n) {
         selectedBook = n;
+        const timestamp = new Date().getTime();
+        
         try {
-            const timestamp = new Date().getTime();
-            // ★★★ FIX: Changed from relative URL to absolute URL to avoid parsing errors in iframe/preview environment
-            const res = await fetch(`https://d4cheap16.github.io/tddt/book${n}.json?t=${timestamp}`);
+            const fileName = BOOK_FILES[n];
+            if (!fileName) throw new Error("尚未設定該冊檔案");
+            
+            const res = await fetch(`./${fileName}?t=${timestamp}`);
             
             if (!res.ok) throw new Error("File not found");
             
             currentBookData = await res.json();
-            console.log(`Loaded Book ${n} successfully`);
+            console.log(`Loaded ${fileName} successfully`);
             
             refreshLessonGrid();
             checkMissionValid();
@@ -1076,7 +1043,6 @@
         loadBookData(n);
     };
 
-    // ★★★ FIX: 使用 Query 查詢，大幅節省讀取次數 ★★★
     function renderRankList(container, records) {
          if(records.length === 0) container.innerHTML = "NO RECORDS IN THIS SECTOR";
          else container.innerHTML = records.map((r, i) => `<div class="flex justify-between"><span>#${i+1} ${escapeHtml(r.name)}</span> <span class="text-green-500 font-bold">${r.score}</span></div>`).join('');
@@ -1087,7 +1053,6 @@
         const preview = document.getElementById('leaderboard-preview');
         const list = document.getElementById('top-records-list');
         
-        // 1. 快取檢查
         if (rankCache[cacheKey]) {
             renderRankList(list, rankCache[cacheKey]);
             preview.classList.remove('hidden');
@@ -1098,16 +1063,14 @@
         preview.classList.remove('hidden');
 
         try {
-            // 從 window.fbase 解構出需要的工具
             const { db, appId, collection, getDocs, query, where, orderBy, limit } = window.fbase;
             
-            // 2. 伺服器端過濾查詢
             const q = query(
                 collection(db, 'artifacts', appId, 'public', 'data', 'scores'),
                 where("book", "==", selectedBook),
                 where("lesson", "==", lessonId),
                 orderBy("score", "desc"), 
-                limit(5) // 取前5名，預留一些被Admin過濾掉的空間
+                limit(5)
             );
 
             const snap = await getDocs(q);
@@ -1117,18 +1080,12 @@
                 if(data.name !== ADMIN_KEY) records.push(data);
             });
             
-            // 取前3名
             records = records.slice(0, 3);
-            
-            // 3. 寫入快取
             rankCache[cacheKey] = records;
 
             renderRankList(list, records);
         } catch (e) { 
             console.error(e); 
-            if (e.message && e.message.includes("requires an index")) {
-                console.log("%c 請點擊 Console 中的連結以建立 Firebase 索引", "color: red; font-size: 16px; font-weight: bold;");
-            }
             list.innerHTML = "UNABLE TO LOAD RECORDS"; 
         }
     }
@@ -1179,7 +1136,6 @@
 
     initUI();
 
-    // ★ 新增：控制說明視窗的開啟與關閉
     window.showHowToPlay = () => {
         document.getElementById('how-to-play-screen').classList.remove('hidden');
     };
@@ -1217,14 +1173,12 @@
 
     let cachedAdminData = [];
 
-    // ★★★ NEW: Only show UI, do NOT fetch data yet
     function showAdmin() {
         document.getElementById('admin-screen').classList.remove('hidden');
         const body = document.getElementById('records-body');
         body.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-zinc-500'>PLEASE SELECT A CLASS TO SEARCH</td></tr>";
     }
 
-    // ★★★ NEW: Fetch only specific class data to save reads
     window.fetchClassRecords = async () => {
         const body = document.getElementById('records-body');
         const grade = document.getElementById('admin-select-grade').value;
@@ -1237,7 +1191,6 @@
             const { db, appId, collection, getDocs, query, where } = window.fbase;
             const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
             
-            // Query: class == targetClass (Requires index? Often not for simple equality)
             const q = query(scoresRef, where('class', '==', targetClass));
             const snap = await getDocs(q);
             
@@ -1247,7 +1200,6 @@
                 if (data.name !== ADMIN_KEY) res.push(data);
             });
 
-            // Sort in memory to avoid compound index requirement errors
             res.sort((a, b) => {
                 const timeA = a.timestamp ? a.timestamp.seconds : 0;
                 const timeB = b.timestamp ? b.timestamp.seconds : 0;
@@ -1292,7 +1244,6 @@
         }
     };
     
-    // ★★★ NEW: Start game from Admin with Custom HP
     window.adminStartGame = () => {
         document.getElementById('admin-screen').classList.add('hidden');
         const customHpVal = parseInt(document.getElementById('admin-custom-hp').value);
@@ -1318,7 +1269,6 @@
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(",") + "\n" + rows.join("\n");
         const encodedUri = encodeURI(csvContent);
         
-        // Use class name in filename if available
         let filename = `tddt_report_${Date.now()}.csv`;
         if (cachedAdminData.length > 0) {
              filename = `tddt_report_${cachedAdminData[0].class}_${Date.now()}.csv`;
@@ -1702,7 +1652,6 @@
         randomizeBackground(); 
         state.gameActive = true; 
         
-        // ★★★ FIX: Allow Custom HP for Admin Testing
         if (state.customHP) {
              state.hp = state.customHP;
         } else {
@@ -1720,7 +1669,6 @@
         document.getElementById('perfect-badge').style.display = 'none';
         document.getElementById('game-footer').classList.add('hidden');
         
-        // ★★★ FIX: 重置對齊方式 ★★★
         document.getElementById('current-word-ui').classList.remove('boss-mode-layout');
         
         updateUIPanel();
@@ -1877,7 +1825,6 @@
         
         document.getElementById('boss-ui').style.opacity = '1';
         
-        // ★★★ FIX: 切換為 BOSS 對齊模式 ★★★
         document.getElementById('current-word-ui').classList.add('boss-mode-layout');
         
         sfx.boss();
@@ -1985,8 +1932,6 @@
     function triggerDamage() {
         const shakeConf = DAMAGE_SHAKE_CONFIG[state.difficultyMode] || DAMAGE_SHAKE_CONFIG['Veteran'];
         const physics = BOSS_PHYSICS_CONFIG[state.difficultyMode] || BOSS_PHYSICS_CONFIG['Veteran'];
-        
-        // ★★★ REMOVED GOD MODE PHYSICS GLITCH HERE ★★★
         
         state.hp--; 
         state.shake = shakeConf.intensity;
@@ -2096,25 +2041,18 @@
         const wordEl = document.getElementById('current-word-ui');
 
         if (state.bossMode) {
-            // labelEl removed
-            // labelEl.innerText = "BOSS SEQUENCE";
-            // labelEl.className = "text-[6px] text-red-500 mb-1 uppercase tracking-widest flicker";
+            
         } else {
-            // labelEl removed
-            // labelEl.innerText = "TARGETING";
-            // labelEl.className = "text-[6px] text-zinc-600 mb-1 uppercase tracking-widest";
             
             const target = [...state.enemies].filter(e => !e.isDying).sort((a,b) => b.z - a.z)[0];
             
             if (target) {
                 if (target.zh) {
-                    // Display English + Chinese
                     wordEl.innerHTML = `
                         <div class="w-full">${target.word}</div>
                         <div class="w-full text-[#4ade80] text-[12px] font-normal mt-1 tracking-wider" style="font-family: 'Noto Sans TC', sans-serif;">${target.zh}</div>
                     `;
                 } else {
-                    // Display English only
                     wordEl.innerText = target.word;
                 }
             } else {
