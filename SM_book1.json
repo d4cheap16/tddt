@@ -122,10 +122,50 @@
     }
   },
   "L3": {
-    "title": "",
+    "title": "Unit 3: Clicks, Crumbs, and Consequences",
     "stages": {
-      "1": [],
-      "2": []
+      "1": [
+        {"en": "click", "zh": "點擊 / 卡嗒聲"},
+        {"en": "consequence", "zh": "結果 / 後果"},
+        {"en": "satisfying", "zh": "令人滿足的"},
+        {"en": "information", "zh": "資料 / 消息"},
+        {"en": "including", "zh": "包括 / 包含"},
+        {"en": "search", "zh": "搜索 / 搜尋"},
+        {"en": "harmless", "zh": "無害的"},
+        {"en": "content", "zh": "內容"},
+        {"en": "advertisement", "zh": "廣告"},
+        {"en": "dislike", "zh": "討厭的事物 / 厭惡 / 不喜愛"},
+        {"en": "image", "zh": "形象 / 印象 / 影像 / 畫面"},
+        {"en": "comment", "zh": "評論 / 意見 / 表達意見"},
+        {"en": "form", "zh": "形成 / 產生 / 形式 / 種類"},
+        {"en": "opinion", "zh": "想法 / 評論 / 意見"},
+        {"en": "offensive", "zh": "冒犯的"},
+        {"en": "applicant", "zh": "申請人"},
+        {"en": "offer", "zh": "機會 / 提議 / 提供"},
+        {"en": "damage", "zh": "破壞 / 損害"},
+        {"en": "identity", "zh": "身分"}
+      ],
+      "2": [
+        "You can open the file with a single click on the screen.",
+        "He had to face the consequence of his careless actions.",
+        "It is very satisfying to finish a long project on time.",
+        "You can find more information about the museum on their website.",
+        "Everyone went to the park, including my little brother.",
+        "She will search the entire house to find her missing keys.",
+        "The small green snake in the garden is completely harmless.",
+        "The content of this book is perfect for young readers.",
+        "I saw a funny advertisement for dog food on television.",
+        "I strongly dislike the taste of cold coffee in the morning.",
+        "The artist painted a beautiful image of a quiet mountain lake.",
+        "Please leave a comment if you enjoyed watching this video.",
+        "Dark clouds will form in the sky before a heavy rainstorm.",
+        "Everyone has a different opinion about the new school rules.",
+        "His offensive joke made everyone in the room feel uncomfortable.",
+        "The manager interviewed each applicant for the new job opening.",
+        "They will offer him a higher salary to stay at the company.",
+        "The strong wind did a lot of damage to the old wooden fence.",
+        "The secret agent used a fake name to hide his true identity."
+      ]
     }
   },
   "L4": {
