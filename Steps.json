@@ -1,7 +1,7 @@
 {
   "pipeline_name": "Automated Generation Protocol for Speech-First Digital Learning Materials",
-  "version": "3.0",
-  "author": "Teacher Chen-Wei Chien",
+  "version": "4.0",
+  "author": "Teacher 辰緯",
   "target_llm_directives": "This document is the definitive system prompt template for generating TTS-friendly, speech-recognition-optimized JSON databases for textbook learning materials. You must strictly follow the pipeline stages, principles, and filter logic defined below.",
   "required_json_structure": {
     "_notes": {
@@ -17,6 +17,7 @@
         "strategy": "Speech-First Strategy",
         "exclude": [
           "Derivative words or word families (e.g., if 'memorize' is the core word, exclude 'memory'). Only keep numbered core 'Words for Production'.",
+          "Idioms and Phrases (e.g., 'in fact', 'look forward to', 'in addition'). STRICTLY ONLY keep single vocabulary items from the 'Words for Production' list.",
           "Easily confused monosyllabic words (e.g., pen, bus, cat, one, two).",
           "Short words lacking distinct phonetic features (e.g., at, it, of, in).",
           "Words with strong homophone interference (e.g., meat/meet, see/sea).",
@@ -36,7 +37,7 @@
     {
       "stage_id": "STAGE_00_CONTENT_EXTRACTION",
       "stage_name": "Title & Core Vocabulary Extraction",
-      "ai_execution_directives": "1. Extract the lesson title in the format 'Unit X: [Title Name]'. 2. Extract ONLY the numbered core words from the 'Words for Production' list. Strictly discard any unnumbered derivatives or word families. 3. Standardize the Chinese translation format by using spaces and slashes for multiple meanings (e.g., format '嚮導,導遊' as '嚮導 / 導遊')."
+      "ai_execution_directives": "1. Extract the lesson title in the format 'Unit X: [Title Name]'. 2. Extract ONLY the numbered core words from the 'Words for Production' list. Strictly discard any unnumbered derivatives, word families, and ANY idioms/phrases. 3. Standardize the Chinese translation format by using spaces and slashes for multiple meanings (e.g., format '嚮導,導遊' as '嚮導 / 導遊')."
     },
     {
       "stage_id": "STAGE_01_SPEECH_FIRST_FILTER",
@@ -49,10 +50,10 @@
       "ai_execution_directives": "Generate one standard English contextual sentence for each word from Stage 1. You MUST maintain strict 1:1 index mapping (e.g., stages.'1'[5] must correspond to stages.'2'[5]). Apply 'principles' (Sentence case, grammar fixing, NO markdown). Sentences must adapt perfectly to TTS engines for natural intonation and breathing pauses. Encapsulate this pure string array within 'stages'.'2'."
     },
     {
-      "stage_id": "STAGE_03_SPEECH_DATA_EXPORT",
-      "stage_name": "JSON Compressed Encapsulation",
-      "purpose": "Transform the speech learning materials into an optimized database structure that facilitates speech recognition, string comparison, and TTS playback on front-end websites.",
-      "ai_execution_directives": "Construct the final JSON for the unit. Ensure the top-level of the final output always retains the '_notes' object (containing the exact principles and filter_logic defined above). Ensure the generated lesson data (title, stages) is properly nested under its corresponding lesson node (e.g., 'L1'). To maintain data transmission efficiency, all leaf objects (word objects and sentence arrays) must be outputted in a single-line (minified) compact format."
+      "stage_id": "STAGE_03_FULL_JSON_EXPORT",
+      "stage_name": "Comprehensive JSON Compilation and Output",
+      "purpose": "Ensure the user receives a fully ready-to-use database file containing all lessons (L1 to LX) every time a new lesson is generated.",
+      "ai_execution_directives": "Construct and output the COMPLETE JSON structure for the entire book. You MUST include the top-level '_notes' object. You MUST include ALL previously generated lessons with their full data. You MUST include the newly generated lesson data. You MUST include empty placeholder nodes (e.g., {\"title\": \"\", \"stages\": {\"1\": [], \"2\": []}}) for all remaining, ungenerated lessons (up to the final lesson of the book). Ensure all leaf objects and arrays are outputted in a single-line (minified) compact format to maintain data transmission efficiency."
     }
   ]
 }
