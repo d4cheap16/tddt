@@ -1,24 +1,58 @@
 {
   "pipeline_name": "Automated Generation Protocol for Speech-First Digital Learning Materials",
-  "version": "2.0",
+  "version": "3.0",
   "author": "Teacher Chen-Wei Chien",
-  "target_llm_directives": "This document serves as a system prompt engineering template specifically for speech recognition and TTS-friendly websites. When reading this JSON, completely discard the old Group A/B/C grouping and CEFR story architecture, and switch to generating a highly recognizable relational speech database for L1-L9 with natural pauses.",
+  "target_llm_directives": "This document is the definitive system prompt template for generating TTS-friendly, speech-recognition-optimized JSON databases for textbook learning materials. You must strictly follow the pipeline stages, principles, and filter logic defined below.",
+  "required_json_structure": {
+    "_notes": {
+      "principles": [
+        "TTS FRIENDLY: Standard English capitalization and punctuation added for natural pausing.",
+        "LOWERCASE: Stage 1 words are strictly lowercase.",
+        "SENTENCE CASE: Stage 2 sentences start with uppercase.",
+        "GRAMMAR FIXED: Added missing possessives (apostrophes) and commas.",
+        "NO MARKDOWN: Strictly forbid any markdown formatting (e.g., **, _) in the output arrays.",
+        "STRICT 1:1 MAPPING: Absolute parallel index mapping between stages.'1' and stages.'2'."
+      ],
+      "filter_logic": {
+        "strategy": "Speech-First Strategy",
+        "exclude": [
+          "Derivative words or word families (e.g., if 'memorize' is the core word, exclude 'memory'). Only keep numbered core 'Words for Production'.",
+          "Easily confused monosyllabic words (e.g., pen, bus, cat, one, two).",
+          "Short words lacking distinct phonetic features (e.g., at, it, of, in).",
+          "Words with strong homophone interference (e.g., meat/meet, see/sea).",
+          "Pure numbers (e.g., eleven, thirty) - speech recognition often converts these to digits (11, 30), causing string comparison failures.",
+          "Phrases containing pure numbers (e.g., one's heart, one's mind)."
+        ],
+        "include": [
+          "Polysyllabic words (e.g., beautiful, tomato, vacation).",
+          "Clear and sonorous disyllabic words (e.g., shoulder, tiger, market).",
+          "Structurally long yet simple words (e.g., afternoon, basketball).",
+          "Time- and frequency-related words (e.g., clock, future) as substitutes for numbers to improve recognition rates."
+        ]
+      }
+    }
+  },
   "pipeline_stages": [
     {
+      "stage_id": "STAGE_00_CONTENT_EXTRACTION",
+      "stage_name": "Title & Core Vocabulary Extraction",
+      "ai_execution_directives": "1. Extract the lesson title in the format 'Unit X: [Title Name]'. 2. Extract ONLY the numbered core words from the 'Words for Production' list. Strictly discard any unnumbered derivatives or word families. 3. Standardize the Chinese translation format by using spaces and slashes for multiple meanings (e.g., format '嚮導,導遊' as '嚮導 / 導遊')."
+    },
+    {
       "stage_id": "STAGE_01_SPEECH_FIRST_FILTER",
-      "stage_name": "Extraction of All-Lowercase Core Vocabulary (Speech-First Filter)",
-      "ai_execution_directives": "Analyze the specified textbook vocabulary and strictly execute speech-first filtering. Inclusion: Include polysyllabic words, clear and sonorous disyllabic words, and structurally long yet simple words (substitute pure numbers with time, space, or frequency words). Exclusion: Exclude easily confused monosyllabic words, short words with indistinct phonetic features, strong homophones, and pure numbers. The generated English words must be strictly kept in lowercase, and outputted as an array of objects in the format of { 'en': '...', 'zh': '...' }, encapsulated within stages.'1'."
+      "stage_name": "Speech-First Filtering & Formatting",
+      "ai_execution_directives": "Apply the 'filter_logic' rules to the extracted core vocabulary. Transform the retained words into an array of objects format: { 'en': 'word', 'zh': 'translation' }. All English text here MUST be strictly lowercase. Encapsulate this array within 'stages'.'1'."
     },
     {
       "stage_id": "STAGE_02_TTS_FRIENDLY_SENTENCES",
-      "stage_name": "Crafting Speech-Optimized Standard Contextual Sentences",
-      "ai_execution_directives": "Craft a standard English contextual sentence for each vocabulary word from Stage 1 in a one-to-one correspondence based on their index order. Do not include any web formatting tags (e.g., **) in the sentences, but they must strictly comply with: 1. Sentence case capitalization. 2. Accurately supply possessive apostrophes ('s) and necessary commas. 3. Punctuation and grammatical structures must perfectly adapt to the TTS engine, ensuring the system presents the most natural intonation fluctuations and breathing pauses when converting text to speech. Sentences must be encapsulated as a pure string array within stages.'2'."
+      "stage_name": "Crafting Speech-Optimized Contextual Sentences",
+      "ai_execution_directives": "Generate one standard English contextual sentence for each word from Stage 1. You MUST maintain strict 1:1 index mapping (e.g., stages.'1'[5] must correspond to stages.'2'[5]). Apply 'principles' (Sentence case, grammar fixing, NO markdown). Sentences must adapt perfectly to TTS engines for natural intonation and breathing pauses. Encapsulate this pure string array within 'stages'.'2'."
     },
     {
       "stage_id": "STAGE_03_SPEECH_DATA_EXPORT",
-      "stage_name": "JSON Compressed Encapsulation for Speech-Dedicated Websites",
+      "stage_name": "JSON Compressed Encapsulation",
       "purpose": "Transform the speech learning materials into an optimized database structure that facilitates speech recognition, string comparison, and TTS playback on front-end websites.",
-      "ai_execution_directives": "Construct a complete JSON containing lesson nodes such as L1 and L2. The top-level of the file must fully retain the '_notes' object, which includes principles (TTS-friendly, capitalization rules, grammatical corrections) and filter_logic (exclusion and inclusion logic). To maintain data transmission efficiency, all leaf objects, such as word objects and sentence arrays, must be outputted in a single-line (minified) compact format."
+      "ai_execution_directives": "Construct the final JSON for the unit. Ensure the top-level of the final output always retains the '_notes' object (containing the exact principles and filter_logic defined above). Ensure the generated lesson data (title, stages) is properly nested under its corresponding lesson node (e.g., 'L1'). To maintain data transmission efficiency, all leaf objects (word objects and sentence arrays) must be outputted in a single-line (minified) compact format."
     }
   ]
 }
