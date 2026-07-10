@@ -1,0 +1,24 @@
+{
+  "pipeline_name": "Automated Generation Protocol for Speech-First Digital Learning Materials",
+  "version": "2.0",
+  "author": "Teacher Chen-Wei Chien",
+  "target_llm_directives": "This document serves as a system prompt engineering template specifically for speech recognition and TTS-friendly websites. When reading this JSON, completely discard the old Group A/B/C grouping and CEFR story architecture, and switch to generating a highly recognizable relational speech database for L1-L9 with natural pauses.",
+  "pipeline_stages": [
+    {
+      "stage_id": "STAGE_01_SPEECH_FIRST_FILTER",
+      "stage_name": "Extraction of All-Lowercase Core Vocabulary (Speech-First Filter)",
+      "ai_execution_directives": "Analyze the specified textbook vocabulary and strictly execute speech-first filtering. Inclusion: Include polysyllabic words, clear and sonorous disyllabic words, and structurally long yet simple words (substitute pure numbers with time, space, or frequency words). Exclusion: Exclude easily confused monosyllabic words, short words with indistinct phonetic features, strong homophones, and pure numbers. The generated English words must be strictly kept in lowercase, and outputted as an array of objects in the format of { 'en': '...', 'zh': '...' }, encapsulated within stages.'1'."
+    },
+    {
+      "stage_id": "STAGE_02_TTS_FRIENDLY_SENTENCES",
+      "stage_name": "Crafting Speech-Optimized Standard Contextual Sentences",
+      "ai_execution_directives": "Craft a standard English contextual sentence for each vocabulary word from Stage 1 in a one-to-one correspondence based on their index order. Do not include any web formatting tags (e.g., **) in the sentences, but they must strictly comply with: 1. Sentence case capitalization. 2. Accurately supply possessive apostrophes ('s) and necessary commas. 3. Punctuation and grammatical structures must perfectly adapt to the TTS engine, ensuring the system presents the most natural intonation fluctuations and breathing pauses when converting text to speech. Sentences must be encapsulated as a pure string array within stages.'2'."
+    },
+    {
+      "stage_id": "STAGE_03_SPEECH_DATA_EXPORT",
+      "stage_name": "JSON Compressed Encapsulation for Speech-Dedicated Websites",
+      "purpose": "Transform the speech learning materials into an optimized database structure that facilitates speech recognition, string comparison, and TTS playback on front-end websites.",
+      "ai_execution_directives": "Construct a complete JSON containing lesson nodes such as L1 and L2. The top-level of the file must fully retain the '_notes' object, which includes principles (TTS-friendly, capitalization rules, grammatical corrections) and filter_logic (exclusion and inclusion logic). To maintain data transmission efficiency, all leaf objects, such as word objects and sentence arrays, must be outputted in a single-line (minified) compact format."
+    }
+  ]
+}
