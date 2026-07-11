@@ -543,6 +543,22 @@
             <input type="number" id="admin-custom-hp" placeholder="TEST HP (e.g. 100)" class="col-span-1 text-[10px]">
             <button onclick="adminStartGame()" class="btn py-2 bg-green-900 border-green-600 text-green-400 uppercase font-bold col-span-1 text-[9px]">TEST MISSION</button>
 
+            <!-- 🔽 新增的 Data Management 區塊 🔽 -->
+            <div class="col-span-2 border-t border-zinc-800 mt-2 mb-1"></div>
+            <p class="col-span-2 text-red-600 text-[8px] font-bold uppercase text-left">Data Management (Danger Zone)</p>
+            <select id="admin-clear-book" class="col-span-1 !border-red-900 !text-red-400 focus:!border-red-500">
+                <option value="1">Book 1</option><option value="2">Book 2</option><option value="3">Book 3</option><option value="4">Book 4</option><option value="5">Book 5</option>
+            </select>
+            <select id="admin-clear-lesson" class="col-span-1 !border-red-900 !text-red-400 focus:!border-red-500">
+                <option value="ALL">ALL Units</option>
+                <option value="1">Lesson 1</option><option value="2">Lesson 2</option><option value="3">Lesson 3</option>
+                <option value="4">Lesson 4</option><option value="5">Lesson 5</option><option value="6">Lesson 6</option>
+                <option value="7">Lesson 7</option><option value="8">Lesson 8</option><option value="9">Lesson 9</option>
+            </select>
+            <button id="clear-data-btn" onclick="handleClearData()" class="btn py-3 bg-red-950 border-red-800 text-red-500 uppercase col-span-2 font-bold tracking-widest">Clear Data</button>
+            <div class="col-span-2 border-t border-zinc-800 mt-2 mb-1"></div>
+            <!-- 🔼 新增的 Data Management 區塊 🔼 -->
+
             <button onclick="exportToCSV()" class="btn py-3 bg-blue-900 border-blue-600 text-white uppercase col-span-2">Export Class CSV</button>
             <button onclick="location.reload()" class="btn py-3 bg-zinc-900 uppercase col-span-2">Logout</button>
         </div>
@@ -1316,20 +1332,69 @@
         });
     }
 
+    // 🔽 重新設計的資料清除函式 🔽
     window.handleClearData = async () => {
         const btn = document.getElementById('clear-data-btn');
+        const bookVal = document.getElementById('admin-clear-book').value;
+        const lessonVal = document.getElementById('admin-clear-lesson').value;
+        
+        const targetDesc = lessonVal === "ALL" ? `Book ${bookVal} (ALL)` : `B${bookVal}-L${lessonVal}`;
+
         if (!clearConfirm) {
-            clearConfirm = true; btn.innerText = "ARE YOU SURE?"; btn.classList.add('bg-red-600');
-            setTimeout(() => { if(clearConfirm) { clearConfirm = false; btn.innerText = "Clear All"; btn.classList.remove('bg-red-600'); } }, 3000);
+            clearConfirm = true; 
+            btn.innerText = `SURE TO CLEAR ${targetDesc}?`; 
+            btn.classList.add('bg-red-600', 'text-white');
+            setTimeout(() => { 
+                if(clearConfirm) { 
+                    clearConfirm = false; 
+                    btn.innerText = "Clear Data"; 
+                    btn.classList.remove('bg-red-600', 'text-white'); 
+                } 
+            }, 3000);
             return;
         }
-        const { db, appId, collection, getDocs, deleteDoc, doc } = window.fbase;
+
+        btn.innerText = "DELETING...";
+        const { db, appId, collection, getDocs, deleteDoc, doc, query, where } = window.fbase;
         try {
-            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'scores'));
-            for(let d of snap.docs) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'scores', d.id));
-            clearConfirm = false; showAdmin();
-        } catch (e) { btn.innerText = "ERROR"; }
+            // 根據下拉選單組合查詢條件
+            let constraints = [where("book", "==", parseInt(bookVal))];
+            if (lessonVal !== "ALL") {
+                constraints.push(where("lesson", "==", parseInt(lessonVal)));
+            }
+            
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), ...constraints);
+            const snap = await getDocs(q);
+            
+            // 執行資料刪除
+            for(let d of snap.docs) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'scores', d.id));
+            }
+            
+            clearConfirm = false; 
+            btn.innerText = "DONE!";
+            btn.classList.remove('bg-red-600');
+            btn.classList.add('bg-green-700', 'text-white');
+            
+            // 清除後更新下方的成績報表，讓管理員看到畫面變化
+            fetchClassRecords(); 
+            
+            setTimeout(() => {
+                btn.innerText = "Clear Data";
+                btn.classList.remove('bg-green-700', 'text-white');
+            }, 2000);
+
+        } catch (e) { 
+            console.error(e);
+            btn.innerText = "ERROR"; 
+            clearConfirm = false;
+            setTimeout(() => {
+                btn.innerText = "Clear Data";
+                btn.classList.remove('bg-red-600', 'text-white');
+            }, 3000);
+        }
     };
+    // 🔼 重新設計的資料清除函式 🔼
 
     window.setDifficulty = (val, mode) => {
         state.difficulty = val; state.difficultyMode = mode;
