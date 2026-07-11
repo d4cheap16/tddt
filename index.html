@@ -988,7 +988,7 @@
     // 🔽 新增了出版社陣列，並改寫按鈕生成的 initUI 函式 🔽
     function initUI() {
         // 在這裡設定各冊對應的版本（順序：Book 1, Book 2, ..., Book 5）
-        const publishers = ['San Min', 'Long Teng', 'Long Teng', 'Long Teng', 'Long Teng'];
+        const publishers = ['三民', '龍騰', '龍騰', '龍騰', '龍騰'];
 
         document.getElementById('book-grid').innerHTML = [1,2,3,4,5].map(i => {
             const roman = ['I','II','III','IV','V'][i-1];
@@ -996,7 +996,7 @@
             
             return `<button onclick="selectBook(${i})" class="btn book-btn ${i===1?'book-active':''}" id="b${i}">
                 <span>${roman}</span>
-                <span class="text-[7px] mt-1 opacity-70 tracking-widest" style="font-family: 'Noto Sans TC', sans-serif;">${pub}</span>
+                <span class="text-[10px] mt-1 opacity-70 tracking-widest" style="font-family: 'Noto Sans TC', sans-serif;">${pub}</span>
             </button>`;
         }).join('');
         
