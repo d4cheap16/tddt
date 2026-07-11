@@ -261,10 +261,52 @@
     }
   },
   "L6": {
-    "title": "",
+    "title": "Unit 6: Reaching for Space",
     "stages": {
-      "1": [],
-      "2": []
+      "1": [
+        {"id": 1, "en": "talent", "zh": "天分 / 天賦"},
+        {"id": 2, "en": "achieve", "zh": "實現 / 達成"},
+        {"id": 3, "en": "opportunity", "zh": "時機 / 機會"},
+        {"id": 4, "en": "especially", "zh": "尤其 / 特別"},
+        {"id": 5, "en": "environment", "zh": "環境 / 自然環境"},
+        {"id": 6, "en": "minority", "zh": "少數群體 / 少數"},
+        {"id": 7, "en": "adapt", "zh": "適應新狀況 / 適應"},
+        {"id": 8, "en": "succeed", "zh": "成功 / 達成目標"},
+        {"id": 9, "en": "determined", "zh": "堅決的 / 下定決心的"},
+        {"id": 10, "en": "calculate", "zh": "計算"},
+        {"id": 11, "en": "despite", "zh": "儘管 / 即使"},
+        {"id": 12, "en": "contribution", "zh": "貢獻"},
+        {"id": 13, "en": "career", "zh": "生涯 / 職業"},
+        {"id": 14, "en": "attention", "zh": "關注 / 注意"},
+        {"id": 15, "en": "recognize", "zh": "認可 / 辨認 / 認出"},
+        {"id": 16, "en": "receive", "zh": "得到 / 收到"},
+        {"id": 17, "en": "honor", "zh": "向...致敬 / 光榮 / 榮譽"},
+        {"id": 18, "en": "encourage", "zh": "鼓勵"},
+        {"id": 19, "en": "field", "zh": "專業領域 / 範圍 / 田地 / 牧場"},
+        {"id": 20, "en": "effort", "zh": "努力"}
+      ],
+      "2": [
+        "She has a remarkable talent for playing the piano.",
+        "If you work hard, you can achieve your highest goals.",
+        "Studying abroad provides a great opportunity to learn a new language.",
+        "The traffic is very heavy today, especially in the downtown area.",
+        "We must take action to protect our natural environment from pollution.",
+        "Only a small minority of the students voted against the new rule.",
+        "It took him a few months to adapt to the cold weather in the mountains.",
+        "With careful planning and hard work, our team will definitely succeed.",
+        "The determined athlete practiced every single day to win the championship.",
+        "The computer can quickly calculate complex math problems for the engineers.",
+        "We decided to go for a long walk despite the heavy rain.",
+        "His financial contribution helped the local hospital buy new medical equipment.",
+        "After college, she began her career as a software developer in the city.",
+        "The teacher asked the students to pay close attention to the instructions.",
+        "I did not recognize him because he was wearing a large hat and sunglasses.",
+        "You will receive an email confirmation once your payment is fully processed.",
+        "It is a great honor to be invited to speak at this prestigious university.",
+        "My parents always encourage me to try my best in everything I do.",
+        "He is a well known expert in the field of medical science.",
+        "Learning a second language requires a lot of time and continuous effort."
+      ]
     }
   },
   "L7": {
