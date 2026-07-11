@@ -330,7 +330,7 @@
         {"id": 15, "en": "fade", "zh": "逐漸消失 / 消退 / 褪色"},
         {"id": 16, "en": "awful", "zh": "糟糕的"},
         {"id": 17, "en": "urge", "zh": "力勸"},
-        {"id": 18, "en": "instead", "zh": "作為替代 / 反而"},
+        {"id": 18, "en": "instead", "zh": "作為替代 / 反揉"},
         {"id": 19, "en": "willing", "zh": "情願的 / 樂意的"}
       ],
       "2": [
@@ -404,10 +404,54 @@
     }
   },
   "L9": {
-    "title": "",
+    "title": "Unit 9: I Owe You a Big Apology",
     "stages": {
-      "1": [],
-      "2": []
+      "1": [
+        {"id": 1, "en": "owe", "zh": "虧欠"},
+        {"id": 2, "en": "apology", "zh": "道歉"},
+        {"id": 3, "en": "emotional", "zh": "情感上的"},
+        {"id": 4, "en": "guilty", "zh": "內疚的"},
+        {"id": 5, "en": "necessary", "zh": "必要的"},
+        {"id": 6, "en": "essay", "zh": "短文"},
+        {"id": 7, "en": "senior", "zh": "高年級的 / 畢業前一年的"},
+        {"id": 8, "en": "exhausting", "zh": "令人疲憊不堪的 / 令人筋疲力盡的"},
+        {"id": 9, "en": "refuse", "zh": "拒絕"},
+        {"id": 10, "en": "selfish", "zh": "自私的"},
+        {"id": 11, "en": "tense", "zh": "緊張的 / 使人不安的"},
+        {"id": 12, "en": "responsible", "zh": "負責的"},
+        {"id": 13, "en": "attempt", "zh": "試圖 / 嘗試"},
+        {"id": 14, "en": "manipulate", "zh": "操縱 / 操控"},
+        {"id": 15, "en": "realize", "zh": "了解 / 發覺"},
+        {"id": 16, "en": "threaten", "zh": "威脅"},
+        {"id": 17, "en": "regret", "zh": "感到遺憾 / 後悔 / 遺憾"},
+        {"id": 18, "en": "blame", "zh": "怪罪 / 責備"},
+        {"id": 19, "en": "trust", "zh": "信任 / 相信"},
+        {"id": 20, "en": "behavior", "zh": "行為 / 舉止"},
+        {"id": 21, "en": "handle", "zh": "應付 / 處理 / 把手 / 柄"}
+      ],
+      "2": [
+        "I owe my parents a big thank you for always supporting me.",
+        "He wrote a sincere apology letter to his friend after their argument.",
+        "She offered emotional support to her sister during a difficult time.",
+        "The young boy felt guilty after he accidentally broke the window.",
+        "It is absolutely necessary to drink plenty of water during the hot summer.",
+        "The teacher asked the students to write a short essay about their summer vacation.",
+        "The senior students are currently busy preparing for their final exams.",
+        "Running the marathon in the rain was an incredibly exhausting experience.",
+        "I had to politely refuse the invitation because I was already busy that day.",
+        "It is very selfish to take all the food and leave nothing for others.",
+        "The atmosphere in the room became tense when the two men started shouting.",
+        "You are completely responsible for finishing this project by tomorrow morning.",
+        "He will attempt to climb the highest mountain in the country next year.",
+        "The clever salesman tried to manipulate the customer into buying the expensive car.",
+        "I did not realize how late it was until I looked at the clock.",
+        "The angry customer tried to threaten the manager with a bad online review.",
+        "You will deeply regret your decision if you do not study hard for the test.",
+        "It is unfair to blame him for the mistake when he was not even there.",
+        "A strong relationship is always built on mutual respect and complete trust.",
+        "The teacher praised the young boy for his excellent behavior in the classroom.",
+        "The new manager knows exactly how to handle difficult situations in the office."
+      ]
     }
   }
 }
