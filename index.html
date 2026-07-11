@@ -991,7 +991,7 @@
         const publishers = ['三民', '龍騰', '龍騰', '龍騰', '龍騰'];
 
         document.getElementById('book-grid').innerHTML = [1,2,3,4,5].map(i => {
-            const roman = ['I','II','III','IV','V'][i-1];
+            const roman = ['1','2','3','4','5'][i-1];
             const pub = publishers[i-1];
             
             return `<button onclick="selectBook(${i})" class="btn book-btn ${i===1?'book-active':''}" id="b${i}">
