@@ -543,7 +543,7 @@
             <input type="number" id="admin-custom-hp" placeholder="TEST HP (e.g. 100)" class="col-span-1 text-[10px]">
             <button onclick="adminStartGame()" class="btn py-2 bg-green-900 border-green-600 text-green-400 uppercase font-bold col-span-1 text-[9px]">TEST MISSION</button>
 
-            <!-- 🔽 新增的 Data Management 區塊 🔽 -->
+            <!-- Data Management 區塊 -->
             <div class="col-span-2 border-t border-zinc-800 mt-2 mb-1"></div>
             <p class="col-span-2 text-red-600 text-[8px] font-bold uppercase text-left">Data Management (Danger Zone)</p>
             <select id="admin-clear-book" class="col-span-1 !border-red-900 !text-red-400 focus:!border-red-500">
@@ -557,7 +557,6 @@
             </select>
             <button id="clear-data-btn" onclick="handleClearData()" class="btn py-3 bg-red-950 border-red-800 text-red-500 uppercase col-span-2 font-bold tracking-widest">Clear Data</button>
             <div class="col-span-2 border-t border-zinc-800 mt-2 mb-1"></div>
-            <!-- 🔼 新增的 Data Management 區塊 🔼 -->
 
             <button onclick="exportToCSV()" class="btn py-3 bg-blue-900 border-blue-600 text-white uppercase col-span-2">Export Class CSV</button>
             <button onclick="location.reload()" class="btn py-3 bg-zinc-900 uppercase col-span-2">Logout</button>
@@ -986,9 +985,20 @@
         }, 600); 
     }
 
+    // 🔽 新增了出版社陣列，並改寫按鈕生成的 initUI 函式 🔽
     function initUI() {
-        document.getElementById('book-grid').innerHTML = [1,2,3,4,5].map(i => 
-            `<button onclick="selectBook(${i})" class="btn book-btn ${i===1?'book-active':''}" id="b${i}">${['I','II','III','IV','V'][i-1]}</button>`).join('');
+        // 在這裡設定各冊對應的版本（順序：Book 1, Book 2, ..., Book 5）
+        const publishers = ['San Min', 'Long Teng', 'Long Teng', 'Long Teng', 'Long Teng'];
+
+        document.getElementById('book-grid').innerHTML = [1,2,3,4,5].map(i => {
+            const roman = ['I','II','III','IV','V'][i-1];
+            const pub = publishers[i-1];
+            
+            return `<button onclick="selectBook(${i})" class="btn book-btn ${i===1?'book-active':''}" id="b${i}">
+                <span>${roman}</span>
+                <span class="text-[7px] mt-1 opacity-70 tracking-widest" style="font-family: 'Noto Sans TC', sans-serif;">${pub}</span>
+            </button>`;
+        }).join('');
         
         loadBookData(1);
         
@@ -1000,6 +1010,7 @@
             state.bgStars.push({ x: (Math.random() - 0.5) * 600, y: (Math.random() - 0.5) * 400, z: Math.random(), s: Math.random() * 1.5 });
         }
     }
+    // 🔼 新增了出版社陣列，並改寫按鈕生成的 initUI 函式 🔼
 
     function loadSavedProfile() {
         const saved = localStorage.getItem('vofd_profile');
@@ -1332,7 +1343,6 @@
         });
     }
 
-    // 🔽 重新設計的資料清除函式 🔽
     window.handleClearData = async () => {
         const btn = document.getElementById('clear-data-btn');
         const bookVal = document.getElementById('admin-clear-book').value;
@@ -1357,7 +1367,6 @@
         btn.innerText = "DELETING...";
         const { db, appId, collection, getDocs, deleteDoc, doc, query, where } = window.fbase;
         try {
-            // 根據下拉選單組合查詢條件
             let constraints = [where("book", "==", parseInt(bookVal))];
             if (lessonVal !== "ALL") {
                 constraints.push(where("lesson", "==", parseInt(lessonVal)));
@@ -1366,7 +1375,6 @@
             const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), ...constraints);
             const snap = await getDocs(q);
             
-            // 執行資料刪除
             for(let d of snap.docs) {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'scores', d.id));
             }
@@ -1376,7 +1384,6 @@
             btn.classList.remove('bg-red-600');
             btn.classList.add('bg-green-700', 'text-white');
             
-            // 清除後更新下方的成績報表，讓管理員看到畫面變化
             fetchClassRecords(); 
             
             setTimeout(() => {
@@ -1394,7 +1401,6 @@
             }, 3000);
         }
     };
-    // 🔼 重新設計的資料清除函式 🔼
 
     window.setDifficulty = (val, mode) => {
         state.difficulty = val; state.difficultyMode = mode;
